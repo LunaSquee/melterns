@@ -289,7 +289,7 @@ local function caster_node_timer(pos, elapsed)
 
 	-- Handle bucket output, only allow empty buckets in this slot
 	local bucket_out = inv:get_stack("bucket_out", 1):get_name()
-	if bucket_out == "bucket:bucket_empty" and metal ~= "" then
+	if bucket_out == "bucket:bucket_empty" and metal ~= "" and inv:get_stack("bucket_out", 1):get_count() == 1 then
 		local bucket = fluidity.get_bucket_for_fluid(metal)
 		if metal_count >= 1000 then
 			metal_count = metal_count - 1000
