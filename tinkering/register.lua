@@ -365,7 +365,8 @@ for i,v in pairs(components) do
 		name = v.description:sub(4).." Cast",
 		mod = "tinkering",
 		result = "%s:%s_"..i,
-		cost = metal_caster.spec.cast
+		cost = metal_caster.spec.cast,
+		typenames = {i}
 	})
 end
 

@@ -203,7 +203,7 @@ end
 
 -- Get the corresponding cast for an item
 local function get_cast_for(item)
-	local typename, castname = item:match(":([%a_]+)_(%a+)$")
+	local typename, castname = item:match("(%a+)_([%a_]+)$")
 	if not typename or not castname then
 		return nil
 	end
@@ -312,14 +312,15 @@ local function caster_node_timer(pos, elapsed)
 					end
 				end
 			end
-		elseif castname:find("_ingot") or castname:find("_crystal") or castname:find("_lump") and metal_type == "gold" then
+		else
 			-- Create a new cast
 			local result_cost = metal_caster.spec.cast
 			local coolant_cost = result_cost / 4
 			if metal_count >= result_cost and coolant_count >= coolant_cost then
 				local mtype, ctype = get_cast_for(castname)
 				if mtype then
-					local stack = ItemStack("metal_melter:"..ctype)
+					local cmod = metal_caster.casts[ctype].mod or "metal_melter"
+					local stack = ItemStack(cmod..":"..ctype)
 					local output_stack = inv:get_stack("output", 1)
 					local cast_stack = inv:get_stack("cast", 1)
 					if output_stack:item_fits(stack) then

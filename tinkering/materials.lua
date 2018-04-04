@@ -30,7 +30,7 @@ local modifiers = {
 			{name = "stonebound", description = "Stonebound"}
 		}
 	},
-	iron = {
+	steel = {
 		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=20, maxlevel=2},
 		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=30, maxlevel=2},
 		snappy = {times={[1]=2.5, [2]=1.20, [3]=0.35}, uses=30, maxlevel=2},
@@ -240,7 +240,7 @@ tinkering.materials = {
 	obsidian = {name = "Obsidian", default = "default:obsidian", color = "#2C384E", base = "node",  cast = true, modifier = modifiers.obsidian},
 
 	-- Metals
-	iron   = {name = "Iron",   default = "default:steel_ingot",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.iron},
+	steel  = {name = "Steel",  default = "default:steel_ingot",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.steel},
 	copper = {name = "Copper", default = "default:copper_ingot", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
 	tin    = {name = "Tin",    default = "default:tin_ingot",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
 	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},

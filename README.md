@@ -6,7 +6,7 @@ This repository is technically a modpack, in which all mods need to be enabled. 
 
 ### fluidity
 ![](fluidity/screenshot.png)
-Fluidity adds molten metals to the game. Supports metals from [default](https://github.com/minetest/minetest_game), [technic](https://github.com/minetest-mods/technic) and [moreores](https://github.com/minetest-mods/technic).
+Fluidity adds molten metals to the game. Supports metals from [default](https://github.com/minetest/minetest_game), [technic](https://github.com/minetest-mods/technic) and [moreores](https://github.com/minetest-mods/moreores).
 
 ### metal_melter
 ![](metal_melter/screenshot.png)
