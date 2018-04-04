@@ -6,8 +6,11 @@ fluidity.modpath = mpath
 -- Functions
 dofile(mpath.."/functions.lua")
 
--- Register molten metals
+-- Molten metals
 dofile(mpath.."/molten.lua")
 
--- Register tanks for each fluid
+-- Tanks
 dofile(mpath.."/tanks.lua")
+
+-- Register everything
+dofile(mpath.."/register.lua")

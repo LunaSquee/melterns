@@ -344,11 +344,16 @@ local num_tools = 0
 for m, s in pairs(tinkering.materials) do
 	for i, v in pairs(components) do
 		if v.materials == 1 then
+			local component = m.."_"..i
+
 			tinkering.register_component({
-				name = m.."_"..i,
+				name = component,
 				description = v.description:format(s.name),
 				image = tinkering.color_filter(v.image, s.color)
 			})
+
+			-- Make all components meltable
+			metal_melter.register_melt("tinkering:"..component, m, i)
 			num_components = num_components + 1
 		end
 	end
@@ -361,10 +366,11 @@ end
 
 -- Add casts to metal_melter
 for i,v in pairs(components) do
+	metal_melter.set_spec(i, metal_caster.spec.cast)
 	metal_caster.register_cast(i.."_cast", {
 		name = v.description:sub(4).." Cast",
 		mod = "tinkering",
-		result = "%s:%s_"..i,
+		result = i,
 		cost = metal_caster.spec.cast,
 		typenames = {i}
 	})

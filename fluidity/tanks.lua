@@ -184,11 +184,3 @@ function fluidity.register_fluid_tank(data)
 		end
 	end
 end
-
-fluidity.register_fluid_tank({
-	mod_name         = "fluidity",
-	tank_name        = "fluid_tank",
-	tank_description = "Fluid Tank",
-	capacity         = 64,
-	tiles            = {"default_glass.png", "default_glass_detail.png"}
-})

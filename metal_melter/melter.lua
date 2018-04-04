@@ -1,7 +1,5 @@
 -- Melts metals using lava as a heat source
 
-metal_melter = {}
-
 metal_melter.max_fuel = 8000
 metal_melter.max_metal = 16000
 metal_melter.spec = {
@@ -12,36 +10,38 @@ metal_melter.spec = {
 	ore = 288
 }
 
-function metal_melter.get_metal_from_stack(stack)
-	local metal = nil
-	local metal_type = nil
-
-	-- Find a metal that is in the name
-	for v,_ in pairs(fluidity.molten_metals) do
-		if stack:find(v) then
-			metal = v
+local function in_table(t, n)
+	local found = nil
+	
+	for _, v in pairs(t) do
+		if v == n then
+			found = v
 		end
 	end
 
-	if not metal then
-		return nil
-	end
+	return found
+end
 
-	-- Find type
-	if stack:find("lump") then
-		metal_type = "lump"
-	elseif stack:find("ingot") then
-		metal_type = "ingot"
-	elseif stack:find("ore") then
-		metal_type = "ore"
-	elseif stack:find("crystal") then
-		metal_type = "crystal"
-	else
-		-- Assume block
-		metal_type = "block"
+function metal_melter.get_metal_from_stack(stack)
+	local metal = nil
+	local metal_type = nil
+	
+	for mt, types in pairs(metal_melter.melts) do
+		if metal then break end
+		for tp,items in pairs(types) do
+			if in_table(items, stack) then
+				metal = mt
+				metal_type = tp
+				break
+			end
+		end
 	end
 
 	return metal, metal_type
+end
+
+function metal_melter.set_spec(specname, value)
+	metal_melter.spec[specname] = value
 end
 
 function metal_melter.get_metal_melter_formspec_default()

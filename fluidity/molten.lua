@@ -118,24 +118,3 @@ function fluidity.register_molten_metal(metal)
 		"Molten "..description.." Bucket"
 	)
 end
-
--- Default metals
-fluidity.register_molten_metal("steel")
-fluidity.register_molten_metal("copper")
-fluidity.register_molten_metal("tin")
-fluidity.register_molten_metal("gold")
-fluidity.register_molten_metal("mese")
-fluidity.register_molten_metal("obsidian")
-
--- Technic metals
-if minetest.get_modpath("technic") ~= nil then
-	fluidity.register_molten_metal("lead")
-	fluidity.register_molten_metal("chromium")
-	fluidity.register_molten_metal("zinc")
-end
-
--- moreores metals
-if minetest.get_modpath("moreores") ~= nil then
-	fluidity.register_molten_metal("silver")
-	fluidity.register_molten_metal("mithril")
-end

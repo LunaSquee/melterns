@@ -12,9 +12,9 @@ metal_caster.spec = metal_melter.spec
 metal_caster.spec.cast = 288
 
 metal_caster.casts = {
-	ingot_cast = {name = "Ingot Cast", result = "%s:%s_ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
-	lump_cast  = {name = "Lump Cast",  result = "%s:%s_lump",    cost = metal_caster.spec.lump,    typenames = {"lump"}},
-	gem_cast   = {name = "Gem Cast",   result = "%s:%s_crystal", cost = metal_caster.spec.crystal, typenames = {"crystal", "gem"}}
+	ingot_cast = {name = "Ingot Cast", result = "ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
+	lump_cast  = {name = "Lump Cast",  result = "lump",    cost = metal_caster.spec.lump,    typenames = {"lump"}},
+	gem_cast   = {name = "Gem Cast",   result = "crystal", cost = metal_caster.spec.crystal, typenames = {"crystal", "gem"}}
 }
 
 local metal_cache = {}
@@ -98,37 +98,36 @@ function metal_caster.get_metal_caster_formspec(data)
 		default.get_hotbar_bg(0, 4.25)
 end
 
--- Find the name of the mod that adds this particular metal into the game.
-function metal_caster.get_modname_for_metal(metal_type)
-	if not metal_cache[metal_type] then
-		for i, v in pairs(minetest.registered_items) do
-			if i:find(metal_type) and (i:find("ingot") or i:find("block") or i:find("crystal")) and not metal_cache[metal_type] then
-				local modname, metalname = i:match("(%a+):(%a+)")
-				metal_cache[metalname] = modname
-			end
+local function find_castable(metal_name, cast_name)
+	local cast = metal_caster.casts[cast_name]
+	if not cast then return nil end
+
+	local types = metal_melter.melts[metal_name]
+
+	if not types then return nil end
+
+	local typeres = types[cast.result]
+	if not typeres then return nil end
+
+	if #typeres > 0 then
+		return typeres[1]
+	end
+
+	return nil
+end
+
+function metal_caster.get_cast_for_name(name)
+	for index, value in pairs(metal_caster.casts) do
+		local mod = value.mod or "metal_melter"
+		if name == mod..":"..index then
+			return index
 		end
 	end
 
-	return metal_cache[metal_type]
+	return nil
 end
 
 -- Check to see if this cast is able to cast this metal type
-local function can_cast(metal_name, cast_name)
-	local cast = metal_caster.casts[cast_name]
-
-	if cast.mod then
-		return cast.mod
-	end
-
-	local mod = metal_caster.get_modname_for_metal(metal_name)
-	local item_name = cast.result:format(mod, metal_name)
-
-	if minetest.registered_items[item_name] ~= nil then
-		return mod
-	else
-		return nil
-	end
-end
 
 local function can_dig(pos, player)
 	local meta = minetest.get_meta(pos)
@@ -203,21 +202,26 @@ end
 
 -- Get the corresponding cast for an item
 local function get_cast_for(item)
-	local typename, castname = item:match("(%a+)_([%a_]+)$")
-	if not typename or not castname then
-		return nil
-	end
-
 	local cast = nil
-	for i, v in pairs(metal_caster.casts) do
-		for _,k in pairs(v.typenames) do
-			if castname == k then
-				cast = i
+	local typename = nil
+
+	for metal, types in pairs(metal_melter.melts) do
+		if typename ~= nil then break end
+		for t, items in pairs(types) do
+			if items[item] then
+				typename = t
+				break
 			end
 		end
 	end
 
-	if not cast then return nil end
+	for cname,v in pairs(metal_caster.casts) do
+		if v.result == typename then
+			cast = cname
+			break
+		end
+	end
+	
 	return typename, cast
 end
 
@@ -290,14 +294,13 @@ local function caster_node_timer(pos, elapsed)
 	if metal ~= "" then
 		metal_type = fluidity.get_metal_for_fluid(metal)
 
-		local castname = inv:get_stack("cast", 1):get_name()
-		castname = castname:gsub("[a-zA-Z0-9_]+:", "")
-		if metal_caster.casts[castname] then
+		local caststack = inv:get_stack("cast", 1):get_name()
+		local castname  = metal_caster.get_cast_for_name(caststack)
+		if castname ~= nil then
 			-- Cast metal using a cast
 			local cast = metal_caster.casts[castname]
-			local modname = can_cast(metal_type, castname)
-			if modname ~= nil then
-				local result_name = cast.result:format(modname, metal_type)
+			local result_name = find_castable(metal_type, castname)
+			if result_name ~= nil then
 				local result_cost = cast.cost
 				local coolant_cost = result_cost / 4
 
@@ -317,7 +320,7 @@ local function caster_node_timer(pos, elapsed)
 			local result_cost = metal_caster.spec.cast
 			local coolant_cost = result_cost / 4
 			if metal_count >= result_cost and coolant_count >= coolant_cost then
-				local mtype, ctype = get_cast_for(castname)
+				local mtype, ctype = get_cast_for(caststack)
 				if mtype then
 					local cmod = metal_caster.casts[ctype].mod or "metal_melter"
 					local stack = ItemStack(cmod..":"..ctype)
