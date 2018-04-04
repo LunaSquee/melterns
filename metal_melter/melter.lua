@@ -7,7 +7,7 @@ metal_melter.max_metal = 16000
 metal_melter.spec = {
 	ingot = 144,
 	crystal = 144,
-	block = 1000,
+	block = 1296,
 	lump = 288,
 	ore = 288
 }
