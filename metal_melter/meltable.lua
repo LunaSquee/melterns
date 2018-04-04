@@ -3,10 +3,6 @@ metal_melter.melts  = {}
 -- fluidity.molten_metals - metals
 
 function metal_melter.register_melt(item, metal, type)
-	if not fluidity.molten_metals[metal] then
-		return nil
-	end
-
 	if not metal_melter.melts[metal] then
 		metal_melter.melts[metal] = {}
 	end

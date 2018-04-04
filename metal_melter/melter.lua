@@ -1,12 +1,18 @@
 -- Melts metals using lava as a heat source
 
+-- Max lava that can be held by the melter
 metal_melter.max_fuel = 8000
+
+-- Max metal that can be held by the melter
 metal_melter.max_metal = 16000
+
+-- How much metal is given for melting a typename (in millibuckets)
 metal_melter.spec = {
 	ingot = 144,
 	crystal = 144,
 	block = 1296,
 	lump = 288,
+	cast = 288,
 	ore = 288
 }
 
@@ -38,10 +44,6 @@ function metal_melter.get_metal_from_stack(stack)
 	end
 
 	return metal, metal_type
-end
-
-function metal_melter.set_spec(specname, value)
-	metal_melter.spec[specname] = value
 end
 
 function metal_melter.get_metal_melter_formspec_default()
@@ -242,15 +244,17 @@ local function melter_node_timer(pos, elapsed)
 	if input ~= "" then
 		local mt, t = metal_melter.get_metal_from_stack(input)
 		if mt then
-			local cnt = metal_melter.spec[t]
-			local heat_consume = math.floor(cnt / 2)
-			if metal_count + cnt <= metal_melter.max_metal and heat_count >= heat_consume then
-				local metal_name = fluidity.molten_metals[mt]
-				metal = metal_name
-				metal_count = metal_count + cnt
-				heat_count = heat_count - heat_consume
-				inv:set_stack("input", 1, take_from_stack(inv:get_stack("input", 1), 1))
-				refresh = true
+			local metal_name = fluidity.molten_metals[mt]
+			if metal_name then
+				local cnt = metal_melter.spec[t]
+				local heat_consume = math.floor(cnt / 2)
+				if metal_count + cnt <= metal_melter.max_metal and heat_count >= heat_consume then
+					metal = metal_name
+					metal_count = metal_count + cnt
+					heat_count = heat_count - heat_consume
+					inv:set_stack("input", 1, take_from_stack(inv:get_stack("input", 1), 1))
+					refresh = true
+				end
 			end
 		end
 	end
@@ -387,3 +391,8 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
 })
+
+-- Set a spec
+function metal_melter.set_spec(specname, value)
+	metal_melter.spec[specname] = value
+end

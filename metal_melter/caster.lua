@@ -9,7 +9,6 @@ metal_caster.max_metal = 16000
 
 -- Use melter values
 metal_caster.spec = metal_melter.spec
-metal_caster.spec.cast = 288
 
 metal_caster.casts = {
 	ingot_cast = {name = "Ingot Cast", result = "ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
@@ -98,35 +97,6 @@ function metal_caster.get_metal_caster_formspec(data)
 		default.get_hotbar_bg(0, 4.25)
 end
 
-local function find_castable(metal_name, cast_name)
-	local cast = metal_caster.casts[cast_name]
-	if not cast then return nil end
-
-	local types = metal_melter.melts[metal_name]
-
-	if not types then return nil end
-
-	local typeres = types[cast.result]
-	if not typeres then return nil end
-
-	if #typeres > 0 then
-		return typeres[1]
-	end
-
-	return nil
-end
-
-function metal_caster.get_cast_for_name(name)
-	for index, value in pairs(metal_caster.casts) do
-		local mod = value.mod or "metal_melter"
-		if name == mod..":"..index then
-			return index
-		end
-	end
-
-	return nil
-end
-
 -- Check to see if this cast is able to cast this metal type
 
 local function can_dig(pos, player)
@@ -200,6 +170,18 @@ local function decrement_stack(stack)
 	return stack
 end
 
+local function in_table(t, n)
+	local found = nil
+	
+	for _, v in pairs(t) do
+		if v == n then
+			found = v
+		end
+	end
+
+	return found
+end
+
 -- Get the corresponding cast for an item
 local function get_cast_for(item)
 	local cast = nil
@@ -208,7 +190,7 @@ local function get_cast_for(item)
 	for metal, types in pairs(metal_melter.melts) do
 		if typename ~= nil then break end
 		for t, items in pairs(types) do
-			if items[item] then
+			if in_table(items, item) then
 				typename = t
 				break
 			end
@@ -223,6 +205,36 @@ local function get_cast_for(item)
 	end
 	
 	return typename, cast
+end
+
+
+local function find_castable(metal_name, cast_name)
+	local cast = metal_caster.casts[cast_name]
+	if not cast then return nil end
+
+	local types = metal_melter.melts[metal_name]
+
+	if not types then return nil end
+
+	local typeres = types[cast.result]
+	if not typeres then return nil end
+
+	if #typeres > 0 then
+		return typeres[1]
+	end
+
+	return nil
+end
+
+local function get_cast_for_name(name)
+	for index, value in pairs(metal_caster.casts) do
+		local mod = value.mod or "metal_melter"
+		if name == mod..":"..index then
+			return index
+		end
+	end
+
+	return nil
 end
 
 local function caster_node_timer(pos, elapsed)
@@ -295,7 +307,7 @@ local function caster_node_timer(pos, elapsed)
 		metal_type = fluidity.get_metal_for_fluid(metal)
 
 		local caststack = inv:get_stack("cast", 1):get_name()
-		local castname  = metal_caster.get_cast_for_name(caststack)
+		local castname  = get_cast_for_name(caststack)
 		if castname ~= nil then
 			-- Cast metal using a cast
 			local cast = metal_caster.casts[castname]
@@ -392,9 +404,10 @@ end
 
 -- Register a new cast
 function metal_caster.register_cast(name, data)
-	local modname = data.mod or "metal_melter"
+	local modname  = data.mod or "metal_melter"
+	local castname = modname..":"..name
 
-	minetest.register_craftitem(modname..":"..name, {
+	minetest.register_craftitem(castname, {
 		description = data.name,
 		inventory_image = "caster_"..name..".png",
 		stack_max = 1,
@@ -404,6 +417,8 @@ function metal_caster.register_cast(name, data)
 	if not metal_caster.casts[name] then
 		metal_caster.casts[name] = data
 	end
+
+	metal_melter.register_melt(castname, "gold", "cast")
 end
 
 -- Register the caster
