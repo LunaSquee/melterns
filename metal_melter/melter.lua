@@ -245,7 +245,7 @@ local function melter_node_timer(pos, elapsed)
 		local mt, t = metal_melter.get_metal_from_stack(input)
 		if mt then
 			local metal_name = fluidity.molten_metals[mt]
-			if metal_name then
+			if metal_name and (metal == "" or metal == metal_name) then
 				local cnt = metal_melter.spec[t]
 				local heat_consume = math.floor(cnt / 2)
 				if metal_count + cnt <= metal_melter.max_metal and heat_count >= heat_consume then
