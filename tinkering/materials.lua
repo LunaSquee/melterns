@@ -241,7 +241,7 @@ tinkering.materials = {
 
 	-- Metals
 	iron   = {name = "Iron",   default = "default:steel_ingot",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.iron},
-	copper = {name = "Copper", default = "default:copper_ingot", color = "#FF9F72", base = "ingot", cast = true, modifier = modifiers.copper},
+	copper = {name = "Copper", default = "default:copper_ingot", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
 	tin    = {name = "Tin",    default = "default:tin_ingot",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
 	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
 	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",                modifier = modifiers.mese},

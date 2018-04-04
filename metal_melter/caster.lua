@@ -12,9 +12,9 @@ metal_caster.spec = metal_melter.spec
 metal_caster.spec.cast = 288
 
 metal_caster.casts = {
-	ingot_cast = {"Ingot Cast", "%s:%s_ingot", metal_caster.spec.ingot, {"ingot"}},
-	lump_cast = {"Lump Cast", "%s:%s_lump", metal_caster.spec.lump, {"lump"}},
-	gem_cast = {"Gem Cast", "%s:%s_crystal", metal_caster.spec.crystal, {"crystal", "gem"}}
+	ingot_cast = {name = "Ingot Cast", result = "%s:%s_ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
+	lump_cast  = {name = "Lump Cast",  result = "%s:%s_lump",    cost = metal_caster.spec.lump,    typenames = {"lump"}},
+	gem_cast   = {name = "Gem Cast",   result = "%s:%s_crystal", cost = metal_caster.spec.crystal, typenames = {"crystal", "gem"}}
 }
 
 local metal_cache = {}
@@ -114,9 +114,14 @@ end
 
 -- Check to see if this cast is able to cast this metal type
 local function can_cast(metal_name, cast_name)
+	local cast = metal_caster.casts[cast_name]
+
+	if cast.mod then
+		return cast.mod
+	end
+
 	local mod = metal_caster.get_modname_for_metal(metal_name)
-	local castt = metal_caster.casts[cast_name]
-	local item_name = castt[2]:format(mod, metal_name)
+	local item_name = cast.result:format(mod, metal_name)
 
 	if minetest.registered_items[item_name] ~= nil then
 		return mod
@@ -205,7 +210,7 @@ local function get_cast_for(item)
 
 	local cast = nil
 	for i, v in pairs(metal_caster.casts) do
-		for _,k in pairs(v[4]) do
+		for _,k in pairs(v.typenames) do
 			if castname == k then
 				cast = i
 			end
@@ -286,14 +291,14 @@ local function caster_node_timer(pos, elapsed)
 		metal_type = fluidity.get_metal_for_fluid(metal)
 
 		local castname = inv:get_stack("cast", 1):get_name()
-		castname = castname:gsub("metal_melter:", "")
+		castname = castname:gsub("[a-zA-Z0-9_]+:", "")
 		if metal_caster.casts[castname] then
 			-- Cast metal using a cast
 			local cast = metal_caster.casts[castname]
 			local modname = can_cast(metal_type, castname)
 			if modname ~= nil then
-				local result_name = cast[2]:format(modname, metal_type)
-				local result_cost = cast[3]
+				local result_name = cast.result:format(modname, metal_type)
+				local result_cost = cast.cost
 				local coolant_cost = result_cost / 4
 
 				if metal_count >= result_cost and coolant_count >= coolant_cost then
@@ -383,16 +388,18 @@ end
 
 -- Register a new cast
 function metal_caster.register_cast(name, data)
-	if not metal_caster.casts[name] then
-		metal_caster.casts[name] = data
-	end
+	local modname = data.mod or "metal_melter"
 
-	minetest.register_craftitem("metal_melter:"..name, {
-		description = data[1],
+	minetest.register_craftitem(modname..":"..name, {
+		description = data.name,
 		inventory_image = "caster_"..name..".png",
 		stack_max = 1,
 		groups = {cast=1}
 	})
+
+	if not metal_caster.casts[name] then
+		metal_caster.casts[name] = data
+	end
 end
 
 -- Register the caster
