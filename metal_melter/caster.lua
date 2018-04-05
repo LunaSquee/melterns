@@ -82,6 +82,7 @@ function metal_caster.get_metal_caster_formspec(data)
 		"list[context;bucket_out;4.75,1.4;2,2;]"..
 		"image[5.75,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"image[5.75,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
+		"button[6.68,2.48;1.33,1;dump;Dump]"..
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
 		"listring[context;coolant]"..
@@ -203,8 +204,6 @@ local function get_cast_for(item)
 			break
 		end
 	end
-
-	print(typename, cast)
 	
 	return typename, cast
 end
@@ -253,6 +252,14 @@ local function caster_node_timer(pos, elapsed)
 	-- Current metal used
 	local metal = meta:get_string("metal")
 	local metal_type = ""
+
+	local dumping = meta:get_int("dump")
+	if dumping and dumping == 1 then
+		metal_count = 0
+		metal = ""
+		refresh = true
+		meta:set_int("dump", 0)
+	end
 
 	-- Insert water bucket into tank, return empty bucket
 	if inv:get_stack("coolant", 1):get_name() == "bucket:bucket_water" then
@@ -423,6 +430,18 @@ function metal_caster.register_cast(name, data)
 	metal_melter.register_melt(castname, "gold", "cast")
 end
 
+local function on_receive_fields(pos, formname, fields, sender)
+	if sender and minetest.is_protected(pos, sender:get_player_name()) then
+		return 0
+	end
+
+	local meta = minetest.get_meta(pos)
+	if fields["dump"] then
+		meta:set_int('dump', 1)
+		minetest.get_node_timer(pos):start(1.0)
+	end
+end
+
 -- Register the caster
 minetest.register_node("metal_melter:metal_caster", {
 	description = "Metal Caster",
@@ -449,6 +468,7 @@ minetest.register_node("metal_melter:metal_caster", {
 	on_metadata_inventory_take = function(pos)
 		minetest.get_node_timer(pos):start(1.0)
 	end,
+	on_receive_fields = on_receive_fields,
 	on_blast = function(pos)
 		local drops = {}
 		default.get_inventory_drops(pos, "cast", drops)

@@ -325,6 +325,12 @@ local function compare_components_required(tool_spec, materials)
 		end
 	end
 
+	for i, v in pairs(materials) do
+		if not tool_spec[i] then
+			all_match = false
+		end
+	end
+
 	return all_match
 end
 
@@ -334,15 +340,15 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	-- TODO: Add texture as metadata (https://github.com/minetest/minetest/issues/5686)
 
 	-- Not a valid tool type
-	if not tinkering.tools[tool_type] then return false end
+	if not tinkering.tools[tool_type] then return nil end
 	local tool_data = tinkering.tools[tool_type]
 
 	-- Check if the components are correct
-	if not compare_components_required(tool_data.components, materials) then return false end
+	if not compare_components_required(tool_data.components, materials) then return nil end
 
 	-- Get tool definition and other metadata
 	local tool_def, mat_names, tags = tinkering.tool_definition(tool_type, materials)
-	if not tool_def then return false end
+	if not tool_def then return nil end
 
 	local mod_name = tool_data.mod or "tinkering"
 
@@ -366,7 +372,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 		minetest.register_tool(internal_name, tool_def)
 	end
 
-	if not want_tool then return true end
+	if not want_tool then return nil end
 
 	-- Create a new tool instance and apply metadata
 	local tool = ItemStack(internal_name)
