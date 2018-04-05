@@ -13,3 +13,6 @@ tinkering.bench = {
 
 -- Tool Station
 dofile(tinkering.modpath.."/nodes/tool_station.lua")
+
+-- Part Builder
+dofile(tinkering.modpath.."/nodes/part_builder.lua")

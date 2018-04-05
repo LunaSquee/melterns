@@ -36,7 +36,6 @@ function tool_station.get_formspec()
 		"list[current_player;main;0,5.5;8,3;8]"..
 		tool_list..
 		"listring[context;input]"..
-		"listring[current_player;main]"..
 		"listring[context;output]"..
 		"listring[current_player;main]"..
 		default.get_hotbar_bg(0, 4.25)
@@ -45,8 +44,8 @@ end
 local function get_metalgroup(groups)
 	if not groups then return nil end
 	for g,i in pairs(groups) do
-		if g:find("metal_") == 1 then
-			return g:gsub("^metal_", "")
+		if g:find("material_") == 1 then
+			return g:gsub("^material_", "")
 		end
 	end
 	return nil

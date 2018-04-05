@@ -1,5 +1,19 @@
 
 local modifiers = {
+	flint = {
+		cracky = {times={[3]=1.20}, uses=5, maxlevel=1},
+		crumbly = {times={[1]=2.90, [2]=1.50, [3]=0.30}, uses=5, maxlevel=1},
+		snappy = {times={[2]=1.3, [3]=0.20}, uses=5, maxlevel=1},
+		choppy = {times={[2]=2.70, [3]=1.20}, uses=5, maxlevel=1},
+		damagegroups = {fleshy = 1},
+		explody = nil,
+
+		binding = {increase = 0.00, uses = 0},
+		rod = {increase = 0.00, uses = 0},
+		tags = {
+			{name = "cheap", description = "Cheap"}
+		}
+	},
 	wood = {
 		cracky = {times={[3]=1.60}, uses=10, maxlevel=1},
 		crumbly = {times={[1]=3.00, [2]=1.60, [3]=0.60}, uses=10, maxlevel=1},
@@ -235,8 +249,9 @@ local modifiers = {
 
 tinkering.materials = {
 	-- Materials
-	wood     = {name = "Wood",     default = "group:wood",       color = "#634623", base = "group",              modifier = modifiers.wood},
-	stone    = {name = "Stone",    default = "group:stone",      color = "#8D8988", base = "group",              modifier = modifiers.stone},
+	flint    = {name = "Flint",    default = "default:flint",    color = "#514E49", base = "item",               modifier = modifiers.flint},
+	wood     = {name = "Wood",     default = "wood",             color = "#634623", base = "group",              modifier = modifiers.wood},
+	stone    = {name = "Stone",    default = "stone",            color = "#8D8988", base = "group",              modifier = modifiers.stone},
 	obsidian = {name = "Obsidian", default = "default:obsidian", color = "#2C384E", base = "node",  cast = true, modifier = modifiers.obsidian},
 
 	-- Metals
@@ -244,7 +259,7 @@ tinkering.materials = {
 	copper = {name = "Copper", default = "default:copper_ingot", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
 	tin    = {name = "Tin",    default = "default:tin_ingot",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
 	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
-	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",                modifier = modifiers.mese},
+	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
 
 	-- From technic
 	lead     = {name = "Lead",     default = "technic:lead_ingot",     color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead},

@@ -33,8 +33,8 @@ function metal_caster.get_metal_caster_formspec_default()
 		"image[6.68,0;1.4,2.8;melter_gui_barbg.png]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
 		"label[0.08,3.75;No Molten Metal]"..
-		"list[context;bucket_in;4.75,0.2;2,2;]"..
-		"list[context;bucket_out;4.75,1.4;2,2;]"..
+		"list[context;bucket_in;4.75,0.2;1,1;]"..
+		"list[context;bucket_out;4.75,1.4;1,1;]"..
 		"image[5.75,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"image[5.75,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
 		"button[6.68,2.48;1.33,1;dump;Dump]"..
@@ -79,8 +79,8 @@ function metal_caster.get_metal_caster_formspec(data)
 		"image[6.68,"..(2.44 - metal_percent * 2.44)..";1.4,"..(metal_percent * 2.8)..";"..data.metal_texture.."]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
 		metal_formspec..
-		"list[context;bucket_in;4.75,0.2;2,2;]"..
-		"list[context;bucket_out;4.75,1.4;2,2;]"..
+		"list[context;bucket_in;4.75,0.2;1,1;]"..
+		"list[context;bucket_out;4.75,1.4;1,1;]"..
 		"image[5.75,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"image[5.75,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
 		"button[6.68,2.48;1.33,1;dump;Dump]"..
@@ -323,7 +323,7 @@ local function caster_node_timer(pos, elapsed)
 			local cast = metal_caster.casts[castname]
 			local result_name = find_castable(metal_type, castname)
 			if result_name ~= nil then
-				local result_cost = cast.cost
+				local result_cost = cast.cost * metal_caster.spec.ingot
 				local coolant_cost = result_cost / 4
 
 				if metal_count >= result_cost and coolant_count >= coolant_cost then
@@ -418,10 +418,10 @@ function metal_caster.register_cast(name, data)
 	local castname = mod..":"..name.."_cast"
 
 	minetest.register_craftitem(castname, {
-		description     = data.description.." Cast",
+		description     = data.description.." Cast\n\nMaterial Cost: "..data.cost,
 		inventory_image = "caster_"..name.."_cast.png",
 		stack_max       = 1,
-		groups          = {cast=1}
+		groups          = {tinker_cast=1}
 	})
 
 	if not metal_caster.casts[name] then

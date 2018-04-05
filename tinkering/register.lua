@@ -62,12 +62,12 @@ tinkering.tools = {
 }
 
 tinkering.components = {
-	pickaxe_head = {description = "%s Pickaxe Head", materials = 1, image = tinkering.tools.pick.textures.main},
-	axe_head     = {description = "%s Axe Head",     materials = 1, image = tinkering.tools.axe.textures.main},
-	sword_blade  = {description = "%s Sword Blade",  materials = 1, image = tinkering.tools.sword.textures.main},
-	shovel_head  = {description = "%s Shovel Head",  materials = 1, image = tinkering.tools.shovel.textures.main},
-	tool_rod     = {description = "%s Tool Rod",     materials = 1, image = "tinkering_tool_rod.png"},
-	tool_binding = {description = "%s Tool Binding", materials = 1, image = "tinkering_tool_binding.png"}
+	pickaxe_head = {description = "%s Pickaxe Head", material_cost = 2, image = tinkering.tools.pick.textures.main},
+	axe_head     = {description = "%s Axe Head",     material_cost = 2, image = tinkering.tools.axe.textures.main},
+	sword_blade  = {description = "%s Sword Blade",  material_cost = 2, image = tinkering.tools.sword.textures.main},
+	shovel_head  = {description = "%s Shovel Head",  material_cost = 2, image = tinkering.tools.shovel.textures.main},
+	tool_rod     = {description = "%s Tool Rod",     material_cost = 1, image = "tinkering_tool_rod.png"},
+	tool_binding = {description = "%s Tool Binding", material_cost = 2, image = "tinkering_tool_binding.png"}
 }
 
 -- Create component for material
@@ -78,7 +78,7 @@ local function create_material_component(data)
 
 	local groups = {tinker_component = 1}
 	groups["tc_"..data.component] = 1
-	groups["metal_"..data.metal] = 1
+	groups["material_"..data.metal] = 1
 
 	minetest.register_craftitem(mod..":"..name, {
 		description     = desc,
@@ -103,13 +103,14 @@ function tinkering.register_component(name, data)
 		description = comp_desc,
 		mod_name    = mod,
 		result      = name,
-		cost        = metal_caster.spec.cast,
+		cost        = data.material_cost,
 		typenames   = {name}
 	})
 
 	-- Register pattern
 	tinkering.register_pattern(name, {
 		description = comp_desc,
+		cost        = data.material_cost,
 		mod_name    = mod
 	})
 
