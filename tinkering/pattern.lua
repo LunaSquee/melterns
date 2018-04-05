@@ -2,7 +2,7 @@ tinkering.pattern = {}
 
 -- Register a new pattern
 function tinkering.register_pattern(name, data)
-	local mod    = data.mod_name or "tinkering"
+	local mod    = data.mod_name or minetest.get_current_modname()
 	local desc   = data.description
 
 	tinkering.pattern[name] = data

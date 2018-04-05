@@ -125,7 +125,7 @@ end
 
 -- Register a new tank
 function fluidity.register_fluid_tank(data)
-	local modname  = data.mod_name or 'fluidity'
+	local modname  = data.mod_name or minetest.get_current_modname()
 	local tankname = data.tank_name or 'fluid_tank'
 	local tankdesc = data.tank_description or 'Fluid Tank'
 	local tiles    = data.tiles or {"default_glass.png", "default_glass_detail.png"}

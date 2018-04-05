@@ -16,9 +16,10 @@ end
 
 function fluidity.register_molten_metal(metal)
 	local description = firstToUpper(metal)
-	fluidity.molten_metals[metal] = "fluidity:"..metal.."_source"
+	local mod_name    = minetest.get_current_modname()
+	fluidity.molten_metals[metal] = mod_name..":"..metal.."_source"
 
-	minetest.register_node("fluidity:"..metal.."_source", {
+	minetest.register_node(mod_name..":"..metal.."_source", {
 		description = "Molten "..description.." Source",
 		drawtype = "liquid",
 		tiles = {
@@ -54,8 +55,8 @@ function fluidity.register_molten_metal(metal)
 		drop = "",
 		drowning = 1,
 		liquidtype = "source",
-		liquid_alternative_flowing = "fluidity:"..metal.."_flowing",
-		liquid_alternative_source = "fluidity:"..metal.."_source",
+		liquid_alternative_flowing = mod_name..":"..metal.."_flowing",
+		liquid_alternative_source = mod_name..":"..metal.."_source",
 		liquid_viscosity = 7,
 		liquid_renewable = false,
 		damage_per_second = 4 * 2,
@@ -63,7 +64,7 @@ function fluidity.register_molten_metal(metal)
 		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1},
 	})
 
-	minetest.register_node("fluidity:"..metal.."_flowing", {
+	minetest.register_node(mod_name..":"..metal.."_flowing", {
 		description = "Flowing Molten "..description,
 		drawtype = "flowingliquid",
 		tiles = {"fluidity_"..metal..".png"},
@@ -100,8 +101,8 @@ function fluidity.register_molten_metal(metal)
 		drop = "",
 		drowning = 1,
 		liquidtype = "flowing",
-		liquid_alternative_flowing = "fluidity:"..metal.."_flowing",
-		liquid_alternative_source = "fluidity:"..metal.."_source",
+		liquid_alternative_flowing = mod_name..":"..metal.."_flowing",
+		liquid_alternative_source = mod_name..":"..metal.."_source",
 		liquid_viscosity = 7,
 		liquid_renewable = false,
 		damage_per_second = 4 * 2,
@@ -111,10 +112,10 @@ function fluidity.register_molten_metal(metal)
 	})
 
 	bucket.register_liquid(
-		"fluidity:"..metal.."_source",
-		"fluidity:"..metal.."_flowing",
-		"fluidity:bucket_"..metal,
-		"fluidity_bucket_"..metal..".png",
+		mod_name..":"..metal.."_source",
+		mod_name..":"..metal.."_flowing",
+		mod_name..":bucket_"..metal,
+		mod_name.."_bucket_"..metal..".png",
 		"Molten "..description.." Bucket"
 	)
 end

@@ -345,7 +345,7 @@ local function caster_node_timer(pos, elapsed)
 				local mtype, ctype = get_cast_for(caststack)
 				if mtype and ctype then
 					local cmod = metal_caster.casts[ctype].mod_name or "metal_melter"
-					local stack = ItemStack(cmod..":"..ctype)
+					local stack = ItemStack(cmod..":"..ctype.."_cast")
 					local output_stack = inv:get_stack("output", 1)
 					local cast_stack = inv:get_stack("cast", 1)
 					if output_stack:item_fits(stack) then
@@ -414,7 +414,7 @@ end
 
 -- Register a new cast
 function metal_caster.register_cast(name, data)
-	local mod      = data.mod_name or "metal_melter"
+	local mod      = data.mod_name or minetest.get_current_modname()
 	local castname = mod..":"..name.."_cast"
 
 	minetest.register_craftitem(castname, {
@@ -425,6 +425,7 @@ function metal_caster.register_cast(name, data)
 	})
 
 	if not metal_caster.casts[name] then
+		data.mod_name = mod
 		metal_caster.casts[name] = data
 	end
 

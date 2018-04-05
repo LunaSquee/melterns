@@ -89,7 +89,7 @@ end
 
 -- Register a new tool component
 function tinkering.register_component(name, data)
-	local mod = data.mod_name or "tinkering"
+	local mod = data.mod_name or minetest.get_current_modname()
 
 	if not tinkering.components[name] then
 		tinkering.components[name] = data
@@ -282,7 +282,7 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 		full_punch_interval = 1.0,
 		max_drop_level = 0,
 		groupcaps = fg,
-		damagegroups = fd,
+		damage_groups = fd,
 	}
 
 	-- Construct the name
@@ -309,12 +309,14 @@ function tinkering.tool_definition(tool_type, materials)
 
 	-- Store materials to use in metadata
 	local tink_mats = ""
-	for i, m in pairs(materials) do
+	local i = 1
+	for _, m in pairs(materials) do
 		if i == 1 then 
 			tink_mats = m
 		else
 			tink_mats = tink_mats..","..m
 		end
+		i = i + 1
 	end
 
 	return tool_tree, tink_mats, tags
