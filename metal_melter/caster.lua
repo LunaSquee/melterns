@@ -11,9 +11,9 @@ metal_caster.max_metal = 16000
 metal_caster.spec = metal_melter.spec
 
 metal_caster.casts = {
-	ingot_cast = {name = "Ingot Cast", result = "ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
-	lump_cast  = {name = "Lump Cast",  result = "lump",    cost = metal_caster.spec.lump,    typenames = {"lump"}},
-	gem_cast   = {name = "Gem Cast",   result = "crystal", cost = metal_caster.spec.crystal, typenames = {"crystal", "gem"}}
+	ingot = {description = "Ingot", result = "ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
+	lump  = {description = "Lump",  result = "lump",    cost = metal_caster.spec.lump,    typenames = {"lump"}},
+	gem   = {description = "Gem",   result = "crystal", cost = metal_caster.spec.crystal, typenames = {"crystal", "gem"}}
 }
 
 local metal_cache = {}
@@ -203,6 +203,8 @@ local function get_cast_for(item)
 			break
 		end
 	end
+
+	print(typename, cast)
 	
 	return typename, cast
 end
@@ -228,8 +230,8 @@ end
 
 local function get_cast_for_name(name)
 	for index, value in pairs(metal_caster.casts) do
-		local mod = value.mod or "metal_melter"
-		if name == mod..":"..index then
+		local mod = value.mod_name or "metal_melter"
+		if name == mod..":"..index.."_cast" then
 			return index
 		end
 	end
@@ -333,8 +335,8 @@ local function caster_node_timer(pos, elapsed)
 			local coolant_cost = result_cost / 4
 			if metal_count >= result_cost and coolant_count >= coolant_cost then
 				local mtype, ctype = get_cast_for(caststack)
-				if mtype then
-					local cmod = metal_caster.casts[ctype].mod or "metal_melter"
+				if mtype and ctype then
+					local cmod = metal_caster.casts[ctype].mod_name or "metal_melter"
 					local stack = ItemStack(cmod..":"..ctype)
 					local output_stack = inv:get_stack("output", 1)
 					local cast_stack = inv:get_stack("cast", 1)
@@ -404,14 +406,14 @@ end
 
 -- Register a new cast
 function metal_caster.register_cast(name, data)
-	local modname  = data.mod or "metal_melter"
-	local castname = modname..":"..name
+	local mod      = data.mod_name or "metal_melter"
+	local castname = mod..":"..name.."_cast"
 
 	minetest.register_craftitem(castname, {
-		description = data.name,
-		inventory_image = "caster_"..name..".png",
-		stack_max = 1,
-		groups = {cast=1}
+		description     = data.description.." Cast",
+		inventory_image = "caster_"..name.."_cast.png",
+		stack_max       = 1,
+		groups          = {cast=1}
 	})
 
 	if not metal_caster.casts[name] then

@@ -91,6 +91,24 @@ function tinkering.register_component(name, data)
 		tinkering.components[name] = data
 	end
 
+	local comp_desc = data.description:sub(4)
+
+	-- Register cast
+	metal_melter.set_spec(name, metal_caster.spec.cast)
+	metal_caster.register_cast(name, {
+		description = comp_desc,
+		mod_name    = mod,
+		result      = name,
+		cost        = metal_caster.spec.cast,
+		typenames   = {name}
+	})
+
+	-- Register pattern
+	tinkering.register_pattern(name, {
+		description = comp_desc,
+		mod_name    = mod
+	})
+
 	-- Register components for all materials
 	for m, s in pairs(tinkering.materials) do
 		local component = m.."_"..name
@@ -103,7 +121,6 @@ function tinkering.register_component(name, data)
 		})
 
 		-- Make all components meltable
-		metal_melter.set_spec(name, metal_caster.spec.cast)
 		metal_melter.register_melt(mod..":"..component, m, name)
 	end
 end
