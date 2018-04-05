@@ -5,6 +5,7 @@ function part_builder.get_formspec()
 		default.gui_bg..
 		default.gui_bg_img..
 		default.gui_slots..
+		"label[0,0;Part Builder]"..
 		"list[context;pattern;1,1.5;1,1;]"..
 		"list[context;input;2,1;1,2;]"..
 		"list[context;output;6,1.5;1,1;]"..

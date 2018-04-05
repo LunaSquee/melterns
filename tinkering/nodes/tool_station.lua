@@ -29,9 +29,10 @@ function tool_station.get_formspec()
 		default.gui_bg..
 		default.gui_bg_img..
 		default.gui_slots..
-		"list[context;input;1,0.25;3,3;]"..
-		"list[context;output;5,1.25;1,1;]"..
-		"image[4,1.25;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
+		"label[0,0;Tool Station]"..
+		"list[context;input;1,0.8;3,3;]"..
+		"list[context;output;5,1.8;1,1;]"..
+		"image[4,1.8;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
 		tool_list..
