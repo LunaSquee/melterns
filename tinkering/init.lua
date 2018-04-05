@@ -12,11 +12,11 @@ tinkering.modpath = modpath
 -- Utilities
 dofile(modpath.."/util.lua")
 
--- Pattern Library
-dofile(modpath.."/pattern.lua")
-
 -- Material Database
 dofile(modpath.."/materials.lua")
+
+-- Pattern Library
+dofile(modpath.."/pattern.lua")
 
 -- Registration
 dofile(modpath.."/register.lua")

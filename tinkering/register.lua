@@ -1,6 +1,6 @@
-local tools = {
+tinkering.tools = {
 	pick = {
-		name = "Pickaxe",
+		description = "Pickaxe",
 		groups = {"cracky"},
 		fleshy_decrement = 1,
 		components = {
@@ -15,7 +15,7 @@ local tools = {
 		}
 	},
 	axe = {
-		name = "Axe",
+		description = "Axe",
 		groups = {"choppy"},
 		fleshy_increment = 1,
 		components = {
@@ -30,7 +30,7 @@ local tools = {
 		}
 	},
 	sword = {
-		name = "Sword",
+		description = "Sword",
 		groups = {"snappy"},
 		fleshy_decrement = 0,
 		components = {
@@ -45,7 +45,7 @@ local tools = {
 		}
 	},
 	shovel = {
-		name = "Shovel",
+		description = "Shovel",
 		groups = {"crumbly"},
 		fleshy_decrement = 1,
 		components = {
@@ -61,31 +61,57 @@ local tools = {
 	},
 }
 
-local components = {
-	pickaxe_head = {description = "%s Pickaxe Head", materials = 1, image = tools.pick.textures.main},
-	axe_head     = {description = "%s Axe Head",     materials = 1, image = tools.axe.textures.main},
-	sword_blade  = {description = "%s Sword Blade",  materials = 1, image = tools.sword.textures.main},
-	shovel_head  = {description = "%s Shovel Head",  materials = 1, image = tools.shovel.textures.main},
+tinkering.components = {
+	pickaxe_head = {description = "%s Pickaxe Head", materials = 1, image = tinkering.tools.pick.textures.main},
+	axe_head     = {description = "%s Axe Head",     materials = 1, image = tinkering.tools.axe.textures.main},
+	sword_blade  = {description = "%s Sword Blade",  materials = 1, image = tinkering.tools.sword.textures.main},
+	shovel_head  = {description = "%s Shovel Head",  materials = 1, image = tinkering.tools.shovel.textures.main},
 	tool_rod     = {description = "%s Tool Rod",     materials = 1, image = "tinkering_tool_rod.png"},
 	tool_binding = {description = "%s Tool Binding", materials = 1, image = "tinkering_tool_binding.png"}
 }
 
--- Register a tool component
-function tinkering.register_component(data)
+-- Create component for material
+local function create_material_component(data)
 	local desc = data.description
 	local name = data.name
-	local mod  = data.mod_name or "tinkering"
+	local mod  = data.mod_name
 
 	minetest.register_craftitem(mod..":"..name, {
-		description = desc,
-		groups = {tinker_component = 1},
+		description     = desc,
+		groups          = {tinker_component = 1},
 		inventory_image = data.image
 	})
 end
 
+-- Register a new tool component
+function tinkering.register_component(name, data)
+	local mod = data.mod_name or "tinkering"
+
+	if not tinkering.components[name] then
+		tinkering.components[name] = data
+	end
+
+	-- Register components for all materials
+	for m, s in pairs(tinkering.materials) do
+		local component = m.."_"..name
+
+		create_material_component({
+			name        = component,
+			mod_name    = mod,
+			description = data.description:format(s.name),
+			image       = tinkering.color_filter(data.image, s.color)
+		})
+
+		-- Make all components meltable
+		metal_melter.set_spec(name, metal_caster.spec.cast)
+		metal_melter.register_melt(mod..":"..component, m, name)
+	end
+end
+
 -- Register a tool type
 --
---	name = "Pickaxe",     -- Name (description) of the tool
+--data = {
+--	description = "Pickaxe",     -- Name (description) of the tool
 --	groups = {"cracky"},  -- Group caps that apply
 --  mod = "tinkering",    -- The mod you're registering this tool from
 --	fleshy_decrement = 1, -- Amount removed from base damage group "fleshy". Negative value adds.
@@ -99,9 +125,10 @@ end
 --		second = "tinkering_overlay_handle_pickaxe.png", -- Overlay (typically a handle)
 --		offset = "1,-1"                                  -- Head's offset on the texture
 --	}
+--}
 --
 function tinkering.register_tool_type(name, data)
-	tools[name] = data
+	tinkering.tools[name] = data
 end
 
 -- Create groups based on materials
@@ -175,7 +202,7 @@ function tinkering.compose_tool_texture(tooltype, main, rod)
 	local mat_main = tinkering.materials[main]
 	local mat_rod  = tinkering.materials[rod]
 
-	local tool_data = tools[tooltype]
+	local tool_data = tinkering.tools[tooltype]
 
 	local main_tex = tool_data.textures.main   .."\\^[multiply\\:".. mat_main.color
 	local rod_tex  = tool_data.textures.second .."\\^[multiply\\:".. mat_rod.color
@@ -203,16 +230,16 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	if not main then return nil end
 	
 	-- Tool data
-	local tool_data = tools[tool_type]
+	local tool_data = tinkering.tools[tool_type]
 
 	-- Name of the tool
-	local name = tool_data.name or "Tool"
+	local name = tool_data.description or "Tool"
 
 	-- Group copies
 	local groups = {}
 	local dgroups = {}
 
-	-- Copy the groups
+	-- Copy the damage groups
 	for g,v in pairs(main.modifier.damagegroups) do
 		-- Decrement/increment damage group if tool wants it
 		if tool_data[g.."_decrement"] then
@@ -290,8 +317,8 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	-- TODO: Add texture as metadata (https://github.com/minetest/minetest/issues/5686)
 
 	-- Not a valid tool type
-	if not tools[tool_type] then return false end
-	local tool_data = tools[tool_type]
+	if not tinkering.tools[tool_type] then return false end
+	local tool_data = tinkering.tools[tool_type]
 
 	-- Check if the components are correct
 	if not compare_components_required(tool_data.components, materials) then return false end
@@ -337,43 +364,21 @@ end
 
 -- Register components and base tools
 local start_load = os.clock()
-local tools = {"pick", "axe", "shovel", "sword"}
 local num_components = 0
 local num_tools = 0
 
+-- Create base tools
 for m, s in pairs(tinkering.materials) do
-	for i, v in pairs(components) do
-		if v.materials == 1 then
-			local component = m.."_"..i
-
-			tinkering.register_component({
-				name = component,
-				description = v.description:format(s.name),
-				image = tinkering.color_filter(v.image, s.color)
-			})
-
-			-- Make all components meltable
-			metal_melter.register_melt("tinkering:"..component, m, i)
-			num_components = num_components + 1
-		end
-	end
-
-	for _,t in pairs(tools) do
+	for t,_ in pairs(tinkering.tools) do
 		tinkering.create_tool(t, {main=m,binding="wood",rod="wood"}, false, nil, {groups={not_in_creative_inventory=1}})
 		num_tools = num_tools + 1
 	end
 end
 
--- Add casts to metal_melter
-for i,v in pairs(components) do
-	metal_melter.set_spec(i, metal_caster.spec.cast)
-	metal_caster.register_cast(i.."_cast", {
-		name = v.description:sub(4).." Cast",
-		mod = "tinkering",
-		result = i,
-		cost = metal_caster.spec.cast,
-		typenames = {i}
-	})
+-- Register tool components
+for i, v in pairs(tinkering.components) do
+	tinkering.register_component(i, v)
+	num_components = num_components + 1
 end
 
 print(("[tinkering] Added %d components and %d base tools in %f seconds."):format(num_components, num_tools, os.clock() - start_load))
