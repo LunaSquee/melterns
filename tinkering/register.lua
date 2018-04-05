@@ -76,9 +76,13 @@ local function create_material_component(data)
 	local name = data.name
 	local mod  = data.mod_name
 
+	local groups = {tinker_component = 1}
+	groups["tc_"..data.component] = 1
+	groups["metal_"..data.metal] = 1
+
 	minetest.register_craftitem(mod..":"..name, {
 		description     = desc,
-		groups          = {tinker_component = 1},
+		groups          = groups,
 		inventory_image = data.image
 	})
 end
@@ -115,6 +119,8 @@ function tinkering.register_component(name, data)
 
 		create_material_component({
 			name        = component,
+			component   = name,
+			metal       = m,
 			mod_name    = mod,
 			description = data.description:format(s.name),
 			image       = tinkering.color_filter(data.image, s.color)
@@ -218,14 +224,9 @@ end
 function tinkering.compose_tool_texture(tooltype, main, rod)
 	local mat_main = tinkering.materials[main]
 	local mat_rod  = tinkering.materials[rod]
+	local tool_data = tinkering.tools[tooltype].textures
 
-	local tool_data = tinkering.tools[tooltype]
-
-	local main_tex = tool_data.textures.main   .."\\^[multiply\\:".. mat_main.color
-	local rod_tex  = tool_data.textures.second .."\\^[multiply\\:".. mat_rod.color
-	local align    = tool_data.textures.offset
-
-	return "[combine:16x16:"..align.."="..main_tex..":0,0="..rod_tex
+	return tinkering.combine_textures(tool_data.main, tool_data.second, mat_main.color, mat_rod.color, tool_data.offset)
 end
 
 local function quickcopy(t)
@@ -302,14 +303,18 @@ function tinkering.tool_definition(tool_type, materials)
 	local tool_tree = {
 		description       = name,
 		tool_capabilities = capabilities,
-		groups            = {tinker_tool = 1},
+		groups            = {tinker_tool = 1, ["metal_"..materials.main] = 1},
 		inventory_image   = tinkering.compose_tool_texture(tool_type, materials.main, materials.rod)
 	}
 
 	-- Store materials to use in metadata
 	local tink_mats = ""
-	for _,m in pairs(materials) do
-		tink_mats = tink_mats..","..m
+	for i, m in pairs(materials) do
+		if i == 1 then 
+			tink_mats = m
+		else
+			tink_mats = tink_mats..","..m
+		end
 	end
 
 	return tool_tree, tink_mats, tags
@@ -381,6 +386,10 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	meta:set_string("texture_string", tool_def.inventory_image) -- NOT IMPLEMENTED YET!
 	meta:set_tool_capabilities(tool_def.tool_capabilities)
 	meta:set_string("materials", mat_names)
+
+	if tool_def["wear"] then
+		tool:set_wear(tool_def.wear)
+	end
 
 	return tool
 end

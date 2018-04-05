@@ -37,6 +37,7 @@ function metal_caster.get_metal_caster_formspec_default()
 		"list[context;bucket_out;4.75,1.4;2,2;]"..
 		"image[5.75,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"image[5.75,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
+		"button[6.68,2.48;1.33,1;dump;Dump]"..
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
 		"listring[context;coolant]"..
