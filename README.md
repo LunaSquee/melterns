@@ -13,6 +13,7 @@ Fluidity adds molten metals to the game. Supports metals from [default](https://
 Simple metal melting and casting. Used for ore doubling and making tools in `tinkering`.
 
 ### tinkering
+![](tinkering/screenshot.png)
 Mod that lets you combine different materials to create tools.
 
 ## License

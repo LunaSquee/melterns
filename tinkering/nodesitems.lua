@@ -16,3 +16,6 @@ dofile(tinkering.modpath.."/nodes/tool_station.lua")
 
 -- Part Builder
 dofile(tinkering.modpath.."/nodes/part_builder.lua")
+
+-- Pattern Table
+dofile(tinkering.modpath.."/nodes/pattern_table.lua")

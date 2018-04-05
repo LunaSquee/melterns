@@ -213,7 +213,7 @@ end
 minetest.register_node("tinkering:part_builder", {
 	description = "Part Builder",
 	tiles = {
-		"tinkering_blank_pattern.png",  "tinkering_bench_bottom.png",
+		"tinkering_pattern_bench.png",  "tinkering_bench_bottom.png",
 		"tinkering_bench_side.png",     "tinkering_bench_side.png",
 		"tinkering_bench_side.png",     "tinkering_bench_side.png"
 	},
