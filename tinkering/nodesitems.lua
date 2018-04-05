@@ -19,3 +19,37 @@ dofile(tinkering.modpath.."/nodes/part_builder.lua")
 
 -- Pattern Table
 dofile(tinkering.modpath.."/nodes/pattern_table.lua")
+
+-- Recipes
+minetest.register_craft({
+    output = 'tinkering:blank_pattern 16',
+    recipe = {
+        {'default:stick', 'group:wood'},
+        {'group:wood',    'default:stick'},
+    },
+})
+
+minetest.register_craft({
+    output = 'tinkering:tool_station',
+    recipe = {
+        {'tinkering:blank_pattern', 'tinkering:blank_pattern', 'tinkering:blank_pattern'},
+        {'tinkering:blank_pattern', 'group:wood',              'tinkering:blank_pattern'},
+        {'tinkering:blank_pattern', 'tinkering:blank_pattern', 'tinkering:blank_pattern'},
+    },
+})
+
+minetest.register_craft({
+    output = 'tinkering:pattern_table',
+    recipe = {
+        {'tinkering:blank_pattern'},
+        {'group:wood'},
+    },
+})
+
+minetest.register_craft({
+    output = 'tinkering:part_builder',
+    recipe = {
+        {'tinkering:blank_pattern'},
+        {'group:tree'},
+    },
+})

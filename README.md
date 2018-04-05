@@ -1,5 +1,5 @@
 # Melterns
-An in-development mod for [Minetest](http://minetest.net) that adds molten metals, melting, casting and creating tools. This mod is inspired by the [Tinkers Construct](https://minecraft.curseforge.com/projects/tinkers-construct) mod for Minecraft, however it's much less-featured due to the current limitations of the Minetest API. None of the components used in this mod have been taken from TC - everything is my original creation.
+An in-development mod for [Minetest](http://minetest.net) 0.5.0+ that adds molten metals, melting, casting and creating tools. This mod is inspired by the [Tinkers Construct](https://minecraft.curseforge.com/projects/tinkers-construct) mod for Minecraft, however it's much less-featured due to the current limitations of the Minetest API. None of the components used in this mod have been taken from TC - everything is my original creation.
 
 ## Component mods
 This repository is technically a modpack, in which all mods need to be enabled. These are the mods included in this "modpack".

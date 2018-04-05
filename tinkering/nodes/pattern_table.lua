@@ -139,9 +139,9 @@ end
 minetest.register_node("tinkering:pattern_table", {
 	description = "Pattern Table",
 	tiles = {
-		"tinkering_blank_pattern.png",  "tinkering_bench_bottom.png",
-		"tinkering_bench_side.png",     "tinkering_bench_side.png",
-		"tinkering_bench_side.png",     "tinkering_bench_side.png"
+		"tinkering_pattern_bench.png", "tinkering_bench_bottom.png",
+		"tinkering_bench_side.png",    "tinkering_bench_side.png",
+		"tinkering_bench_side.png",    "tinkering_bench_side.png"
 	},
 	drawtype = "nodebox",
 	paramtype = "light",
