@@ -1,12 +1,15 @@
--- Melts metals using lava as a heat source
+-- Melts metals using lava as a heat source.
 
--- Max lava that can be held by the melter
+-- Max lava that can be held by the melter.
 metal_melter.max_fuel = 8000
 
--- Max metal that can be held by the melter
+-- Spec divided by this number is the lava usage.
+metal_melter.lava_usage = 4
+
+-- Max metal that can be held by the melter.
 metal_melter.max_metal = 16000
 
--- How much metal is given for melting a typename (in millibuckets)
+-- How much metal is given for melting a typename (in millibuckets).
 metal_melter.spec = {
 	ingot = 144,
 	crystal = 144,
@@ -310,7 +313,7 @@ local function melter_node_timer(pos, elapsed)
 			local metal_name = fluidity.molten_metals[mt]
 			if metal_name and (metal == "" or metal == metal_name) then
 				local cnt = metal_melter.spec[t]
-				local heat_consume = math.floor(cnt / 2)
+				local heat_consume = math.floor(cnt / metal_melter.lava_usage)
 				if metal_count + cnt <= metal_melter.max_metal and heat_count >= heat_consume then
 					metal = metal_name
 					metal_count = metal_count + cnt

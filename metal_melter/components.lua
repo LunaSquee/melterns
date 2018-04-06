@@ -89,9 +89,9 @@ minetest.register_craft({
 minetest.register_craft({
     output = 'metal_melter:heat_gravel 4',
     recipe = {
-        {'default:sand',   'default:sand', 'default:sand'},
-        {'default:gravel', 'default:clay', 'default:gravel'},
-        {'default:sand',   'default:sand', 'default:sand'},
+        {'default:sand',   'default:gravel', 'default:sand'},
+        {'default:gravel', 'default:clay',   'default:gravel'},
+        {'default:sand',   'default:gravel', 'default:sand'},
     },
 })
 
