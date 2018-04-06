@@ -155,3 +155,5 @@ minetest.register_craft({
     recipe = "metal_melter:heat_gravel",
     cooktime = 3,
 })
+
+-- Pipeworks

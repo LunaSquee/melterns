@@ -495,16 +495,50 @@ local function on_receive_fields(pos, formname, fields, sender)
 	end
 end
 
+-- Pipeworks integration
+local pipeworks = {}
+local tube_entry = ""
+if minetest.get_modpath("pipeworks") ~= nil then
+	tube_entry = "^pipeworks_tube_connection_metallic.png"
+
+	local function insert_object(pos, node, stack, direction, owner)
+		local stack_name = stack:get_name()
+		local inv        = minetest.get_meta(pos):get_inventory()
+
+		minetest.get_node_timer(pos):start(1.0)
+
+		if stack_name == "bucket:bucket_empty" or fluidity.florbs.get_is_empty_florb(stack) then
+			return inv:add_item("bucket_out", stack)
+		elseif stack_name == "bucket:bucket_water" then
+			return inv:add_item("coolant", stack)
+		elseif stack_name:find(":bucket_") ~= nil or fluidity.florbs.get_is_florb(stack) then
+			return inv:add_item("bucket_in", stack)
+		end
+		
+		return ItemStack(nil)
+	end
+
+	pipeworks = {
+		connect_sides   = {left = 1, right = 1, back = 1, bottom = 1, top = 1},
+		insert_object   = insert_object,
+		input_inventory = "output",
+	}
+end
+
 -- Register the caster
 minetest.register_node("metal_melter:metal_caster", {
 	description = "Metal Caster",
 	tiles = {
-		"melter_side.png", "melter_side.png",
-		"melter_side.png", "melter_side.png",
-		"melter_side.png", "caster_front.png"
+		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
+		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
+		"melter_side.png"..tube_entry, "caster_front.png"
 	},
 	paramtype2 = "facedir",
-	groups = {cracky=2},
+	groups = {
+		cracky=2,
+		tubedevice = 1,
+		tubedevice_receiver = 1,
+	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
 	sounds = default.node_sound_stone_defaults(),
@@ -537,6 +571,8 @@ minetest.register_node("metal_melter:metal_caster", {
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
+
+	tube = pipeworks,
 })
 
 for i,v in pairs(metal_caster.casts) do

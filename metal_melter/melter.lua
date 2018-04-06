@@ -4,7 +4,7 @@
 metal_melter.max_fuel = 8000
 
 -- Spec divided by this number is the lava usage.
-metal_melter.lava_usage = 4
+metal_melter.lava_usage = 9
 
 -- Max metal that can be held by the melter.
 metal_melter.max_metal = 16000
@@ -402,15 +402,49 @@ local function on_receive_fields(pos, formname, fields, sender)
 	end
 end
 
+-- Pipeworks integration
+local pipeworks = {}
+local tube_entry = ""
+if minetest.get_modpath("pipeworks") ~= nil then
+	tube_entry = "^pipeworks_tube_connection_metallic.png"
+
+	local function insert_object(pos, node, stack, direction, owner)
+		local stack_name = stack:get_name()
+		local inv        = minetest.get_meta(pos):get_inventory()
+
+		minetest.get_node_timer(pos):start(1.0)
+
+		if stack_name == "bucket:bucket_empty" or fluidity.florbs.get_is_empty_florb(stack) then
+			return inv:add_item("bucket_out", stack)
+		elseif stack_name == "bucket:bucket_lava" then
+			return inv:add_item("heat", stack)
+		elseif stack_name:find(":bucket_") ~= nil or fluidity.florbs.get_is_florb(stack) then
+			return inv:add_item("bucket_in", stack)
+		else
+			return inv:add_item("input", stack)
+		end
+	end
+
+	pipeworks = {
+		connect_sides   = {left = 1, right = 1, back = 1, bottom = 1, top = 1},
+		insert_object   = insert_object,
+		input_inventory = "bucket_out",
+	}
+end
+
 minetest.register_node("metal_melter:metal_melter", {
 	description = "Metal Melter",
 	tiles = {
-		"melter_side.png", "melter_side.png",
-		"melter_side.png", "melter_side.png",
-		"melter_side.png", "melter_front.png"
+		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
+		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
+		"melter_side.png"..tube_entry, "melter_front.png"
 	},
 	paramtype2 = "facedir",
-	groups = {cracky=2},
+	groups = {
+		cracky = 2,
+		tubedevice = 1,
+		tubedevice_receiver = 1,
+	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
 	sounds = default.node_sound_stone_defaults(),
@@ -439,16 +473,23 @@ minetest.register_node("metal_melter:metal_melter", {
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
+
+	tube = pipeworks,
 })
 
 minetest.register_node("metal_melter:metal_melter_filled", {
 	tiles = {
-		"melter_side.png", "melter_side.png",
-		"melter_side.png", "melter_side.png",
-		"melter_side.png", "melter_front.png^melter_front_lava.png"
+		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
+		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
+		"melter_side.png"..tube_entry, "melter_front.png^melter_front_lava.png"
 	},
 	paramtype2 = "facedir",
-	groups = {cracky=2,not_in_creative_inventory=1},
+	groups = {
+		cracky = 2,
+		tubedevice = 1,
+		tubedevice_receiver = 1,
+		not_in_creative_inventory = 1
+	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
 	sounds = default.node_sound_stone_defaults(),
@@ -470,6 +511,8 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
+
+	tube = pipeworks,
 })
 
 -- Set a spec
