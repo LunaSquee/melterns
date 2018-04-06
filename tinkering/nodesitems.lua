@@ -22,42 +22,48 @@ dofile(tinkering.modpath.."/nodes/pattern_table.lua")
 
 -- Recipes
 minetest.register_craft({
-    output = 'tinkering:blank_pattern 16',
-    recipe = {
-        {'default:stick', 'group:wood'},
-        {'group:wood',    'default:stick'},
-    },
+	output = 'tinkering:blank_pattern 16',
+	recipe = {
+		{'default:stick', 'group:wood'},
+		{'group:wood',    'default:stick'},
+	},
 })
 
 minetest.register_craft({
-    output = 'tinkering:tool_station',
-    recipe = {
-        {'tinkering:blank_pattern', 'tinkering:blank_pattern', 'tinkering:blank_pattern'},
-        {'tinkering:blank_pattern', 'group:wood',              'tinkering:blank_pattern'},
-        {'tinkering:blank_pattern', 'tinkering:blank_pattern', 'tinkering:blank_pattern'},
-    },
+	output = 'tinkering:tool_station',
+	recipe = {
+		{'tinkering:blank_pattern', 'tinkering:blank_pattern', 'tinkering:blank_pattern'},
+		{'tinkering:blank_pattern', 'group:wood',              'tinkering:blank_pattern'},
+		{'tinkering:blank_pattern', 'tinkering:blank_pattern', 'tinkering:blank_pattern'},
+	},
 })
 
 minetest.register_craft({
-    output = 'tinkering:pattern_table',
-    recipe = {
-        {'tinkering:blank_pattern'},
-        {'group:wood'},
-    },
+	output = 'tinkering:pattern_table',
+	recipe = {
+		{'tinkering:blank_pattern'},
+		{'group:wood'},
+	},
 })
 
 minetest.register_craft({
-    output = 'tinkering:part_builder',
-    recipe = {
-        {'tinkering:blank_pattern'},
-        {'group:tree'},
-    },
+	output = 'tinkering:part_builder',
+	recipe = {
+		{'tinkering:blank_pattern'},
+		{'group:tree'},
+	},
 })
 
 minetest.register_craft({
-    output = 'fluidity:florb',
-    recipe = {
-        {'default:glass'},
-        {'bucket:bucket_empty'},
-    },
+	output = 'fluidity:florb',
+	recipe = {
+		{'default:glass'},
+		{'bucket:bucket_empty'},
+	},
+})
+
+minetest.register_craft({
+	type="shapeless",
+	output = 'fluidity:florb',
+	recipe = {'group:florb'},
 })
