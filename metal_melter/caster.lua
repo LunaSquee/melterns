@@ -1,7 +1,5 @@
 -- Casts molten metals into a solid form
 
-local have_ui = minetest.get_modpath("unified_inventory")
-
 metal_caster = {}
 
 metal_caster.max_coolant = 8000
@@ -11,9 +9,9 @@ metal_caster.max_metal = 16000
 metal_caster.spec = metal_melter.spec
 
 metal_caster.casts = {
-	ingot = {description = "Ingot", result = "ingot",   cost = metal_caster.spec.ingot,   typenames = {"ingot"}},
-	lump  = {description = "Lump",  result = "lump",    cost = metal_caster.spec.lump,    typenames = {"lump"}},
-	gem   = {description = "Gem",   result = "crystal", cost = metal_caster.spec.crystal, typenames = {"crystal", "gem"}}
+	ingot = {description = "Ingot", result = "ingot",   cost = 2, typenames = {"ingot"}},
+	lump  = {description = "Lump",  result = "lump",    cost = 2, typenames = {"lump"}},
+	gem   = {description = "Gem",   result = "crystal", cost = 2, typenames = {"crystal", "gem"}}
 }
 
 local metal_cache = {}
@@ -490,34 +488,4 @@ minetest.register_node("metal_melter:metal_caster", {
 
 for i,v in pairs(metal_caster.casts) do
 	metal_caster.register_cast(i, v)
-end
-
--- Support Unified Inventory, partially
-if have_ui then
-	unified_inventory.register_craft_type("casting", {
-		description = "Casting",
-		width = 2,
-		height = 1,
-	})
-
-	unified_inventory.register_craft({
-		type = "casting",
-		output = "metal_melter:ingot_cast",
-		items = {"fluidity:bucket_gold", "default:steel_ingot"},
-		width = 0,
-	})
-
-	unified_inventory.register_craft({
-		type = "casting",
-		output = "metal_melter:lump_cast",
-		items = {"fluidity:bucket_gold", "default:iron_lump"},
-		width = 0,
-	})
-
-	unified_inventory.register_craft({
-		type = "casting",
-		output = "metal_melter:gem_cast",
-		items = {"fluidity:bucket_gold", "default:mese_crystal"},
-		width = 0,
-	})
 end

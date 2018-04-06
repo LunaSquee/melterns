@@ -304,18 +304,18 @@ function tinkering.tool_definition(tool_type, materials)
 	local tool_tree = {
 		description       = name,
 		tool_capabilities = capabilities,
-		groups            = {tinker_tool = 1, ["metal_"..materials.main] = 1},
+		groups            = {tinker_tool = 1, ["mainly_"..materials.main] = 1, ["tinker_"..tool_type] = 1, not_in_creative_inventory = 1},
 		inventory_image   = tinkering.compose_tool_texture(tool_type, materials.main, materials.rod)
 	}
 
 	-- Store materials to use in metadata
 	local tink_mats = ""
 	local i = 1
-	for _, m in pairs(materials) do
+	for name, mat in pairs(materials) do
 		if i == 1 then 
-			tink_mats = m
+			tink_mats = name.."="..mat
 		else
-			tink_mats = tink_mats..","..m
+			tink_mats = tink_mats..","..name.."="..mat
 		end
 		i = i + 1
 	end
@@ -405,7 +405,7 @@ local num_tools = 0
 -- Create base tools
 for m, s in pairs(tinkering.materials) do
 	for t,_ in pairs(tinkering.tools) do
-		tinkering.create_tool(t, {main=m,binding="wood",rod="wood"}, false, nil, {groups={not_in_creative_inventory=1}})
+		tinkering.create_tool(t, {main=m,binding="wood",rod="wood"}, false, nil)
 		num_tools = num_tools + 1
 	end
 end

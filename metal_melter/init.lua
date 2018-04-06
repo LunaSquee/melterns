@@ -1,4 +1,5 @@
--- Melterns mod
+-- Metal Melter for Minetest 0.5.0+
+-- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
 
 local modpath = minetest.get_modpath("metal_melter")
 metal_melter = {}

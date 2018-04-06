@@ -1,3 +1,6 @@
+-- Fluidity for Minetest 0.5.0+
+-- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
+
 fluidity = rawget(_G, "fluidity") or {}
 
 local mpath = minetest.get_modpath("fluidity")

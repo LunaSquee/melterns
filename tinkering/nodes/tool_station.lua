@@ -59,21 +59,33 @@ function tool_station.get_types(list, tool_type)
 
 	local result = {}
 	local items_required = {}
+	local components = {}
 
 	for _,stack in pairs(list) do
+		if not result then break end
 		local stack_name = stack:get_name()
 		for tt, ty in pairs(tool.components) do
+			if not result then break end
 			local in_grp = minetest.get_item_group(stack_name, "tc_"..ty) > 0
 			if in_grp then
-				local mtg = get_metalgroup(minetest.registered_items[stack_name].groups)
-				if mtg ~= nil then
-					result[tt] = mtg
-					
-					if not items_required[stack_name] then
-						items_required[stack_name] = 0
-					end
+				if components[tt] == nil then
+					local mtg = get_metalgroup(minetest.registered_items[stack_name].groups)
+					if mtg ~= nil then
+						result[tt] = mtg
+						
+						if not items_required[stack_name] then
+							items_required[stack_name] = 0
+						end
 
-					items_required[stack_name] = items_required[stack_name] + 1
+						items_required[stack_name] = items_required[stack_name] + 1
+						components[tt] = true
+					end
+				else
+					-- Don't allow multiple components of the same type to avoid confusion
+					result = nil
+					items_required = nil
+					components = {}
+					break
 				end
 			end
 		end
@@ -82,14 +94,125 @@ function tool_station.get_types(list, tool_type)
 	return result, items_required
 end
 
+function tool_station.get_tool(list)
+	local tool_fnd  = nil
+	local tool_type = nil
+	for _,stack in pairs(list) do
+		local stack_name = stack:get_name()
+		if minetest.get_item_group(stack_name, "tinker_tool") > 0 then
+			if tool_fnd == nil then
+				for t in pairs(tinkering.tools) do
+					if minetest.get_item_group(stack_name, "tinker_"..t) > 0 then
+						tool_type = t
+						break
+					end
+				end
+				tool_fnd = stack
+			else
+				-- Don't allow multiple tools in the repair grid at the same time to avoid confusion
+				tool_fnd = nil
+				break
+			end
+		end
+	end
+	return tool_fnd, tool_type
+end
+
+local function decode_meta(s)
+	local t = {}
+	for k, v in string.gmatch(s, "(%w+)=(%w+)") do
+		t[k] = v
+	end
+	return t
+end
+
+local function find_material(stack)
+	-- Meltables
+	for metal,list in pairs(metal_melter.melts) do
+		for type,stacks in pairs(list) do
+			for _,st in pairs(stacks) do
+				if st == stack then
+					return metal, type
+				end 
+			end
+		end
+	end
+
+	-- Grouped
+	for mat,iv in pairs(tinkering.materials) do
+		if iv.base == "group" and minetest.get_item_group(stack, iv.default) > 0 then
+			return mat, "block"
+		elseif stack == iv.default then
+			return mat, "ingot"
+		end
+	end
+
+	return nil
+end
+
+local function get_materials_in_list(list, skip)
+	local result = {}
+	for _,stack in pairs(list) do
+		local stack_name = stack:get_name()
+		if stack_name ~= "" and stack_name ~= skip then
+			local material, type = find_material(stack_name)
+			if material then
+				if result[material] then
+					result[material].count = result[material].count + stack:get_count()
+				else
+					result[material] = {stack = stack_name, type = type, count = stack:get_count()}
+				end
+			end
+		end
+	end
+
+	return result
+end
+
+local function match_materials(list1, materials)
+	local matches = {}
+	for name,type in pairs(materials) do
+		if list1[type] then
+			matches[type] = list1[type]
+		end
+	end
+
+	-- Return nothing if there are materials not suitable
+	for name in pairs(list1) do
+		if not matches[name] then
+			matches = {}
+			break
+		end
+	end
+	return matches
+end
+
+local function take_from_list(list, item, list2)
+	for _,stack in pairs(list) do
+		local stack_name = stack:get_name()
+		if stack_name == item then
+			stack:clear()
+		elseif list2[stack_name] then
+			if list2[stack_name] > stack:get_count() then
+				list2[stack_name] = list2[stack_name] - stack:get_count()
+				stack:clear()
+			else
+				stack:set_count(stack:get_count() - list2[stack_name])
+				list2[stack_name] = 0
+			end
+		end
+	end
+	return list
+end
+
 local function handle_take_output(pos, listname)
 	local meta = minetest.get_meta(pos)
 	local inv  = meta:get_inventory()
 
 	local tooltype = meta:get_string("tool_type")
+	local list     = inv:get_list(listname)
 
 	if tooltype ~= "" then
-		local list = inv:get_list(listname)
 		local types, items = tool_station.get_types(list, tooltype)
 		if not types then return end
 		local res = {}
@@ -114,6 +237,71 @@ local function handle_take_output(pos, listname)
 		end
 
 		inv:set_list(listname, list)
+	else
+		local tool, tool_type_ = tool_station.get_tool(list)
+		if tool then
+			local comp_mats = tool:get_meta():get_string("materials")
+			if comp_mats and comp_mats ~= "" then
+				local materials = decode_meta(comp_mats)
+				-- Material list found, now we can start doing repair work or replacing a component
+				local mat_grid = get_materials_in_list(list, tool:get_name())
+				
+				-- Find components to remove
+				local for_removal = {}
+				local removed_types = {}
+				local repair = true
+				local tool_comps = tinkering.tools[tool_type_].components
+				for mat, stat in pairs(mat_grid) do
+					for name, comp in pairs(tool_comps) do
+						if stat.type == comp and not removed_types[comp] then
+							for_removal[stat.stack] = 1
+							removed_types[comp] = true
+							repair = false
+						end
+					end
+				end
+
+				if not repair then
+					inv:set_list(listname, take_from_list(list, tool:get_name(), for_removal))
+				end
+
+				if tool:get_wear() ~= 0 and repair then
+					local matches = match_materials(mat_grid, materials)
+					local repair_cap = 0
+					for mat, stat in pairs(matches) do
+						repair_cap = repair_cap + math.min(stat.count, 3)
+					end
+
+					if repair_cap > 0 then
+						local _take = 1
+						for i = 1, repair_cap do
+							local tool_wear = 65535 - tool:get_wear()
+							local repair_cnt = (0.33 * 65535) * i
+							local new_wear = 65535 - (tool_wear + repair_cnt)
+							if new_wear > 0 then
+								_take = _take + 1
+							end
+						end
+
+						local to_take = {}
+						local exch = _take
+
+						for type, c in pairs(matches) do
+							if not to_take[c.stack] then to_take[c.stack] = 0 end
+							if c.count < exch then
+								to_take[c.stack] = to_take[c.stack] + c.count
+								exch = exch - 1
+							else
+								to_take[c.stack] = to_take[c.stack] + exch
+								break
+							end
+						end
+
+						inv:set_list(listname, take_from_list(list, tool:get_name(), to_take))
+					end
+				end
+			end
+		end
 	end
 end
 
@@ -126,15 +314,83 @@ local function on_timer(pos, elapsed)
 
 	-- Get selected tool type
 	local tool_type = meta:get_string("tool_type")
+	local list      = inv:get_list("input")
 
 	if tool_type ~= "" then
-		local list    = inv:get_list("input")
 		local results = tool_station.get_types(list, tool_type)
 		if results then
 			-- Attempt to create the tool with the provided materials
 			local tool_res = tinkering.create_tool(tool_type, results, true)
 			if tool_res then
 				output = tool_res
+			end
+		end
+	else
+		local tool, tool_type_ = tool_station.get_tool(list)
+		if tool then
+			local comp_mats = tool:get_meta():get_string("materials")
+			if comp_mats and comp_mats ~= "" then
+				local materials = decode_meta(comp_mats)
+				-- Material list found, now we can start doing repair work or replacing a component
+				local mat_grid = get_materials_in_list(list, tool:get_name())
+				
+				-- Find components to replace
+				local comp_repl = {}
+				local repair = true
+				local tool_comps = tinkering.tools[tool_type_].components
+				for mat, stat in pairs(mat_grid) do
+					if comp_repl == nil then break end
+					for name, comp in pairs(tool_comps) do
+						if stat.type == comp then
+							if comp_repl[name] then
+								-- Dont allow multiple of the same component to avoid confusion
+								comp_repl = nil
+								break
+							else
+								comp_repl[name] = mat
+							end
+							repair = false
+						end
+					end
+				end
+
+				if not repair and comp_repl then
+					-- Add non-replacement materials back
+					for i,v in pairs(materials) do
+						if not comp_repl[i] then
+							comp_repl[i] = v
+						end
+					end
+
+					local tool_res = tinkering.create_tool(tool_type_, comp_repl, true, nil, {wear = tool:get_wear()})
+					if tool_res then
+						output = tool_res
+					end
+				end
+
+				-- Attempt to repair tool with provided items
+				if tool:get_wear() ~= 0 and repair then
+					local matches = match_materials(mat_grid, materials)
+					local repair_cap = 0
+					for mat, stat in pairs(matches) do
+						repair_cap = repair_cap + math.min(stat.count, 3)
+					end
+
+					if repair_cap > 0 then
+						local tool_wear = 65535 - tool:get_wear()
+						local repair_cnt = (0.33 * 65535) * repair_cap
+						local new_wear = 65535 - (tool_wear + repair_cnt)
+						
+						if new_wear < 0 then
+							new_wear = 0
+						end
+
+						local tool_res = tinkering.create_tool(tool_type_, materials, true, nil, {wear = new_wear})
+						if tool_res then
+							output = tool_res
+						end
+					end
+				end
 			end
 		end
 	end

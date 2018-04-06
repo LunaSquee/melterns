@@ -61,7 +61,6 @@ local function find_material_match(type, stack)
 	return match
 end
 
-
 local function get_output(inv)
 	local pattern      = inv:get_stack("pattern", 1):get_name()
 	local find_pattern = get_template_group(minetest.registered_items[pattern].groups)
