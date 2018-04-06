@@ -71,7 +71,7 @@ fluidity.tanks.register_fluid_tank({
 	tank_name        = "heated_tank",
 	tank_description = "Heated Tank",
 	capacity         = 8000,
-	tiles            = {"default_glass.png", "default_glass_detail.png"},
+	tiles            = {"melter_heated_tank.png"},
 	fluids           = {"default:lava_source"}
 })
 

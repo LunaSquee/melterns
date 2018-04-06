@@ -203,7 +203,7 @@ local function register_tankfluid(data)
 
 	minetest.register_node(data.mod_name..":"..data.tank_name.."_"..internal, {
 		description = data.tank_description.." ("..fluid..")",
-		drawtype = "glasslike_framed",
+		drawtype = "glasslike_framed_optional",
 		paramtype = "light",
 		paramtype2 = "glasslikeliquidlevel",
 		drop = data.mod_name..":"..data.tank_name,
@@ -231,7 +231,7 @@ function fluidity.tanks.register_fluid_tank(data)
 
 	minetest.register_node(modname..":"..tankname, {
 		description = tankdesc,
-		drawtype = "glasslike_framed",
+		drawtype = "glasslike_framed_optional",
 		paramtype = "light",
 		paramtype2 = "glasslikeliquidlevel",
 		is_ground_content = false,
