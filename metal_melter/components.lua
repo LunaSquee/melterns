@@ -66,11 +66,11 @@ minetest.register_node('metal_melter:casting_table', {
 })
 
 
-fluidity.register_fluid_tank({
+fluidity.tanks.register_fluid_tank({
 	mod_name         = "metal_melter",
 	tank_name        = "heated_tank",
 	tank_description = "Heated Tank",
-	capacity         = 8,
+	capacity         = 8000,
 	tiles            = {"default_glass.png", "default_glass_detail.png"},
 	fluids           = {"default:lava_source"}
 })

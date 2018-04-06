@@ -113,7 +113,7 @@ local function register_florbfluid(data)
 	})
 end
 
-function fluidity.register_florb(data)
+function fluidity.florbs.register_florb(data)
 	local mod_name    = data.mod_name or minetest.get_current_modname()
 	local florb_name = data.florb_name or 'florb'
 	local florb_desc = data.florb_description or 'Florb'
