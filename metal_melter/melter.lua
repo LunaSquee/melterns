@@ -127,7 +127,7 @@ local function allow_metadata_inventory_put (pos, listname, index, stack, player
 	end
 
 	if listname == "bucket_out" then
-		if stack:get_name() ~= "bucket:bucket_empty" then
+		if stack:get_name() ~= "bucket:bucket_empty" and not fluidity.florbs.get_is_florb(stack) then
 			return 0
 		end
 
@@ -209,42 +209,95 @@ local function melter_node_timer(pos, elapsed)
 	end
 
 	-- Handle input bucket, only allow a molten metal
-	local bucket_in = inv:get_stack("bucket_in", 1):get_name()
-	if bucket_in:find("bucket") and bucket_in ~= "bucket:bucket_empty" then
-		local bucket_fluid = fluidity.get_fluid_for_bucket(bucket_in)
-		local fluid_is_metal = fluidity.get_metal_for_fluid(bucket_fluid) ~= nil
-		local empty_bucket = false
+	local bucket_in   = inv:get_stack("bucket_in", 1)
+	local bucket_name = bucket_in:get_name()
+	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and fluidity.florbs.get_is_florb(bucket_in)) then
+		local is_florb = fluidity.florbs.get_is_florb(bucket_in)
+		if is_florb then
+			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_in)
+			local fluid_metal = fluidity.get_metal_for_fluid(fluid_name)
+			if fluid_metal and (fluid_name == metal or metal == "") then
+				local take = 1000
 
-		if fluid_is_metal then
-			if metal ~= "" and metal == bucket_fluid then
-				if metal_count + 1000 <= metal_melter.max_metal then
-					metal_count = metal_count + 1000
+				if metal_count + take > metal_melter.max_metal then
+					take = metal_melter.max_metal - metal_count
+				end
+
+				-- Attempt to take 1000 millibuckets from the florb
+				local stack,res = fluidity.florbs.take_fluid(bucket_in, take)
+				if res > 0 then
+					take = take - res
+				end
+
+				metal = fluid_name
+				metal_count = metal_count + take
+				inv:set_list("bucket_in", {stack})
+				refresh = true
+			end
+		else
+			local bucket_fluid = fluidity.get_fluid_for_bucket(bucket_name)
+			local fluid_is_metal = fluidity.get_metal_for_fluid(bucket_fluid) ~= nil
+			local empty_bucket = false
+
+			if fluid_is_metal then
+				if metal ~= "" and metal == bucket_fluid then
+					if metal_count + 1000 <= metal_melter.max_metal then
+						metal_count = metal_count + 1000
+						empty_bucket = true
+					end
+				elseif metal == "" then
+					metal_count = 1000
+					metal = bucket_fluid
 					empty_bucket = true
 				end
-			elseif metal == "" then
-				metal_count = 1000
-				metal = bucket_fluid
-				empty_bucket = true
 			end
-		end
 
-		if empty_bucket then
-			inv:set_list("bucket_in", {"bucket:bucket_empty"})
-			refresh = true
+			if empty_bucket then
+				inv:set_list("bucket_in", {"bucket:bucket_empty"})
+				refresh = true
+			end
 		end
 	end
 
 	-- Handle bucket output, only allow empty buckets in this slot
-	local bucket_out = inv:get_stack("bucket_out", 1):get_name()
-	if bucket_out == "bucket:bucket_empty" and metal ~= "" and inv:get_stack("bucket_out", 1):get_count() == 1 then
-		local bucket = fluidity.get_bucket_for_fluid(metal)
-		if metal_count >= 1000 then
-			metal_count = metal_count - 1000
-			inv:set_list("bucket_out", {bucket})
-			refresh = true
+	local bucket_out = inv:get_stack("bucket_out", 1)
+	bucket_name      = bucket_out:get_name()
+	if (bucket_name == "bucket:bucket_empty" or fluidity.florbs.get_is_florb(bucket_out)) and metal ~= "" and bucket_out:get_count() == 1 then
+		local is_florb = fluidity.florbs.get_is_florb(bucket_out)
+		if is_florb then
+			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_out)
+			local fluid_metal = fluidity.get_metal_for_fluid(fluid_name)
+			if not fluid_name or fluid_name == metal then
+				local take = 1000
 
-			if metal_count == 0 then
-				metal = ""
+				if metal_count < take then
+					take = metal_count
+				end
+
+				-- Attempt to put 1000 millibuckets into the florb
+				local stack,res = fluidity.florbs.add_fluid(bucket_out, metal, take)
+				if res > 0 then
+					take = take - res
+				end
+
+				metal_count = metal_count - take
+				inv:set_list("bucket_out", {stack})
+				refresh = true
+
+				if metal_count == 0 then
+					metal = ""
+				end
+			end
+		else
+			local bucket = fluidity.get_bucket_for_fluid(metal)
+			if metal_count >= 1000 then
+				metal_count = metal_count - 1000
+				inv:set_list("bucket_out", {bucket})
+				refresh = true
+
+				if metal_count == 0 then
+					metal = ""
+				end
 			end
 		end
 	end

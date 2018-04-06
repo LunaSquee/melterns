@@ -53,3 +53,11 @@ minetest.register_craft({
         {'group:tree'},
     },
 })
+
+minetest.register_craft({
+    output = 'fluidity:florb',
+    recipe = {
+        {'default:glass'},
+        {'bucket:bucket_empty'},
+    },
+})

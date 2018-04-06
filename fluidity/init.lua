@@ -15,5 +15,8 @@ dofile(mpath.."/molten.lua")
 -- Tanks
 dofile(mpath.."/tanks.lua")
 
+-- Florbs
+dofile(mpath.."/florbs.lua")
+
 -- Register everything
 dofile(mpath.."/register.lua")
