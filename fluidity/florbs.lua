@@ -122,8 +122,8 @@ function fluidity.register_florb(data)
 
 	-- Register base item
 	minetest.register_craftitem(mod_name..":"..florb_name, {
-		description     = florb_desc.." (Empty)\nThis item holds percise amount of fluids.",
-		inventory_image = textures[1],
+		description     = florb_desc.." (Empty)\nThis item holds millibuckets of fluid.",
+		inventory_image = textures[1].."^[noalpha^"..textures[2].."^[makealpha:255,0,0,",
 		_florb_capacity = capacity,
 		_florb_source   = nil,
 		stack_max       = 1,
