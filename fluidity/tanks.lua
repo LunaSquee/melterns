@@ -195,6 +195,37 @@ local function bucket_fill(pos, node, clicker, itemstack, pointed_thing)
 	return ItemStack(stack)
 end
 
+-- Preserve fluid count in the item stack dropped
+local function preserve_metadata(pos, oldnode, oldmeta, drops)
+	local fluid_name, count, capacity = fluidity.tanks.get_tank_at(pos)
+	local meta      = minetest.get_meta(pos)
+	local fluid_cnt = meta:get_int("fluid")
+	local nodedesc  = get_nodedef_field(oldnode.name, "description")
+
+	for i,stack in pairs(drops) do
+		local stack_meta = stack:get_meta()
+		stack_meta:set_int("fluid", fluid_cnt)
+		stack_meta:set_string("description", nodedesc.."\nContains "..count.."/"..capacity.." mB")
+		drops[i] = stack
+	end
+
+	return drops
+end
+
+-- Retrieve fluid count from itemstack when placed
+local function after_place_node(pos, placer, itemstack, pointed_thing)
+	local item_meta = itemstack:get_meta()
+	local fluid_cnt = item_meta:get_int("fluid")
+	local fluid     = get_nodedef_field(itemstack:get_name(), "fluidity_fluid")
+	
+	if fluid_cnt then
+		-- Fill the tank to the count specified in item meta, don't care about overfill or what it returns.
+		fluidity.tanks.fill_tank_at(pos, fluid, fluid_cnt, true)
+	end
+
+	return false
+end
+
 -- Register a tank for a specific fluid
 local function register_tankfluid(data)
 	local source_node = fluidity.get_fluid_node(data.source_name)
@@ -206,13 +237,14 @@ local function register_tankfluid(data)
 		drawtype = "glasslike_framed_optional",
 		paramtype = "light",
 		paramtype2 = "glasslikeliquidlevel",
-		drop = data.mod_name..":"..data.tank_name,
 		fluidity_fluid = data.source_name,
 		place_param2 = 0,
 		special_tiles = source_node.tiles,
 		is_ground_content = false,
 		sunlight_propagates = true,
 		on_rightclick = bucket_fill,
+		preserve_metadata = preserve_metadata,
+		after_place_node = after_place_node,
 		_mod = data.mod_name,
 		_dataname = data.tank_name,
 		_capacity = data.capacity,
