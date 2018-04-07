@@ -60,6 +60,34 @@ local modifiers = {
 		}
 	},
 	copper = {
+		cracky = {times={[1]=3.80, [2]=1.50, [3]=0.70}, uses=20, maxlevel=2},
+		crumbly = {times={[1]=1.30, [2]=0.80, [3]=0.30}, uses=30, maxlevel=2},
+		snappy = {times={[1]=2.30, [2]=1.10, [3]=0.20}, uses=30, maxlevel=2},
+		choppy = {times={[1]=2.30, [2]=1.30, [3]=0.90}, uses=20, maxlevel=2},
+		damagegroups = {fleshy = 5},
+		explody = nil,
+
+		binding = {increase = 0.05, uses = 3},
+		rod = {increase = 0.06, uses = 5},
+		tags = {
+			{name = "cold", description = "Cold"}
+		}
+	},
+	tin = {
+		cracky = {times={[1]=3.70, [2]=1.40, [3]=0.60}, uses=20, maxlevel=2},
+		crumbly = {times={[1]=1.20, [2]=0.70, [3]=0.20}, uses=30, maxlevel=2},
+		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel=2},
+		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.80}, uses=20, maxlevel=2},
+		damagegroups = {fleshy = 5},
+		explody = nil,
+
+		binding = {increase = 0.02, uses = -2},
+		rod = {increase = 0.06, uses = -3},
+		tags = {
+			{name = "cheap", description = "Cheap"}
+		}
+	},
+	bronze = {
 		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=30, maxlevel=2},
 		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=40, maxlevel=2},
 		snappy = {times={[1]=2.50, [2]=1.20, [3]=0.35}, uses=40, maxlevel=2},
@@ -67,25 +95,9 @@ local modifiers = {
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
-		binding = {increase = 0.08, uses = 3},
-		rod = {increase = 0.08, uses = 5},
-		tags = {
-			{name = "cold", description = "Cold"}
-		}
-	},
-	tin = {
-		cracky = {times={[1]=3.80, [2]=1.50, [3]=0.70}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.30, [2]=0.80, [3]=0.30}, uses=30, maxlevel=2},
-		snappy = {times={[1]=2.30, [2]=1.10, [3]=0.20}, uses=30, maxlevel=2},
-		choppy = {times={[1]=2.30, [2]=1.30, [3]=0.90}, uses=20, maxlevel=2},
-		damagegroups = {fleshy = 6},
-		explody = nil,
-
-		binding = {increase = 0.07, uses = -2},
-		rod = {increase = 0.07, uses = -3},
-		tags = {
-			{name = "cheap", description = "Cheap"}
-		}
+		binding = {increase = 0.09, uses = 2},
+		rod = {increase = 0.01, uses = 10},
+		tags = {}
 	},
 	mese = {
 		cracky = {times={[1]=2.4, [2]=1.2, [3]=0.60}, uses=20, maxlevel=3},
@@ -258,6 +270,7 @@ tinkering.materials = {
 	steel  = {name = "Steel",  default = "default:steel_ingot",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.steel},
 	copper = {name = "Copper", default = "default:copper_ingot", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
 	tin    = {name = "Tin",    default = "default:tin_ingot",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
+	bronze = {name = "Bronze", default = "default:bronze_ingot", color = "#C14E19", base = "ingot", cast = true, modifier = modifiers.bronze},
 	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
 	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
 

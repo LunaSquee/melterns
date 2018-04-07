@@ -1,7 +1,7 @@
 
 -- Register molten metals
 -- Default metals
-local metals = {"steel", "copper", "tin", "gold", "mese", "obsidian", "lead", "chromium", "zinc", "silver", "mithril"}
+local metals = {"steel", "copper", "tin", "bronze", "gold", "mese", "obsidian", "lead", "chromium", "zinc", "silver", "mithril"}
 
 for _,v in pairs(metals) do
 	fluidity.register_molten_metal(v)

@@ -63,10 +63,10 @@ function metal_melter.get_metal_melter_formspec_default()
 		"image[6.68,0;1.4,2.8;melter_gui_barbg.png]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
 		"label[0.08,3.75;No Molten Metal]"..
-		"list[context;bucket_in;4.75,0.2;1,1;]"..
-		"list[context;bucket_out;4.75,1.4;1,1;]"..
-		"image[5.75,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"image[5.75,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
+		"list[context;bucket_in;4.7,0.2;1,1;]"..
+		"list[context;bucket_out;4.7,1.4;1,1;]"..
+		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
+		"image[5.7,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
 		"button[6.68,2.48;1.33,1;dump;Dump]"..
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
@@ -106,10 +106,10 @@ function metal_melter.get_metal_melter_formspec(data)
 		"image[6.68,"..(2.44 - metal_percent * 2.44)..";1.4,"..(metal_percent * 2.8)..";"..data.metal_texture.."]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
 		metal_formspec..
-		"list[context;bucket_in;4.75,0.2;1,1;]"..
-		"list[context;bucket_out;4.75,1.4;1,1;]"..
-		"image[5.75,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"image[5.75,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
+		"list[context;bucket_in;4.7,0.2;1,1;]"..
+		"list[context;bucket_out;4.7,1.4;1,1;]"..
+		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
+		"image[5.7,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
 		"button[6.68,2.48;1.33,1;dump;Dump]"..
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
