@@ -18,6 +18,9 @@ dofile(modpath.."/materials.lua")
 -- Pattern Library
 dofile(modpath.."/pattern.lua")
 
+-- Tool Library
+dofile(modpath.."/tool.lua")
+
 -- Registration
 dofile(modpath.."/register.lua")
 
