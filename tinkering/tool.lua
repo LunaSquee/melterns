@@ -308,19 +308,7 @@ function tinkering.tool_definition(tool_type, materials)
 		inventory_image   = tinkering.compose_tool_texture(tool_type, materials.main, materials.rod)
 	}
 
-	-- Store materials to use in metadata
-	local tink_mats = ""
-	local i = 1
-	for name, mat in pairs(materials) do
-		if i == 1 then 
-			tink_mats = name.."="..mat
-		else
-			tink_mats = tink_mats..","..name.."="..mat
-		end
-		i = i + 1
-	end
-
-	return tool_tree, tink_mats, tags
+	return tool_tree, tags
 end
 
 -- Compare provided components to the required components of this tool
@@ -344,7 +332,6 @@ end
 
 -- Create a new tool based on parameters specified.
 function tinkering.create_tool(tool_type, materials, want_tool, custom_name, overrides)
-	-- TODO: Apply tags
 	-- TODO: Add texture as metadata (https://github.com/minetest/minetest/issues/5686)
 
 	-- Not a valid tool type
@@ -355,7 +342,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	if not compare_components_required(tool_data.components, materials) then return nil end
 
 	-- Get tool definition and other metadata
-	local tool_def, mat_names, tags = tinkering.tool_definition(tool_type, materials)
+	local tool_def, tags = tinkering.tool_definition(tool_type, materials)
 	if not tool_def then return nil end
 
 	local mod_name = tool_data.mod or "tinkering"
@@ -382,10 +369,41 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 
 	if not want_tool then return nil end
 
+	-- Store materials to use in metadata
+	local mat_names = ""
+	local i = 1
+	for name, mat in pairs(materials) do
+		if i == 1 then 
+			mat_names = name.."="..mat
+		else
+			mat_names = mat_names..","..name.."="..mat
+		end
+		i = i + 1
+	end
+
+	-- Add components to description
+	local description = tool_def.description
+	description = description.."\n"
+
+	for cmp, mat in pairs(materials) do
+		local mat  = tinkering.materials[mat]
+		local comp = tool_data.components[cmp]
+		local desc = tinkering.components[comp].description:format(mat.name)
+
+		description = description .. "\n" .. minetest.colorize(mat.color, desc)
+	end
+
+	-- Add tags to description
+	description = description.."\n"
+
+	for _,tag in pairs(tags) do
+		description = description .. "\n" .. tag
+	end
+
 	-- Create a new tool instance and apply metadata
 	local tool = ItemStack(internal_name)
 	local meta = tool:get_meta()
-	meta:set_string("description", tool_def.description)
+	meta:set_string("description", description)
 	meta:set_string("texture_string", tool_def.inventory_image) -- NOT IMPLEMENTED YET!
 	meta:set_tool_capabilities(tool_def.tool_capabilities)
 	meta:set_string("materials", mat_names)
