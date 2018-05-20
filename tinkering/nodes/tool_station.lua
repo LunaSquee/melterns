@@ -1,6 +1,7 @@
 -- TODO: Repair
 tool_station = {}
 
+local tool_list_cache = nil
 function tool_station.get_tool_type_list(ix, iy, mx)
 	local formspec = ""
 	local x        = 0
@@ -23,19 +24,36 @@ function tool_station.get_tool_type_list(ix, iy, mx)
 	return formspec
 end
 
-function tool_station.get_formspec()
-	local tool_list = tool_station.get_tool_type_list(8, 0, 5)
+function tool_station.get_formspec(comp_list)
+	if not tool_list_cache then
+		tool_list_cache = tool_station.get_tool_type_list(8, 0, 5)
+	end
+
+	local x = 1
+	local y = 1
+	local til = ""
+	for _,comp in pairs(comp_list) do
+		local img = tinkering.components[comp].image .. "^[colorize:#1e1e1e:255"
+		til = til .. "image[" .. (x * 1) .. "," .. (y * 0.8) .. ";1,1;".. img .. "]"
+		x = x + 1
+		if x > 3 then
+			x = 1
+			y = y + 1
+		end
+	end
+
 	return "size[13,8.5]"..
 		default.gui_bg..
 		default.gui_bg_img..
 		default.gui_slots..
 		"label[0,0;Tool Station]"..
+		til..
 		"list[context;input;1,0.8;3,3;]"..
 		"list[context;output;5,1.8;1,1;]"..
 		"image[4,1.8;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
-		tool_list..
+		tool_list_cache..
 		"listring[context;input]"..
 		"listring[context;output]"..
 		"listring[current_player;main]"..
@@ -325,6 +343,7 @@ local function on_timer(pos, elapsed)
 				output = tool_res
 			end
 		end
+		meta:set_string("formspec", tool_station.get_formspec(tinkering.tools[tool_type].components))
 	else
 		local tool, tool_type_ = tool_station.get_tool(list)
 		if tool then
@@ -393,6 +412,7 @@ local function on_timer(pos, elapsed)
 				end
 			end
 		end
+		meta:set_string("formspec", tool_station.get_formspec({}))
 	end
 
 	if output then
@@ -433,7 +453,7 @@ end
 
 local function on_construct(pos)
 	local meta = minetest.get_meta(pos)
-	meta:set_string("formspec", tool_station.get_formspec())
+	meta:set_string("formspec", tool_station.get_formspec({}))
 	
 	-- Create inventory
 	local inv = meta:get_inventory()
