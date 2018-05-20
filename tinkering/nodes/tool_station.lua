@@ -1,4 +1,3 @@
--- TODO: Repair
 tool_station = {}
 
 local tool_list_cache = nil
@@ -30,15 +29,15 @@ function tool_station.get_formspec(comp_list)
 	end
 
 	local x = 1
-	local y = 1
+	local y = 0
 	local til = ""
 	for _,comp in pairs(comp_list) do
 		local img = tinkering.components[comp].image .. "^[colorize:#1e1e1e:255"
-		til = til .. "image[" .. (x * 1) .. "," .. (y * 0.8) .. ";1,1;".. img .. "]"
-		x = x + 1
-		if x > 3 then
-			x = 1
-			y = y + 1
+		til = til .. "image[" .. (x * 1) .. "," .. (y + 0.8) .. ";1,1;".. img .. "]"
+		y = y + 1
+		if y > 2 then
+			y = 0
+			x = x + 1
 		end
 	end
 
