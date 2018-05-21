@@ -28,17 +28,34 @@ function tool_station.get_formspec(comp_list)
 		tool_list_cache = tool_station.get_tool_type_list(8, 0, 5)
 	end
 
+	local w = 1
+	local h = 0
+
 	local x = 1
 	local y = 0
+
 	local til = ""
-	for _,comp in pairs(comp_list) do
-		local img = tinkering.components[comp].image .. "^[colorize:#1e1e1e:255"
-		til = til .. "image[" .. (x * 1) .. "," .. (y + 0.8) .. ";1,1;".. img .. "]"
-		y = y + 1
-		if y > 2 then
-			y = 0
-			x = x + 1
+
+	if comp_list then
+		for _,comp in pairs(comp_list) do
+			local img = tinkering.components[comp].image .. "^[colorize:#1e1e1e:255"
+			til = til .. "image[" .. (x * 1) .. "," .. (y + 0.8) .. ";1,1;".. img .. "]"
+			y = y + 1
+			h = h + 1
+
+			if y > 2 then
+				y = 0
+				x = x + 1
+			end
+
+			if h > 3 then
+				h = 3
+				w = w + 1
+			end
 		end
+	else
+		h = 3
+		w = 3
 	end
 
 	return "size[13,8.5]"..
@@ -47,7 +64,7 @@ function tool_station.get_formspec(comp_list)
 		default.gui_slots..
 		"label[0,0;Tool Station]"..
 		til..
-		"list[context;input;1,0.8;3,3;]"..
+		"list[context;input;1,0.8;" .. w .. "," .. h .. ";]"..
 		"list[context;output;5,1.8;1,1;]"..
 		"image[4,1.8;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 		"list[current_player;main;0,4.25;8,1;]"..
@@ -411,7 +428,7 @@ local function on_timer(pos, elapsed)
 				end
 			end
 		end
-		meta:set_string("formspec", tool_station.get_formspec({}))
+		meta:set_string("formspec", tool_station.get_formspec())
 	end
 
 	if output then
@@ -452,7 +469,7 @@ end
 
 local function on_construct(pos)
 	local meta = minetest.get_meta(pos)
-	meta:set_string("formspec", tool_station.get_formspec({}))
+	meta:set_string("formspec", tool_station.get_formspec())
 	
 	-- Create inventory
 	local inv = meta:get_inventory()
