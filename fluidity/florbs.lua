@@ -99,10 +99,16 @@ local function register_florbfluid(data)
 	local fluid       = fluidity.fluid_name(source_node.description)
 	local internal    = fluidity.fluid_short(fluid)
 
+	local itemname = data.mod_name..":"..data.florb_name.."_"..internal
+
+	if minetest.registered_items[itemname] then
+		return
+	end
+
 	local stationary_name = source_node.tiles[1].name:gsub("_source_animated", "")
 
 	-- Register base item
-	minetest.register_craftitem(data.mod_name..":"..data.florb_name.."_"..internal, {
+	minetest.register_craftitem(itemname, {
 		description     = data.florb_description.." ("..fluid..")",
 		inventory_image = stationary_name.."^[noalpha^"..data.textures[1].."^"..data.textures[2].."^[makealpha:255,0,0,",
 		_florb_capacity = data.capacity,
@@ -114,21 +120,24 @@ local function register_florbfluid(data)
 end
 
 function fluidity.florbs.register_florb(data)
-	local mod_name    = data.mod_name or minetest.get_current_modname()
+	local mod_name   = data.mod_name or minetest.get_current_modname()
 	local florb_name = data.florb_name or 'florb'
 	local florb_desc = data.florb_description or 'Florb'
 	local textures   = data.textures or {"fluidity_florb.png", "fluidity_florb_mask.png"}
 	local capacity   = data.capacity or 1000
+	local item_name  = mod_name..":"..florb_name
 
-	-- Register base item
-	minetest.register_craftitem(mod_name..":"..florb_name, {
-		description     = florb_desc.." (Empty)\nThis item holds millibuckets of fluid.",
-		inventory_image = textures[1].."^[noalpha^"..textures[2].."^[makealpha:255,0,0,",
-		_florb_capacity = capacity,
-		_florb_source   = nil,
-		stack_max       = 1,
-		groups          = {florb = 1, florb_blank = 1}
-	})
+	if not minetest.registered_items[item_name] then
+		-- Register base item
+		minetest.register_craftitem(item_name, {
+			description     = florb_desc.." (Empty)\nThis item holds millibuckets of fluid.",
+			inventory_image = textures[1].."^[noalpha^"..textures[2].."^[makealpha:255,0,0,",
+			_florb_capacity = capacity,
+			_florb_source   = nil,
+			stack_max       = 1,
+			groups          = {florb = 1, florb_blank = 1}
+		})
+	end
 
 	-- Register for all fluids
 	if data.fluids then

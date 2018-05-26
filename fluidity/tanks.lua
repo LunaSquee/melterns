@@ -232,7 +232,13 @@ local function register_tankfluid(data)
 	local fluid       = fluidity.fluid_name(source_node.description)
 	local internal    = fluidity.fluid_short(fluid)
 
-	minetest.register_node(data.mod_name..":"..data.tank_name.."_"..internal, {
+	local nodename = data.mod_name..":"..data.tank_name.."_"..internal
+
+	if minetest.registered_nodes[nodename] then
+		return
+	end
+
+	minetest.register_node(nodename, {
 		description = data.tank_description.." ("..fluid..")",
 		drawtype = "glasslike_framed_optional",
 		paramtype = "light",
@@ -260,27 +266,30 @@ function fluidity.tanks.register_fluid_tank(data)
 	local tankdesc = data.tank_description or 'Fluid Tank'
 	local tiles    = data.tiles or {"default_glass.png", "default_glass_detail.png"}
 	local capacity = data.capacity or 64000
+	local tanknode = modname..":"..tankname
 
-	minetest.register_node(modname..":"..tankname, {
-		description = tankdesc,
-		drawtype = "glasslike_framed_optional",
-		paramtype = "light",
-		paramtype2 = "glasslikeliquidlevel",
-		is_ground_content = false,
-		sunlight_propagates = true,
-		fluidity_fluid = nil,
-		on_construct = function ( pos )
-			local meta = minetest.get_meta(pos)
-			meta:set_int("fluid", 0)
-			meta:set_string("infotext", "Empty "..tankdesc)
-		end,
-		on_rightclick = bucket_fill,
-		_mod = modname,
-		_dataname = tankname,
-		_capacity = capacity,
-		groups = {cracky = 1, oddly_breakable_by_hand = 3, fluidity_tank = 1, fluid_tank_empty = 1},
-		tiles = tiles
-	})
+	if not tanknode then
+		minetest.register_node(tanknode, {
+			description = tankdesc,
+			drawtype = "glasslike_framed_optional",
+			paramtype = "light",
+			paramtype2 = "glasslikeliquidlevel",
+			is_ground_content = false,
+			sunlight_propagates = true,
+			fluidity_fluid = nil,
+			on_construct = function ( pos )
+				local meta = minetest.get_meta(pos)
+				meta:set_int("fluid", 0)
+				meta:set_string("infotext", "Empty "..tankdesc)
+			end,
+			on_rightclick = bucket_fill,
+			_mod = modname,
+			_dataname = tankname,
+			_capacity = capacity,
+			groups = {cracky = 1, oddly_breakable_by_hand = 3, fluidity_tank = 1, fluid_tank_empty = 1},
+			tiles = tiles
+		})
+	end
 
 	if data.fluids then
 		-- This tank only uses certain fluids

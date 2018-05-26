@@ -71,7 +71,7 @@ tinkering.components = {
 }
 
 -- Create component for material
-local function create_material_component(data)
+function tinkering.create_material_component(data)
 	local desc = data.description
 	local name = data.name
 	local mod  = data.mod_name
@@ -85,51 +85,6 @@ local function create_material_component(data)
 		groups          = groups,
 		inventory_image = data.image
 	})
-end
-
--- Register a new tool component
-function tinkering.register_component(name, data)
-	local mod = data.mod_name or minetest.get_current_modname()
-
-	if not tinkering.components[name] then
-		tinkering.components[name] = data
-	end
-
-	local comp_desc = data.description:sub(4)
-
-	-- Register cast
-	metal_melter.set_spec(name, metal_caster.spec.cast)
-	metal_caster.register_cast(name, {
-		description = comp_desc,
-		mod_name    = mod,
-		result      = name,
-		cost        = data.material_cost,
-		typenames   = {name}
-	})
-
-	-- Register pattern
-	tinkering.register_pattern(name, {
-		description = comp_desc,
-		cost        = data.material_cost,
-		mod_name    = mod
-	})
-
-	-- Register components for all materials
-	for m, s in pairs(tinkering.materials) do
-		local component = m.."_"..name
-
-		create_material_component({
-			name        = component,
-			component   = name,
-			metal       = m,
-			mod_name    = mod,
-			description = data.description:format(s.name),
-			image       = tinkering.color_filter(data.image, s.color)
-		})
-
-		-- Make all components meltable
-		metal_melter.register_melt(mod..":"..component, m, name)
-	end
 end
 
 -- Register a tool type
@@ -363,7 +318,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	local internal_name = mod_name..":"..materials.main.."_"..tool_type
 
 	-- Register base tool if it doesnt exist already
-	if not minetest.registered_items[internal_name] then
+	if not minetest.registered_items[internal_name] and minetest.get_current_modname() then
 		minetest.register_tool(internal_name, tool_def)
 	end
 
@@ -413,4 +368,56 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	end
 
 	return tool
+end
+
+-- Register new tool material
+function tinkering.register_material_tool(material)
+	for t,_ in pairs(tinkering.tools) do
+		tinkering.create_tool(t, {main=material,binding="wood",rod="wood"}, false, nil)
+	end
+end
+
+-- Register a new tool component
+function tinkering.register_component(name, data)
+	local mod = data.mod_name or minetest.get_current_modname()
+
+	if not tinkering.components[name] then
+		tinkering.components[name] = data
+	end
+
+	local comp_desc = data.description:sub(4)
+
+	-- Register cast
+	metal_melter.set_spec(name, metal_caster.spec.cast)
+	metal_caster.register_cast(name, {
+		description = comp_desc,
+		mod_name    = mod,
+		result      = name,
+		cost        = data.material_cost,
+		typenames   = {name}
+	})
+
+	-- Register pattern
+	tinkering.register_pattern(name, {
+		description = comp_desc,
+		cost        = data.material_cost,
+		mod_name    = mod
+	})
+
+	-- Register components for all materials
+	for m, s in pairs(tinkering.materials) do
+		local component = m.."_"..name
+
+		tinkering.create_material_component({
+			name        = component,
+			component   = name,
+			metal       = m,
+			mod_name    = mod,
+			description = data.description:format(s.name),
+			image       = tinkering.color_filter(data.image, s.color)
+		})
+
+		-- Make all components meltable
+		metal_melter.register_melt(mod..":"..component, m, name)
+	end
 end

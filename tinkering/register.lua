@@ -6,10 +6,8 @@ local num_tools = 0
 
 -- Create base tools
 for m, s in pairs(tinkering.materials) do
-	for t,_ in pairs(tinkering.tools) do
-		tinkering.create_tool(t, {main=m,binding="wood",rod="wood"}, false, nil)
-		num_tools = num_tools + 1
-	end
+	tinkering.register_material_tool(m)
+	num_tools = num_tools + 1
 end
 
 -- Register tool components
