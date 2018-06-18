@@ -52,13 +52,13 @@ function metal_caster.get_metal_caster_formspec_default()
 end
 
 function metal_caster.get_metal_caster_formspec(data)
-	local water_percent = data.water_level / metal_caster.max_coolant
-	local metal_percent = data.metal_level / metal_caster.max_metal
+	local water_percent = data.water_fluid_storage / metal_caster.max_coolant
+	local metal_percent = data.metal_fluid_storage / metal_caster.max_metal
 
 	local metal_formspec = "label[0.08,3.75;No Molten Metal]"
 
 	if data.metal ~= "" then
-		metal_formspec = "label[0.08,3.75;"..data.metal..": "..data.metal_level.."/"..metal_caster.max_metal.." mB]"
+		metal_formspec = "label[0.08,3.75;"..data.metal..": "..data.metal_fluid_storage.."/"..metal_caster.max_metal.." mB]"
 	end
 
 	return "size[8,8.5]"..
@@ -72,7 +72,7 @@ function metal_caster.get_metal_caster_formspec(data)
 		"image[0.08,0;1.4,2.8;melter_gui_barbg.png]"..
 		"image[0.08,"..(2.44 - water_percent * 2.44)..";1.4,"..(water_percent * 2.8)..";default_water.png]"..
 		"image[0.08,0;1.4,2.8;melter_gui_gauge.png]"..
-		"label[0.08,3.4;Water: "..data.water_level.."/"..metal_caster.max_coolant.." mB]"..
+		"label[0.08,3.4;Water: "..data.water_fluid_storage.."/"..metal_caster.max_coolant.." mB]"..
 		"image[6.68,0;1.4,2.8;melter_gui_barbg.png]"..
 		"image[6.68,"..(2.44 - metal_percent * 2.44)..";1.4,"..(metal_percent * 2.8)..";"..data.metal_texture.."]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
@@ -243,13 +243,13 @@ local function caster_node_timer(pos, elapsed)
 	local inv = meta:get_inventory()
 
 	-- Current amount of water (coolant) in the block
-	local coolant_count = meta:get_int("water_level")
+	local coolant_count = meta:get_int("water_fluid_storage")
 
 	-- Current amount of metal in the block
-	local metal_count = meta:get_int("metal_level")
+	local metal_count = meta:get_int("metal_fluid_storage")
 
 	-- Current metal used
-	local metal = meta:get_string("metal")
+	local metal = meta:get_string("metal_fluid")
 	local metal_type = ""
 
 	local dumping = meta:get_int("dump")
@@ -421,31 +421,29 @@ local function caster_node_timer(pos, elapsed)
 		end
 	end
 
-	if refresh then
-		meta:set_int("water_level", coolant_count)
-		meta:set_int("metal_level", metal_count)
-		meta:set_string("metal", metal)
+	meta:set_int("water_fluid_storage", coolant_count)
+	meta:set_int("metal_fluid_storage", metal_count)
+	meta:set_string("metal_fluid", metal)
 
-		local metal_texture = "default_lava.png"
-		local metal_name = ""
+	local metal_texture = "default_lava.png"
+	local metal_name = ""
 
-		local infotext = "Metal Caster\n"
-		infotext = infotext.."Water: "..coolant_count.."/"..metal_caster.max_coolant.." mB \n"
-		
-		if metal ~= "" then
-			metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
+	local infotext = "Metal Caster\n"
+	infotext = infotext.."Water: "..coolant_count.."/"..metal_caster.max_coolant.." mB \n"
+	
+	if metal ~= "" then
+		metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
 
-			local metal_node = minetest.registered_nodes[metal]
-			metal_name = fluidity.fluid_name(metal_node.description)
-			infotext = infotext..metal_name..": "..metal_count.."/"..metal_caster.max_metal.." mB"
-		else
-			infotext = infotext.."No Molten Metal"
-		end
-
-		meta:set_string("infotext", infotext)
-		meta:set_string("formspec", metal_caster.get_metal_caster_formspec(
-			{water_level=coolant_count, metal_level=metal_count, metal_texture=metal_texture, metal=metal_name}))
+		local metal_node = minetest.registered_nodes[metal]
+		metal_name = fluidity.fluid_name(metal_node.description)
+		infotext = infotext..metal_name..": "..metal_count.."/"..metal_caster.max_metal.." mB"
+	else
+		infotext = infotext.."No Molten Metal"
 	end
+
+	meta:set_string("infotext", infotext)
+	meta:set_string("formspec", metal_caster.get_metal_caster_formspec(
+		{water_fluid_storage=coolant_count, metal_fluid_storage=metal_count, metal_texture=metal_texture, metal=metal_name}))
 
 	return refresh
 end
@@ -463,11 +461,12 @@ local function on_construct(pos)
 	inv:set_size('bucket_out', 1)
 
 	-- Fluid buffers
-	meta:set_int('water_level', 0)
-	meta:set_int('metal_level', 0)
+	meta:set_int('water_fluid_storage', 0)
+	meta:set_int('metal_fluid_storage', 0)
 
 	-- Metal source block
-	meta:set_string('metal', '')
+	meta:set_string('metal_fluid', '')
+	meta:set_string('water_fluid', 'default:water_source')
 
 	-- Default infotext
 	meta:set_string("infotext", "Metal Caster Inactive")
@@ -548,6 +547,7 @@ minetest.register_node("metal_melter:metal_caster", {
 		cracky=2,
 		tubedevice = 1,
 		tubedevice_receiver = 1,
+		fluid_container = 1,
 	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
@@ -581,6 +581,17 @@ minetest.register_node("metal_melter:metal_caster", {
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
+
+	fluid_buffers = {
+		water = {
+			capacity = metal_caster.max_coolant,
+			accepts  = {"default:water_source"}
+		},
+		metal = {
+			capacity = metal_caster.max_metal,
+			accepts  = "group:molten_metal",
+		}
+	},
 
 	tube = pipeworks,
 })

@@ -186,13 +186,13 @@ local function melter_node_timer(pos, elapsed)
 	local inv = meta:get_inventory()
 
 	-- Current amount of lava in the block
-	local heat_count = meta:get_int("lava_level")
+	local heat_count = meta:get_int("lava_fluid_storage")
 
 	-- Current amount of metal in the block
-	local metal_count = meta:get_int("metal_level")
+	local metal_count = meta:get_int("metal_fluid_storage")
 
 	-- Current metal used
-	local metal = meta:get_string("metal")
+	local metal = meta:get_string("metal_fluid")
 
 	local dumping = meta:get_int("dump")
 	if dumping and dumping == 1 then
@@ -326,37 +326,35 @@ local function melter_node_timer(pos, elapsed)
 	end
 
 	-- Refresh metadata and formspec
-	if refresh then
-		meta:set_int("lava_level", heat_count)
-		meta:set_int("metal_level", metal_count)
-		meta:set_string("metal", metal)
+	meta:set_int("lava_fluid_storage", heat_count)
+	meta:set_int("metal_fluid_storage", metal_count)
+	meta:set_string("metal_fluid", metal)
 
-		local metal_texture = "default_lava.png"
-		local metal_name = ""
+	local metal_texture = "default_lava.png"
+	local metal_name = ""
 
-		local infotext = "Metal Melter\n"
-		infotext = infotext.."Lava: "..heat_count.."/"..metal_melter.max_fuel.." mB \n"
-		
-		if metal ~= "" then
-			metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
+	local infotext = "Metal Melter\n"
+	infotext = infotext.."Lava: "..heat_count.."/"..metal_melter.max_fuel.." mB \n"
+	
+	if metal ~= "" then
+		metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
 
-			local metal_node = minetest.registered_nodes[metal]
-			metal_name = fluidity.fluid_name(metal_node.description)
-			infotext = infotext..metal_name..": "..metal_count.."/"..metal_melter.max_metal.." mB"
-		else
-			infotext = infotext.."No Molten Metal"
-		end
-
-		if heat_count > 144 then
-			swap_node(pos, "metal_melter:metal_melter_filled")
-		else
-			swap_node(pos, "metal_melter:metal_melter")
-		end
-
-		meta:set_string("infotext", infotext)
-		meta:set_string("formspec", metal_melter.get_metal_melter_formspec(
-			{lava_level=heat_count, metal_level=metal_count, metal_texture=metal_texture, metal=metal_name}))
+		local metal_node = minetest.registered_nodes[metal]
+		metal_name = fluidity.fluid_name(metal_node.description)
+		infotext = infotext..metal_name..": "..metal_count.."/"..metal_melter.max_metal.." mB"
+	else
+		infotext = infotext.."No Molten Metal"
 	end
+
+	if heat_count > 144 then
+		swap_node(pos, "metal_melter:metal_melter_filled")
+	else
+		swap_node(pos, "metal_melter:metal_melter")
+	end
+
+	meta:set_string("infotext", infotext)
+	meta:set_string("formspec", metal_melter.get_metal_melter_formspec(
+		{lava_level=heat_count, metal_level=metal_count, metal_texture=metal_texture, metal=metal_name}))
 
 	-- If true, calls for another clock cycle.
 	return refresh
@@ -374,11 +372,12 @@ local function on_construct(pos)
 	inv:set_size('bucket_out', 1)
 
 	-- Fluid buffers
-	meta:set_int('lava_level', 0)
-	meta:set_int('metal_level', 0)
+	meta:set_int('lava_fluid_storage', 0)
+	meta:set_int('metal_fluid_storage', 0)
 
 	-- Metal source block
-	meta:set_string('metal', '')
+	meta:set_string('metal_fluid', '')
+	meta:set_string('lava_fluid',  'default:lava_source')
 
 	-- Default infotext
 	meta:set_string("infotext", "Metal Melter Inactive")
@@ -444,6 +443,7 @@ minetest.register_node("metal_melter:metal_melter", {
 		cracky = 2,
 		tubedevice = 1,
 		tubedevice_receiver = 1,
+		fluid_container = 1,
 	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
@@ -474,6 +474,16 @@ minetest.register_node("metal_melter:metal_melter", {
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
 
+	fluid_buffers = {
+		lava = {
+			capacity = metal_melter.max_fuel,
+			accepts  = {"default:lava_source"}
+		},
+		metal = {
+			capacity = metal_melter.max_metal
+		}
+	},
+
 	tube = pipeworks,
 })
 
@@ -488,7 +498,8 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 		cracky = 2,
 		tubedevice = 1,
 		tubedevice_receiver = 1,
-		not_in_creative_inventory = 1
+		not_in_creative_inventory = 1,
+		fluid_container = 1,
 	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
@@ -511,6 +522,16 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
+
+	fluid_buffers = {
+		lava = {
+			capacity = metal_melter.max_fuel,
+			accepts  = {"default:lava_source"}
+		},
+		metal = {
+			capacity = metal_melter.max_metal
+		}
+	},
 
 	tube = pipeworks,
 })

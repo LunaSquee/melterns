@@ -86,7 +86,7 @@ function fluidity.tanks.fill_tank_at(pos, fluid, amount, overfill)
 	local remainder = 0
 	if count + amount > capacity then
 		if overfill then
-			remainder = (count + amount) - capacity
+			remainder = capacity - count
 			count = capacity
 		else
 			return nil
@@ -268,7 +268,7 @@ function fluidity.tanks.register_fluid_tank(data)
 	local capacity = data.capacity or 64000
 	local tanknode = modname..":"..tankname
 
-	if not tanknode then
+	if not minetest.registered_nodes[tanknode] then
 		minetest.register_node(tanknode, {
 			description = tankdesc,
 			drawtype = "glasslike_framed_optional",
