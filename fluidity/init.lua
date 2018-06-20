@@ -6,14 +6,12 @@ fluidity = rawget(_G, "fluidity") or {}
 local mpath = minetest.get_modpath("fluidity")
 fluidity.modpath = mpath
 
--- Functions
-dofile(mpath.."/functions.lua")
+function fluidity.fluid_short(str)
+	return string.lower(str):gsub("%s", "_")
+end
 
 -- Molten metals
 dofile(mpath.."/molten.lua")
-
--- Tanks
-dofile(mpath.."/tanks.lua")
 
 -- Florbs
 dofile(mpath.."/florbs.lua")

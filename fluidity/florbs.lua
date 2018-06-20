@@ -42,8 +42,8 @@ end
 
 function fluidity.florbs.add_fluid(stack, source_name, amount)
 	if not fluidity.florbs.get_is_florb(stack) then return nil end
-	local source_node = fluidity.get_fluid_node(source_name)
-	local fluid       = fluidity.fluid_name(source_node.description)
+	local source_node = minetest.registered_nodes[source_name]
+	local fluid       = fluid_lib.cleanse_node_description(source_name)
 	local internal    = fluidity.fluid_short(fluid)
 	local florbname   = stack:get_name()
 
@@ -95,8 +95,8 @@ function fluidity.florbs.take_fluid(stack, amount)
 end
 
 local function register_florbfluid(data)
-	local source_node = fluidity.get_fluid_node(data.source_name)
-	local fluid       = fluidity.fluid_name(source_node.description)
+	local source_node = minetest.registered_nodes[data.source_name]
+	local fluid       = fluid_lib.cleanse_node_description(data.source_name)
 	local internal    = fluidity.fluid_short(fluid)
 
 	local itemname = data.mod_name..":"..data.florb_name.."_"..internal

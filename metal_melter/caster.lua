@@ -52,8 +52,8 @@ function metal_caster.get_metal_caster_formspec_default()
 end
 
 function metal_caster.get_metal_caster_formspec(data)
-	local water_percent = data.water_fluid_storage / metal_caster.max_coolant
-	local metal_percent = data.metal_fluid_storage / metal_caster.max_metal
+	local water_percent = math.floor(100 * data.water_fluid_storage / metal_caster.max_coolant)
+	local metal_percent = math.floor(100 * data.metal_fluid_storage / metal_caster.max_metal)
 
 	local metal_formspec = "label[0.08,3.75;No Molten Metal]"
 
@@ -69,12 +69,12 @@ function metal_caster.get_metal_caster_formspec(data)
 		"image[2.7,1.35;1,1;gui_furnace_arrow_bg.png^[transformFY]"..
 		"list[context;output;2.7,2.5;1,1;]"..
 		"list[context;coolant;0.25,2.5;1,1;]"..
-		"image[0.08,0;1.4,2.8;melter_gui_barbg.png]"..
-		"image[0.08,"..(2.44 - water_percent * 2.44)..";1.4,"..(water_percent * 2.8)..";default_water.png]"..
+		"image[0.08,0;1.4,2.8;melter_gui_barbg.png"..
+		"\\^[lowpart\\:" .. water_percent .. "\\:default_water.png\\\\^[resize\\\\:64x128]"..
 		"image[0.08,0;1.4,2.8;melter_gui_gauge.png]"..
 		"label[0.08,3.4;Water: "..data.water_fluid_storage.."/"..metal_caster.max_coolant.." mB]"..
-		"image[6.68,0;1.4,2.8;melter_gui_barbg.png]"..
-		"image[6.68,"..(2.44 - metal_percent * 2.44)..";1.4,"..(metal_percent * 2.8)..";"..data.metal_texture.."]"..
+		"image[6.68,0;1.4,2.8;melter_gui_barbg.png"..
+		"\\^[lowpart\\:" .. metal_percent .. "\\:"..data.metal_texture.."\\\\^[resize\\\\:64x128]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
 		metal_formspec..
 		"list[context;bucket_in;4.7,0.2;1,1;]"..
@@ -434,8 +434,7 @@ local function caster_node_timer(pos, elapsed)
 	if metal ~= "" then
 		metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
 
-		local metal_node = minetest.registered_nodes[metal]
-		metal_name = fluidity.fluid_name(metal_node.description)
+		metal_name = fluid_lib.cleanse_node_description(metal)
 		infotext = infotext..metal_name..": "..metal_count.."/"..metal_caster.max_metal.." mB"
 	else
 		infotext = infotext.."No Molten Metal"
@@ -584,8 +583,9 @@ minetest.register_node("metal_melter:metal_caster", {
 
 	fluid_buffers = {
 		water = {
-			capacity = metal_caster.max_coolant,
-			accepts  = {"default:water_source"}
+			capacity  = metal_caster.max_coolant,
+			accepts   = {"default:water_source"},
+			drainable = false,
 		},
 		metal = {
 			capacity = metal_caster.max_metal,

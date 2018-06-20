@@ -82,8 +82,8 @@ function metal_melter.get_metal_melter_formspec_default()
 end
 
 function metal_melter.get_metal_melter_formspec(data)
-	local lava_percent = data.lava_level / metal_melter.max_fuel
-	local metal_percent = data.metal_level / metal_melter.max_metal
+	local lava_percent  = math.floor(100 * data.lava_level / metal_melter.max_fuel)
+	local metal_percent = math.floor(100 * data.metal_level / metal_melter.max_metal)
 
 	local metal_formspec = "label[0.08,3.75;No Molten Metal]"
 
@@ -98,12 +98,12 @@ function metal_melter.get_metal_melter_formspec(data)
 		"list[context;input;2.25,0.2;1,1;]"..
 		"list[context;heat;2.25,1.4;1,1;]"..
 		"image[1.3,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
-		"image[0.08,0;1.4,2.8;melter_gui_barbg.png]"..
-		"image[0.08,"..(2.44 - lava_percent * 2.44)..";1.4,"..(lava_percent * 2.8)..";default_lava.png]"..
+		"image[0.08,0;1.4,2.8;melter_gui_barbg.png"..
+		"\\^[lowpart\\:" .. lava_percent .. "\\:default_lava.png\\\\^[resize\\\\:64x128]"..
 		"image[0.08,0;1.4,2.8;melter_gui_gauge.png]"..
 		"label[0.08,3.4;Lava: "..data.lava_level.."/"..metal_melter.max_fuel.." mB]"..
-		"image[6.68,0;1.4,2.8;melter_gui_barbg.png]"..
-		"image[6.68,"..(2.44 - metal_percent * 2.44)..";1.4,"..(metal_percent * 2.8)..";"..data.metal_texture.."]"..
+		"image[6.68,0;1.4,2.8;melter_gui_barbg.png"..
+		"\\^[lowpart\\:" .. metal_percent .. "\\:"..data.metal_texture.."\\\\^[resize\\\\:64x128]"..
 		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
 		metal_formspec..
 		"list[context;bucket_in;4.7,0.2;1,1;]"..
@@ -339,8 +339,7 @@ local function melter_node_timer(pos, elapsed)
 	if metal ~= "" then
 		metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
 
-		local metal_node = minetest.registered_nodes[metal]
-		metal_name = fluidity.fluid_name(metal_node.description)
+		metal_name = fluid_lib.cleanse_node_description(metal)
 		infotext = infotext..metal_name..": "..metal_count.."/"..metal_melter.max_metal.." mB"
 	else
 		infotext = infotext.."No Molten Metal"
@@ -476,8 +475,9 @@ minetest.register_node("metal_melter:metal_melter", {
 
 	fluid_buffers = {
 		lava = {
-			capacity = metal_melter.max_fuel,
-			accepts  = {"default:lava_source"}
+			capacity  = metal_melter.max_fuel,
+			accepts   = {"default:lava_source"},
+			drainable = false,
 		},
 		metal = {
 			capacity = metal_melter.max_metal
@@ -525,8 +525,9 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 
 	fluid_buffers = {
 		lava = {
-			capacity = metal_melter.max_fuel,
-			accepts  = {"default:lava_source"}
+			capacity  = metal_melter.max_fuel,
+			accepts   = {"default:lava_source"},
+			drainable = false,
 		},
 		metal = {
 			capacity = metal_melter.max_metal
