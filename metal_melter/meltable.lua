@@ -16,7 +16,7 @@ end
 
 -- Autofind meltable
 local autofind = {"ingot", "lump", "crystal", "ore", "block"}
-local modfind = {"default", "technic", "moreores"}
+local modfind = {"default", "technic", "moreores", "elepower_dynamics"}
 
 for metal,_ in pairs(fluidity.molten_metals) do
 	for i,v in pairs(modfind) do

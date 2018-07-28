@@ -16,49 +16,11 @@ metal_caster.casts = {
 
 local metal_cache = {}
 
-function metal_caster.get_metal_caster_formspec_default()
-	return "size[8,8.5]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		"list[context;cast;2.7,0.2;1,1;]"..
-		"image[2.7,1.35;1,1;gui_furnace_arrow_bg.png^[transformFY]"..
-		"list[context;output;2.7,2.5;1,1;]"..
-		"list[context;coolant;0.25,2.5;1,1;]"..
-		"image[0.08,0;1.4,2.8;melter_gui_barbg.png]"..
-		"image[0.08,0;1.4,2.8;melter_gui_gauge.png]"..
-		"label[0.08,3.4;Water: 0/"..metal_caster.max_coolant.." mB]"..
-		"image[6.68,0;1.4,2.8;melter_gui_barbg.png]"..
-		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
-		"label[0.08,3.75;No Molten Metal]"..
-		"list[context;bucket_in;4.7,0.2;1,1;]"..
-		"list[context;bucket_out;4.7,1.4;1,1;]"..
-		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"image[5.7,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
-		"button[6.68,2.48;1.33,1;dump;Dump]"..
-		"list[current_player;main;0,4.25;8,1;]"..
-		"list[current_player;main;0,5.5;8,3;8]"..
-		"listring[context;coolant]"..
-		"listring[current_player;main]"..
-		"listring[context;cast]"..
-		"listring[current_player;main]"..
-		"listring[context;output]"..
-		"listring[current_player;main]"..
-		"listring[context;bucket_in]"..
-		"listring[current_player;main]"..
-		"listring[context;bucket_out]"..
-		"listring[current_player;main]"..
-		default.get_hotbar_bg(0, 4.25)
-end
-
-function metal_caster.get_metal_caster_formspec(data)
-	local water_percent = math.floor(100 * data.water_fluid_storage / metal_caster.max_coolant)
-	local metal_percent = math.floor(100 * data.metal_fluid_storage / metal_caster.max_metal)
-
+function metal_caster.get_metal_caster_formspec(water, metal)
 	local metal_formspec = "label[0.08,3.75;No Molten Metal]"
 
-	if data.metal ~= "" then
-		metal_formspec = "label[0.08,3.75;"..data.metal..": "..data.metal_fluid_storage.."/"..metal_caster.max_metal.." mB]"
+	if metal ~= nil then
+		metal_formspec = "label[0.08,3.75;Metal: "..fluid_lib.buffer_to_string(metal).."]"
 	end
 
 	return "size[8,8.5]"..
@@ -69,13 +31,9 @@ function metal_caster.get_metal_caster_formspec(data)
 		"image[2.7,1.35;1,1;gui_furnace_arrow_bg.png^[transformFY]"..
 		"list[context;output;2.7,2.5;1,1;]"..
 		"list[context;coolant;0.25,2.5;1,1;]"..
-		"image[0.08,0;1.4,2.8;melter_gui_barbg.png"..
-		"\\^[lowpart\\:" .. water_percent .. "\\:default_water.png\\\\^[resize\\\\:64x128]"..
-		"image[0.08,0;1.4,2.8;melter_gui_gauge.png]"..
-		"label[0.08,3.4;Water: "..data.water_fluid_storage.."/"..metal_caster.max_coolant.." mB]"..
-		"image[6.68,0;1.4,2.8;melter_gui_barbg.png"..
-		"\\^[lowpart\\:" .. metal_percent .. "\\:"..data.metal_texture.."\\\\^[resize\\\\:64x128]"..
-		"image[6.68,0;1.4,2.8;melter_gui_gauge.png]"..
+		metal_melter.fluid_bar(0.08, 0, water)..
+		"label[0.08,3.4;Water: ".. fluid_lib.buffer_to_string(water) .."]"..
+		metal_melter.fluid_bar(6.68, 0, metal)..
 		metal_formspec..
 		"list[context;bucket_in;4.7,0.2;1,1;]"..
 		"list[context;bucket_out;4.7,1.4;1,1;]"..
@@ -104,6 +62,12 @@ local function can_dig(pos, player)
 	local inv = meta:get_inventory()
 	return inv:is_empty("cast") and inv:is_empty("coolant") and inv:is_empty("bucket_in") and inv:is_empty("bucket_out") and 
 		inv:is_empty("output")
+end
+
+local function get_bucket_for_fluid(src)
+	local bucket = bucket.liquids[src]
+	if not bucket then return nil end
+	return bucket.itemname
 end
 
 local function allow_metadata_inventory_put (pos, listname, index, stack, player)
@@ -243,27 +207,26 @@ local function caster_node_timer(pos, elapsed)
 	local inv = meta:get_inventory()
 
 	-- Current amount of water (coolant) in the block
-	local coolant_count = meta:get_int("water_fluid_storage")
+	local coolant = fluid_lib.get_buffer_data(pos, "water")
 
 	-- Current amount of metal in the block
-	local metal_count = meta:get_int("metal_fluid_storage")
+	local metal = fluid_lib.get_buffer_data(pos, "metal")
 
 	-- Current metal used
-	local metal = meta:get_string("metal_fluid")
 	local metal_type = ""
 
 	local dumping = meta:get_int("dump")
 	if dumping and dumping == 1 then
-		metal_count = 0
-		metal = ""
+		metal.amount = 0
+		metal.fluid = ""
 		refresh = true
 		meta:set_int("dump", 0)
 	end
 
 	-- Insert water bucket into tank, return empty bucket
 	if inv:get_stack("coolant", 1):get_name() == "bucket:bucket_water" then
-		if coolant_count + 1000 <= metal_caster.max_coolant then
-			coolant_count = coolant_count + 1000
+		if coolant.amount + 1000 <= metal_caster.max_coolant then
+			coolant.amount = coolant.amount + 1000
 			inv:set_list("coolant", {"bucket:bucket_empty"})
 			refresh = true
 		end
@@ -272,16 +235,17 @@ local function caster_node_timer(pos, elapsed)
 	-- Handle input bucket, only allow a molten metal
 	local bucket_in   = inv:get_stack("bucket_in", 1)
 	local bucket_name = bucket_in:get_name()
-	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and fluidity.florbs.get_is_florb(bucket_in)) then
+	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
+			fluidity.florbs.get_is_florb(bucket_in)) then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_in)
 		if is_florb then
 			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_in)
 			local fluid_metal = fluidity.get_metal_for_fluid(fluid_name)
-			if fluid_metal and (fluid_name == metal or metal == "") then
+			if fluid_metal and (fluid_name == metal.fluid or metal.fluid == "") then
 				local take = 1000
 
-				if metal_count + take > metal_melter.max_metal then
-					take = metal_melter.max_metal - metal_count
+				if metal.amount + take > metal_melter.max_metal then
+					take = metal_melter.max_metal - metal.amount
 				end
 
 				-- Attempt to take 1000 millibuckets from the florb
@@ -290,25 +254,25 @@ local function caster_node_timer(pos, elapsed)
 					take = take - res
 				end
 
-				metal = fluid_name
-				metal_count = metal_count + take
+				metal.fluid = fluid_name
+				metal.amount = metal.amount + take
 				inv:set_list("bucket_in", {stack})
 				refresh = true
 			end
 		else
-			local bucket_fluid = fluidity.get_fluid_for_bucket(bucket_name)
+			local bucket_fluid = bucket.get_liquid_for_bucket(bucket_name)
 			local fluid_is_metal = fluidity.get_metal_for_fluid(bucket_fluid) ~= nil
 			local empty_bucket = false
 
 			if fluid_is_metal then
-				if metal ~= "" and metal == bucket_fluid then
-					if metal_count + 1000 <= metal_melter.max_metal then
-						metal_count = metal_count + 1000
+				if metal.fluid ~= "" and metal.fluid == bucket_fluid then
+					if metal.amount + 1000 <= metal_melter.max_metal then
+						metal.amount = metal.amount + 1000
 						empty_bucket = true
 					end
-				elseif metal == "" then
-					metal_count = 1000
-					metal = bucket_fluid
+				elseif metal.fluid == "" then
+					metal.amount = 1000
+					metal.fluid = bucket_fluid
 					empty_bucket = true
 				end
 			end
@@ -323,49 +287,49 @@ local function caster_node_timer(pos, elapsed)
 	-- Handle bucket output, only allow empty buckets in this slot
 	local bucket_out = inv:get_stack("bucket_out", 1)
 	bucket_name      = bucket_out:get_name()
-	if (bucket_name == "bucket:bucket_empty" or fluidity.florbs.get_is_florb(bucket_out)) and metal ~= "" and bucket_out:get_count() == 1 then
+	if (bucket_name == "bucket:bucket_empty" or fluidity.florbs.get_is_florb(bucket_out)) and metal and metal.fluid ~= "" and bucket_out:get_count() == 1 then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_out)
 		if is_florb then
 			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_out)
 			local fluid_metal = fluidity.get_metal_for_fluid(fluid_name)
-			if not fluid_name or fluid_name == metal then
+			if not fluid_name or fluid_name == metal.fluid then
 				local take = 1000
 
-				if metal_count < take then
-					take = metal_count
+				if metal.amount < take then
+					take = metal.amount
 				end
 
 				-- Attempt to put 1000 millibuckets into the florb
-				local stack,res = fluidity.florbs.add_fluid(bucket_out, metal, take)
+				local stack,res = fluidity.florbs.add_fluid(bucket_out, metal.fluid, take)
 				if res > 0 then
 					take = take - res
 				end
 
-				metal_count = metal_count - take
+				metal.amount = metal.amount - take
 				inv:set_list("bucket_out", {stack})
 				refresh = true
 
-				if metal_count == 0 then
-					metal = ""
+				if metal.amount == 0 then
+					metal.fluid = ""
 				end
 			end
 		else
-			local bucket = fluidity.get_bucket_for_fluid(metal)
-			if metal_count >= 1000 then
-				metal_count = metal_count - 1000
+			local bucket = get_bucket_for_fluid(metal.fluid)
+			if bucket and metal.amount >= 1000 then
+				metal.amount = metal.amount - 1000
 				inv:set_list("bucket_out", {bucket})
 				refresh = true
 
-				if metal_count == 0 then
-					metal = ""
+				if metal.amount == 0 then
+					metal.fluid = ""
 				end
 			end
 		end
 	end
 
 	-- If we have a cast, check if we can cast right now.
-	if metal ~= "" then
-		metal_type = fluidity.get_metal_for_fluid(metal)
+	if metal and metal.fluid ~= "" then
+		metal_type = fluidity.get_metal_for_fluid(metal.fluid)
 
 		local caststack = inv:get_stack("cast", 1):get_name()
 		local castname  = get_cast_for_name(caststack)
@@ -377,16 +341,16 @@ local function caster_node_timer(pos, elapsed)
 				local result_cost = cast.cost * metal_caster.spec.ingot
 				local coolant_cost = result_cost / 4
 
-				if metal_count >= result_cost and coolant_count >= coolant_cost then
+				if metal.amount >= result_cost and coolant.amount >= coolant_cost then
 					local stack = ItemStack(result_name)
 					local output_stack = inv:get_stack("output", 1)
 					if output_stack:item_fits(stack) then
 						inv:set_stack("output", 1, increment_stack(output_stack, stack))
-						metal_count = metal_count - result_cost
-						coolant_count = coolant_count - coolant_cost
+						metal.amount = metal.amount - result_cost
+						coolant.amount = coolant.amount - coolant_cost
 
-						if metal_count == 0 then
-							metal = ""
+						if metal.amount == 0 then
+							metal.fluid = ""
 						end
 
 						refresh = true
@@ -397,7 +361,7 @@ local function caster_node_timer(pos, elapsed)
 			-- Create a new cast
 			local result_cost = metal_caster.spec.cast
 			local coolant_cost = result_cost / 4
-			if metal_count >= result_cost and coolant_count >= coolant_cost then
+			if metal.amount >= result_cost and coolant.amount >= coolant_cost then
 				local mtype, ctype = get_cast_for(caststack)
 				if mtype and ctype then
 					local cmod = metal_caster.casts[ctype].mod_name or "metal_melter"
@@ -407,11 +371,11 @@ local function caster_node_timer(pos, elapsed)
 					if output_stack:item_fits(stack) then
 						inv:set_stack("output", 1, increment_stack(output_stack, stack))
 						inv:set_stack("cast", 1, decrement_stack(cast_stack))
-						metal_count = metal_count - result_cost
-						coolant_count = coolant_count - coolant_cost
+						metal.amount = metal.amount - result_cost
+						coolant.amount = coolant.amount - coolant_cost
 
-						if metal_count == 0 then
-							metal = ""
+						if metal.amount == 0 then
+							metal.fluid = ""
 						end
 						
 						refresh = true
@@ -421,35 +385,29 @@ local function caster_node_timer(pos, elapsed)
 		end
 	end
 
-	meta:set_int("water_fluid_storage", coolant_count)
-	meta:set_int("metal_fluid_storage", metal_count)
-	meta:set_string("metal_fluid", metal)
-
-	local metal_texture = "default_lava.png"
-	local metal_name = ""
+	meta:set_int("water_fluid_storage", coolant.amount)
+	meta:set_int("metal_fluid_storage", metal.amount)
+	meta:set_string("metal_fluid", metal.fluid)
+	meta:set_string("water_fluid", "default:water_source")
 
 	local infotext = "Metal Caster\n"
-	infotext = infotext.."Water: "..coolant_count.."/"..metal_caster.max_coolant.." mB \n"
+	infotext = infotext .. fluid_lib.buffer_to_string(coolant) .. "\n"
 	
-	if metal ~= "" then
-		metal_texture = "fluidity_"..fluidity.get_metal_for_fluid(metal)..".png"
-
-		metal_name = fluid_lib.cleanse_node_description(metal)
-		infotext = infotext..metal_name..": "..metal_count.."/"..metal_caster.max_metal.." mB"
+	if metal and metal.fluid ~= "" then
+		infotext = infotext .. fluid_lib.buffer_to_string(metal)
 	else
-		infotext = infotext.."No Molten Metal"
+		infotext = infotext .. "No Molten Metal"
 	end
 
 	meta:set_string("infotext", infotext)
-	meta:set_string("formspec", metal_caster.get_metal_caster_formspec(
-		{water_fluid_storage=coolant_count, metal_fluid_storage=metal_count, metal_texture=metal_texture, metal=metal_name}))
+	meta:set_string("formspec", metal_caster.get_metal_caster_formspec(coolant, metal))
 
 	return refresh
 end
 
 local function on_construct(pos)
 	local meta = minetest.get_meta(pos)
-	meta:set_string("formspec", metal_caster.get_metal_caster_formspec_default())
+	meta:set_string("formspec", metal_caster.get_metal_caster_formspec())
 	
 	-- Create inventory
 	local inv = meta:get_inventory()

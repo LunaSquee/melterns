@@ -274,11 +274,6 @@ tinkering.materials = {
 	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
 	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
 
-	-- From technic
-	lead     = {name = "Lead",     default = "technic:lead_ingot",     color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead},
-	chromium = {name = "Chromium", default = "technic:chromium_ingot", color = "#DFE8E8", base = "ingot", cast = true, modifier = modifiers.chromium},
-	zinc     = {name = "Zinc",     default = "technic:zinc_ingot",     color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc},
-
 	-- From moreores
 	silver  = {name = "Silver",  default = "moreores:silver_ingot",  color = "#D7E2E8", base = "ingot", cast = true, modifier = modifiers.silver},
 	mithril = {name = "Mithril", default = "moreores:mithril_ingot", color = "#6868D7", base = "ingot", cast = true, modifier = modifiers.mithril}
@@ -287,3 +282,24 @@ tinkering.materials = {
 tinkering.modifiers = {
 	diamond = {name = "Diamond", default = "default:diamond", modifier = modifiers.diamond}
 }
+
+if minetest.get_modpath("technic") then
+	-- From technic
+	tinkering.materials["lead"]     = {name = "Lead",     default = "technic:lead_ingot",
+		color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead}
+
+	tinkering.materials["chromium"] = {name = "Chromium", default = "technic:chromium_ingot",
+		color = "#DFE8E8", base = "ingot", cast = true, modifier = modifiers.chromium}
+
+	tinkering.materials["zinc"]     = {name = "Zinc",     default = "technic:zinc_ingot",
+		color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
+end
+
+if minetest.get_modpath("elepower_dynamics") then
+	-- From elepower
+	tinkering.materials["lead"]     = {name = "Lead",     default = "elepower_dynamics:lead_ingot",
+		color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead}
+
+	tinkering.materials["zinc"]     = {name = "Zinc",     default = "elepower_dynamics:zinc_ingot",
+		color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
+end
