@@ -178,7 +178,8 @@ local function melter_node_timer(pos, elapsed)
 	-- Handle input bucket, only allow a molten metal
 	local bucket_in   = inv:get_stack("bucket_in", 1)
 	local bucket_name = bucket_in:get_name()
-	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and fluidity.florbs.get_is_florb(bucket_in)) then
+	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
+			fluidity.florbs.get_is_florb(bucket_in)) then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_in)
 		if is_florb then
 			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_in)
@@ -328,13 +329,8 @@ local function on_construct(pos)
 	inv:set_size('bucket_in', 1)
 	inv:set_size('bucket_out', 1)
 
-	-- Fluid buffers
-	meta:set_int('lava_fluid_storage', 0)
-	meta:set_int('metal_fluid_storage', 0)
-
-	-- Metal source block
-	meta:set_string('metal_fluid', '')
-	meta:set_string('lava_fluid',  'default:lava_source')
+	-- Lava source block
+	meta:set_string('lava_fluid', 'default:lava_source')
 
 	-- Default infotext
 	meta:set_string("infotext", "Metal Melter Inactive")

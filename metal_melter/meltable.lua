@@ -18,16 +18,24 @@ end
 local autofind = {"ingot", "lump", "crystal", "ore", "block"}
 local modfind = {"default", "technic", "moreores", "elepower_dynamics"}
 
-for metal,_ in pairs(fluidity.molten_metals) do
-	for i,v in pairs(modfind) do
-		for j,k in pairs(autofind) do
-			local name = v..":"..metal.."_"..k
+function metal_melter.auto_detect_metal_forms(metal, mod)
+	if mod then
+		local modfind = { [0] = mod }
+	end
+
+	for i, v in pairs(modfind) do
+		for j, k in pairs(autofind) do
+			local name = v .. ":" .. metal .. "_" .. k
 
 			if minetest.registered_items[name] then
 				metal_melter.register_melt(name, metal, k)
 			end
 		end
 	end
+end
+
+for metal,_ in pairs(fluidity.molten_metals) do
+	metal_melter.auto_detect_metal_forms(metal)
 end
 
 -- Manually register default blocks, for now

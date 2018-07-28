@@ -417,12 +417,7 @@ local function on_construct(pos)
 	inv:set_size('bucket_in', 1)
 	inv:set_size('bucket_out', 1)
 
-	-- Fluid buffers
-	meta:set_int('water_fluid_storage', 0)
-	meta:set_int('metal_fluid_storage', 0)
-
-	-- Metal source block
-	meta:set_string('metal_fluid', '')
+	-- Water source block
 	meta:set_string('water_fluid', 'default:water_source')
 
 	-- Default infotext
