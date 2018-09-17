@@ -491,6 +491,9 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	tube = pipeworks,
 })
 
+fluid_lib.register_node("metal_melter:metal_melter")
+fluid_lib.register_node("metal_melter:metal_melter_filled")
+
 -- Set a spec
 function metal_melter.set_spec(specname, value)
 	metal_melter.spec[specname] = value

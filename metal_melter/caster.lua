@@ -549,6 +549,8 @@ minetest.register_node("metal_melter:metal_caster", {
 	tube = pipeworks,
 })
 
+fluid_lib.register_node("metal_melter:metal_caster")
+
 for i,v in pairs(metal_caster.casts) do
 	metal_caster.register_cast(i, v)
 end

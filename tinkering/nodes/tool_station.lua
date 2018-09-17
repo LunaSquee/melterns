@@ -70,7 +70,9 @@ function tool_station.get_formspec(comp_list)
 		"list[current_player;main;0,4.25;8,1;]"..
 		"list[current_player;main;0,5.5;8,3;8]"..
 		tool_list_cache..
+		"listring[current_player;main]"..
 		"listring[context;input]"..
+		"listring[current_player;main]"..
 		"listring[context;output]"..
 		"listring[current_player;main]"..
 		default.get_hotbar_bg(0, 4.25)
