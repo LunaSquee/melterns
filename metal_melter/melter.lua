@@ -50,23 +50,27 @@ function metal_melter.get_metal_from_stack(stack)
 end
 
 function metal_melter.get_metal_melter_formspec(lava, metal)
-	local metal_formspec = "label[0.08,3.75;No Molten Metal]"
+	local metal_formspec = "tooltip[6.68,0;0.8,2.45;No Molten Metal]"
 
 	if metal ~= nil then
-		metal_formspec = "label[0.08,3.75;Metal: "..fluid_lib.buffer_to_string(metal).."]"
+		metal_formspec = "tooltip[6.68,0;0.8,2.45;"..fluid_lib.buffer_to_string(metal).."]"
 	end
 
 	return "size[8,8.5]"..
 		default.gui_bg..
 		default.gui_bg_img..
 		default.gui_slots..
+		"image[2.25,0.2;1,1;metal_melter_gui_lump.png]"..
 		"list[context;input;2.25,0.2;1,1;]"..
+		"image[2.25,1.4;1,1;metal_melter_gui_bucket.png]"..
 		"list[context;heat;2.25,1.4;1,1;]"..
 		"image[1.3,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
 		metal_melter.fluid_bar(0.08, 0, lava)..
-		"label[0.08,3.4;Lava: ".. fluid_lib.buffer_to_string(lava) .."]"..
+		"tooltip[0.08,0;0.8,2.45;".. fluid_lib.buffer_to_string(lava) .."]"..
 		metal_melter.fluid_bar(6.68, 0, metal)..
 		metal_formspec..
+		"image[4.7,0.2;1,1;metal_melter_gui_bucket.png]"..
+		"image[4.7,1.4;1,1;metal_melter_gui_bucket.png]"..
 		"list[context;bucket_in;4.7,0.2;1,1;]"..
 		"list[context;bucket_out;4.7,1.4;1,1;]"..
 		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..

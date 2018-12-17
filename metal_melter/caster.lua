@@ -17,10 +17,10 @@ metal_caster.casts = {
 local metal_cache = {}
 
 function metal_caster.get_metal_caster_formspec(water, metal)
-	local metal_formspec = "label[0.08,3.75;No Molten Metal]"
+	local metal_formspec = "tooltip[6.68,0;0.8,2.45;No Molten Metal]"
 
 	if metal ~= nil then
-		metal_formspec = "label[0.08,3.75;Metal: "..fluid_lib.buffer_to_string(metal).."]"
+		metal_formspec = "tooltip[6.68,0;0.8,2.45;"..fluid_lib.buffer_to_string(metal).."]"
 	end
 
 	return "size[8,8.5]"..
@@ -30,11 +30,14 @@ function metal_caster.get_metal_caster_formspec(water, metal)
 		"list[context;cast;2.7,0.2;1,1;]"..
 		"image[2.7,1.35;1,1;gui_furnace_arrow_bg.png^[transformFY]"..
 		"list[context;output;2.7,2.5;1,1;]"..
-		"list[context;coolant;0.25,2.5;1,1;]"..
+		"image[0.08,2.5;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;coolant;0.08,2.5;1,1;]"..
 		metal_melter.fluid_bar(0.08, 0, water)..
-		"label[0.08,3.4;Water: ".. fluid_lib.buffer_to_string(water) .."]"..
+		"tooltip[0.08,0;0.8,2.45;".. fluid_lib.buffer_to_string(water) .."]"..
 		metal_melter.fluid_bar(6.68, 0, metal)..
 		metal_formspec..
+		"image[4.7,0.2;1,1;metal_melter_gui_bucket.png]"..
+		"image[4.7,1.4;1,1;metal_melter_gui_bucket.png]"..
 		"list[context;bucket_in;4.7,0.2;1,1;]"..
 		"list[context;bucket_out;4.7,1.4;1,1;]"..
 		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
