@@ -11,12 +11,12 @@ metal_melter.max_metal = 16000
 
 -- How much metal is given for melting a typename (in millibuckets).
 metal_melter.spec = {
-	ingot = 144,
+	ingot   = 144,
 	crystal = 144,
-	block = 1296,
-	lump = 288,
-	cast = 288,
-	ore = 288
+	block   = 1296,
+	lump    = 288,
+	cast    = 288,
+	ore     = 288,
 }
 
 local function in_table(t, n)
@@ -163,7 +163,7 @@ local function melter_node_timer(pos, elapsed)
 	local metal = fluid_lib.get_buffer_data(pos, "metal")
 
 	local dumping = meta:get_int("dump")
-	if dumping and dumping == 1 then
+	if dumping == 1 then
 		metal.amount = 0
 		metal.fluid = ""
 		refresh = true
@@ -499,6 +499,6 @@ fluid_lib.register_node("metal_melter:metal_melter")
 fluid_lib.register_node("metal_melter:metal_melter_filled")
 
 -- Set a spec
-function metal_melter.set_spec(specname, value)
+function metal_melter.register_melt_value(specname, value)
 	metal_melter.spec[specname] = value
 end

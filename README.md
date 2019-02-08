@@ -9,7 +9,7 @@ An in-development mod for [Minetest](http://minetest.net) 0.5.0+ that adds molte
 Just do `git clone https://gitlab.icynet.eu/evert/melterns.git` in your `minetest/mods` directory. You can also [download the repository](https://gitlab.icynet.eu/evert/melterns/archive/master.zip) but in that case you **must** change the folder name from `melterns-master` to `melterns`!
 
 ## Documentation
-Documentation on how to use this mod can be found on [this wiki page](https://gitlab.icynet.eu/evert/melterns/wiki). I recommend using a mod that shows you crafting recipes in order to know how to craft the nodes.
+Documentation on how to use this mod can be found on [this wiki page](https://gitlab.icynet.eu/evert/melterns/wikis/home). I recommend using a mod that shows you crafting recipes in order to know how to craft the nodes.
 
 ## License
 The MIT License

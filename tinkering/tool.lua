@@ -74,7 +74,7 @@ tinkering.components = {
 function tinkering.create_material_component(data)
 	local desc = data.description
 	local name = data.name
-	local mod  = data.mod_name
+	local mod  = data.mod_name or minetest.get_current_modname()
 
 	local groups = {tinker_component = 1}
 	groups["tc_"..data.component] = 1
@@ -107,6 +107,10 @@ end
 --}
 --
 function tinkering.register_tool_type(name, data)
+	if not data.mod then
+		data.mod = minetest.get_current_modname()
+	end
+
 	tinkering.tools[name] = data
 end
 
@@ -388,7 +392,7 @@ function tinkering.register_component(name, data)
 	local comp_desc = data.description:sub(4)
 
 	-- Register cast
-	metal_melter.set_spec(name, metal_caster.spec.cast)
+	metal_melter.register_melt_value(name, metal_caster.spec.cast)
 	metal_caster.register_cast(name, {
 		description = comp_desc,
 		mod_name    = mod,

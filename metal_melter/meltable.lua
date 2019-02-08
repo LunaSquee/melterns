@@ -34,10 +34,6 @@ function metal_melter.auto_detect_metal_forms(metal, mod)
 	end
 end
 
-for metal,_ in pairs(fluidity.molten_metals) do
-	metal_melter.auto_detect_metal_forms(metal)
-end
-
 -- Manually register default blocks, for now
 metal_melter.register_melt("default:mese", "mese", "block")
 metal_melter.register_melt("default:obsidian", "obsidian", "block")
@@ -48,3 +44,10 @@ metal_melter.register_melt("default:tinblock", "tin", "block")
 
 -- Special snowflake
 metal_melter.register_melt("default:iron_lump", "steel", "lump")
+
+-- Register melts after all mods have loaded
+minetest.register_on_mods_loaded(function ()
+	for metal,_ in pairs(fluidity.molten_metals) do
+		metal_melter.auto_detect_metal_forms(metal)
+	end
+end)

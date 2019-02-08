@@ -219,7 +219,7 @@ local function caster_node_timer(pos, elapsed)
 	local metal_type = ""
 
 	local dumping = meta:get_int("dump")
-	if dumping and dumping == 1 then
+	if dumping == 1 then
 		metal.amount = 0
 		metal.fluid = ""
 		refresh = true
