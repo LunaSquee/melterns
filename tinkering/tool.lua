@@ -422,6 +422,6 @@ function tinkering.register_component(name, data)
 		})
 
 		-- Make all components meltable
-		metal_melter.register_melt(mod..":"..component, m, name)
+		fluidity.register_melt(mod..":"..component, m, name)
 	end
 end

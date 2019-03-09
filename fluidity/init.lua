@@ -1,5 +1,5 @@
 -- Fluidity for Minetest 5.0.0+
--- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
+-- Copyright (c) 2019 Evert "Diamond" Prants <evert@lunasqu.ee>
 
 fluidity = rawget(_G, "fluidity") or {}
 
@@ -12,6 +12,9 @@ end
 
 -- Molten metals
 dofile(mpath.."/molten.lua")
+
+-- Meltable metals list
+dofile(mpath.."/meltable.lua")
 
 -- Florbs
 dofile(mpath.."/florbs.lua")

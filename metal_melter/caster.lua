@@ -154,7 +154,7 @@ local function get_cast_for(item)
 	local cast = nil
 	local typename = nil
 
-	for metal, types in pairs(metal_melter.melts) do
+	for metal, types in pairs(fluidity.melts) do
 		if typename ~= nil then break end
 		for t, items in pairs(types) do
 			if in_table(items, item) then
@@ -179,7 +179,7 @@ local function find_castable(metal_name, cast_name)
 	local cast = metal_caster.casts[cast_name]
 	if not cast then return nil end
 
-	local types = metal_melter.melts[metal_name]
+	local types = fluidity.melts[metal_name]
 
 	if not types then return nil end
 
@@ -444,7 +444,7 @@ function metal_caster.register_cast(name, data)
 		metal_caster.casts[name] = data
 	end
 
-	metal_melter.register_melt(castname, "gold", "cast")
+	fluidity.register_melt(castname, "gold", "cast")
 end
 
 local function on_receive_fields(pos, formname, fields, sender)

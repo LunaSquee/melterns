@@ -35,7 +35,7 @@ function metal_melter.get_metal_from_stack(stack)
 	local metal = nil
 	local metal_type = nil
 	
-	for mt, types in pairs(metal_melter.melts) do
+	for mt, types in pairs(fluidity.melts) do
 		if metal then break end
 		for tp,items in pairs(types) do
 			if in_table(items, stack) then

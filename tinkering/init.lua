@@ -1,5 +1,5 @@
--- Tinkering for Minetest 0.5.0+
--- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
+-- Tinkering for Minetest 5.0.0+
+-- Copyright (c) 2019 Evert "Diamond" Prants <evert@lunasqu.ee>
 
 -- This mod is currently stuck behind https://github.com/minetest/minetest/issues/5686
 -- Once this gets implemented, the full abilities of this mod will be available.
