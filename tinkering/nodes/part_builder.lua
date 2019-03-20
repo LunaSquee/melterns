@@ -33,7 +33,7 @@ local function get_template_group(groups)
 end
 
 local function find_buildable(material_name, pattern_name)
-	local types = metal_melter.melts[material_name]
+	local types = fluidity.melts[material_name]
 
 	if not types then return nil end
 
