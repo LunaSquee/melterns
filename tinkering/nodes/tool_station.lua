@@ -164,7 +164,7 @@ end
 
 local function find_material(stack)
 	-- Meltables
-	for metal,list in pairs(metal_melter.melts) do
+	for metal,list in pairs(fluidity.melts) do
 		for type,stacks in pairs(list) do
 			for _,st in pairs(stacks) do
 				if st == stack then
