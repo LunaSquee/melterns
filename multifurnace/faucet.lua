@@ -1,6 +1,6 @@
 -- Faucet is a simple liquid transfer node
 
-local FAUCET_PER_SECOND = 122
+local FAUCET_PER_SECOND = metal_melter.spec.ingot
 
 local function update_timer (pos)
 	local t = minetest.get_node_timer(pos)

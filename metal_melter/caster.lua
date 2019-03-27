@@ -193,7 +193,7 @@ local function find_castable(metal_name, cast_name)
 	return nil
 end
 
-local function get_cast_for_name(name)
+function metal_caster.get_cast_for_name(name)
 	for index, value in pairs(metal_caster.casts) do
 		local mod = value.mod_name or "metal_melter"
 		if name == mod..":"..index.."_cast" then
@@ -335,7 +335,7 @@ local function caster_node_timer(pos, elapsed)
 		metal_type = fluidity.get_metal_for_fluid(metal.fluid)
 
 		local caststack = inv:get_stack("cast", 1):get_name()
-		local castname  = get_cast_for_name(caststack)
+		local castname  = metal_caster.get_cast_for_name(caststack)
 		if castname ~= nil then
 			-- Cast metal using a cast
 			local cast = metal_caster.casts[castname]
