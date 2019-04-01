@@ -150,7 +150,7 @@ local function in_table(t, n)
 end
 
 -- Get the corresponding cast for an item
-local function get_cast_for(item)
+function metal_caster.get_cast_for(item)
 	local cast = nil
 	local typename = nil
 
@@ -174,8 +174,7 @@ local function get_cast_for(item)
 	return typename, cast
 end
 
-
-local function find_castable(metal_name, cast_name)
+function metal_caster.find_castable(metal_name, cast_name)
 	local cast = metal_caster.casts[cast_name]
 	if not cast then return nil end
 
@@ -339,7 +338,7 @@ local function caster_node_timer(pos, elapsed)
 		if castname ~= nil then
 			-- Cast metal using a cast
 			local cast = metal_caster.casts[castname]
-			local result_name = find_castable(metal_type, castname)
+			local result_name = metal_caster.find_castable(metal_type, castname)
 			if result_name ~= nil then
 				local result_cost = cast.cost * metal_caster.spec.ingot
 				local coolant_cost = result_cost / 4
@@ -365,7 +364,7 @@ local function caster_node_timer(pos, elapsed)
 			local result_cost = metal_caster.spec.cast
 			local coolant_cost = result_cost / 4
 			if metal.amount >= result_cost and coolant.amount >= coolant_cost then
-				local mtype, ctype = get_cast_for(caststack)
+				local mtype, ctype = metal_caster.get_cast_for(caststack)
 				if mtype and ctype then
 					local cmod = metal_caster.casts[ctype].mod_name or "metal_melter"
 					local stack = ItemStack(cmod..":"..ctype.."_cast")
