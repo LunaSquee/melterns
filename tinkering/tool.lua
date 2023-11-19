@@ -251,6 +251,28 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	return tool_caps, name, tags
 end
 
+-- Replace the itemstack with a broken tool instead of destroying it
+local function after_use_handler(itemstack, user, node, digparams)
+	local wear_add = digparams.wear
+	local wear_before = itemstack:get_wear()
+	if wear_before + wear_add < 65536 then
+		itemstack:add_wear(wear_add)
+		return itemstack
+	end
+	-- TODO: Consider creating an itemdef field for the broken counterpart name
+	local tool_broken = ItemStack(itemstack:get_name().."_broken")
+	local tool_broken_meta = tool_broken:get_meta()
+	local meta = itemstack:get_meta()
+	tool_broken_meta:from_table(meta:to_table())
+	local description = meta:get_string("description")
+	tool_broken_meta:set_string("description_non_broken", description)
+	tool_broken_meta:set_string("description", description .. "\n" .. minetest.colorize("#BB1111", "Broken"))
+	tool_broken_meta:set_string("capabilities_non_broken", minetest.serialize(itemstack:get_tool_capabilities()))
+	itemstack:replace(tool_broken)
+	meta:set_tool_capabilities({})
+	return itemstack
+end
+
 -- Return tool definition
 function tinkering.tool_definition(tool_type, materials)
 	if not materials["main"] or not materials["rod"] then
@@ -264,6 +286,8 @@ function tinkering.tool_definition(tool_type, materials)
 		description       = name,
 		tool_capabilities = capabilities,
 		groups            = {tinker_tool = 1, ["mainly_"..materials.main] = 1, ["tinker_"..tool_type] = 1, not_in_creative_inventory = 1},
+		after_use         = after_use_handler,
+		_is_broken        = false,
 		inventory_image   = tinkering.compose_tool_texture(tool_type, materials.main, materials.rod)
 	}
 
@@ -324,6 +348,13 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	-- Register base tool if it doesnt exist already
 	if not minetest.registered_items[internal_name] and minetest.get_current_modname() then
 		minetest.register_tool(internal_name, tool_def)
+		local tool_def_broken = table.copy(tool_def)
+		tool_def_broken.tool_capabilities = nil
+		tool_def_broken.description = tool_def_broken.description.." (Broken)"
+		tool_def_broken.after_use = nil
+		tool_def_broken._is_broken = true
+		tool_def_broken._unbroken_name = internal_name
+		minetest.register_tool(internal_name.."_broken", tool_def_broken)
 	end
 
 	if not want_tool then return nil end
@@ -362,6 +393,12 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	-- Create a new tool instance and apply metadata
 	local tool = ItemStack(internal_name)
 	local meta = tool:get_meta()
+
+	if tool_def["initial_metadata"] then
+		-- For the mods that add additional fields to tool metadata, e. g. toolranks
+		meta:from_table(tool_def.initial_metadata)
+	end
+
 	meta:set_string("description", description)
 	meta:set_string("texture_string", tool_def.inventory_image) -- NOT IMPLEMENTED YET!
 	meta:set_tool_capabilities(tool_def.tool_capabilities)

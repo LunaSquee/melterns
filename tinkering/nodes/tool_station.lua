@@ -137,6 +137,18 @@ function tool_station.get_tool(list)
 		local stack_name = stack:get_name()
 		if minetest.get_item_group(stack_name, "tinker_tool") > 0 then
 			if tool_fnd == nil then
+				local itemdef = stack:get_definition()
+				if itemdef._is_broken then
+					local broken_stack = stack
+					stack = ItemStack(itemdef._unbroken_name)
+					local meta = stack:get_meta()
+					meta:from_table(broken_stack:get_meta():to_table())
+					meta:set_string("description", meta:get_string("description_non_broken"))
+					meta:set_string("description_non_broken", "")
+					meta:set_tool_capabilities(minetest.deserialize(meta:get_string("capabilities_non_broken"), true))
+					meta:set_string("capabilities_non_broken", "")
+					stack:set_wear(65535)
+				end
 				for t in pairs(tinkering.tools) do
 					if minetest.get_item_group(stack_name, "tinker_"..t) > 0 then
 						tool_type = t
@@ -224,9 +236,10 @@ local function match_materials(list1, materials)
 end
 
 local function take_from_list(list, item, list2)
+	local item_broken = item .. "_broken"
 	for _,stack in pairs(list) do
 		local stack_name = stack:get_name()
-		if stack_name == item then
+		if stack_name == item or stack_name == item_broken then
 			stack:clear()
 		elseif list2[stack_name] then
 			if list2[stack_name] > stack:get_count() then
@@ -399,7 +412,7 @@ local function on_timer(pos, elapsed)
 						end
 					end
 
-					local tool_res = tinkering.create_tool(tool_type_, comp_repl, true, nil, {wear = tool:get_wear()})
+					local tool_res = tinkering.create_tool(tool_type_, comp_repl, true, nil, {wear = tool:get_wear(), initial_metadata = tool:get_meta():to_table()})
 					if tool_res then
 						output = tool_res
 					end
@@ -422,7 +435,7 @@ local function on_timer(pos, elapsed)
 							new_wear = 0
 						end
 
-						local tool_res = tinkering.create_tool(tool_type_, materials, true, nil, {wear = new_wear})
+						local tool_res = tinkering.create_tool(tool_type_, materials, true, nil, {wear = new_wear, initial_metadata = tool:get_meta():to_table()})
 						if tool_res then
 							output = tool_res
 						end
