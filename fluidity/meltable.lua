@@ -23,15 +23,23 @@ function fluidity.auto_detect_metal_forms(metal, mod)
 		local modfind = { [0] = mod }
 	end
 
-	for i, v in pairs(modfind) do
-		for j, k in pairs(autofind) do
-			local name = v .. ":" .. metal .. "_" .. k
-			local name2 = v .. ":" .. k .. "_" .. metal
+	for _, v in pairs(modfind) do
+		for _, k in pairs(autofind) do
+			local configurations = {
+				metal .. "_" .. k,
+				k .. "_" .. metal,
+				metal .. k,
+				k .. metal,
+			}
 
-			if minetest.registered_items[name] then
-				fluidity.register_melt(name, metal, k)
-			elseif minetest.registered_items[name2] then
-				fluidity.register_melt(name2, metal, k)
+			for _, name in pairs(configurations) do
+				if name ~= metal and name ~= k then
+					local name_w_mod = v .. ":" ..name
+					if minetest.registered_items[name_w_mod] then
+						-- core.debug("Registered "..name_w_mod .. " metal "..metal.. " " ..k)
+						fluidity.register_melt(name_w_mod, metal, k)
+					end
+				end
 			end
 		end
 	end
@@ -47,6 +55,14 @@ fluidity.register_melt("default:tinblock", "tin", "block")
 
 -- Special snowflake
 fluidity.register_melt("default:iron_lump", "steel", "lump")
+
+-- VoxeLibre oddities
+fluidity.register_melt("mcl_copper:block", "copper", "block")
+fluidity.register_melt("mcl_core:ironblock", "steel", "block")
+fluidity.register_melt("mcl_core:iron_ingot", "steel", "ingot")
+fluidity.register_melt("mcl_core:raw_iron", "steel", "raw")
+fluidity.register_melt("mcl_core:obsidian", "obsidian", "block")
+fluidity.register_melt("mesecons_torch:redstoneblock", "mese", "block")
 
 -- Register melts after all mods have loaded
 minetest.register_on_mods_loaded(function ()
