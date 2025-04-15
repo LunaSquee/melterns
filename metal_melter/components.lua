@@ -1,3 +1,6 @@
+
+local mei = fluidity.external.items
+
 -- Crafting components
 
 -- Items
@@ -17,14 +20,14 @@ minetest.register_node("metal_melter:heated_bricks", {
 	paramtype2 = "facedir",
 	place_param2 = 0,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
 })
 
 minetest.register_node("metal_melter:heat_gravel", {
 	description = "Heat Gravel",
 	tiles = {"metal_melter_heat_gravel.png"},
 	groups = {crumbly = 2, falling_node = 1},
-	sounds = default.node_sound_gravel_defaults()
+	sounds = fluidity.external.sounds.node_sound_gravel
 })
 
 minetest.register_node("metal_melter:heat_exchanger", {
@@ -33,7 +36,7 @@ minetest.register_node("metal_melter:heat_exchanger", {
 	groups = {cracky = 3},
 	place_param2 = 0,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
 	drawtype = "nodebox",
 	paramtype = "light",
 	paramtype2 = "facedir",
@@ -69,7 +72,7 @@ fluid_tanks.register_tank("metal_melter:heated_tank",{
 	description = "Heated Tank",
 	capacity    = 8000,
 	tiles       = {"melter_heated_tank.png"},
-	accepts     = {"default:lava_source"}
+	accepts     = {mei.lava}
 })
 
 -- Crafting
@@ -77,18 +80,18 @@ fluid_tanks.register_tank("metal_melter:heated_tank",{
 minetest.register_craft({
     output = 'metal_melter:heat_gravel 4',
     recipe = {
-        {'default:gravel', 'default:sand', 'default:gravel'},
-        {'default:sand',   'default:clay', 'default:sand'},
-        {'default:gravel', 'default:sand', 'default:gravel'},
+        {mei.gravel, mei.sand, mei.gravel},
+        {mei.sand,   mei.clay, mei.sand},
+        {mei.gravel, mei.sand, mei.gravel},
     },
 })
 
 minetest.register_craft({
     output = 'metal_melter:heat_gravel 4',
     recipe = {
-        {'default:sand',   'default:gravel', 'default:sand'},
-        {'default:gravel', 'default:clay',   'default:gravel'},
-        {'default:sand',   'default:gravel', 'default:sand'},
+        {mei.sand,   mei.gravel, mei.sand},
+        {mei.gravel, mei.clay,   mei.gravel},
+        {mei.sand,   mei.gravel, mei.sand},
     },
 })
 
@@ -103,16 +106,16 @@ minetest.register_craft({
 minetest.register_craft({
 	output = 'metal_melter:heated_tank',
 	recipe = {
-		{'metal_melter:heated_brick', 'default:glass', 'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', 'default:glass', 'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', 'default:glass', 'metal_melter:heated_brick'},
+		{'metal_melter:heated_brick', mei.glass, 'metal_melter:heated_brick'},
+		{'metal_melter:heated_brick', mei.glass, 'metal_melter:heated_brick'},
+		{'metal_melter:heated_brick', mei.glass, 'metal_melter:heated_brick'},
 	}
 })
 
 minetest.register_craft({
 	output = 'metal_melter:heat_exchanger',
 	recipe = {
-		{'default:steel_ingot',       'default:steel_ingot',       'default:steel_ingot'},
+		{mei.steel_ingot,       mei.steel_ingot,       mei.steel_ingot},
 		{'metal_melter:heated_brick', 'metal_melter:heated_brick', 'metal_melter:heated_brick'},
 	}
 })

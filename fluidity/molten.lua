@@ -46,7 +46,7 @@ function fluidity.register_molten_metal(metal)
 			},
 		},
 		paramtype = "light",
-		light_source = default.LIGHT_MAX - 1,
+		light_source = core.LIGHT_MAX - 1,
 		walkable = false,
 		pointable = false,
 		diggable = false,
@@ -92,7 +92,7 @@ function fluidity.register_molten_metal(metal)
 		},
 		paramtype = "light",
 		paramtype2 = "flowingliquid",
-		light_source = default.LIGHT_MAX - 1,
+		light_source = core.LIGHT_MAX - 1,
 		walkable = false,
 		pointable = false,
 		diggable = false,
@@ -111,7 +111,7 @@ function fluidity.register_molten_metal(metal)
 			not_in_creative_inventory = 1},
 	})
 
-	bucket.register_liquid(
+	fluid_lib.register_liquid(
 		mod_name..":"..metal.."_source",
 		mod_name..":"..metal.."_flowing",
 		mod_name..":bucket_"..metal,

@@ -154,7 +154,7 @@ function fluidity.florbs.register_florb(data)
 		end
 	else
 		-- Get all fluids and buckets and cache them
-		for i, v in pairs(bucket.liquids) do
+		for i in pairs(fluid_lib.get_liquid_list()) do
 			if (i:find("source") ~= nil) then
 				-- Add tank
 				register_florbfluid({
@@ -163,7 +163,7 @@ function fluidity.florbs.register_florb(data)
 					florb_description = florb_desc,
 					textures          = textures,
 					capacity          = capacity,
-					source_name       = v["source"]
+					source_name       = i
 				})
 			end
 		end

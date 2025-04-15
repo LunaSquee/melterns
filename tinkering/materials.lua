@@ -305,4 +305,16 @@ minetest.register_on_mods_loaded(function ()
 		tinkering.materials["zinc"]     = {name = "Zinc",     default = "elepower_dynamics:zinc_ingot",
 			color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
 	end
+
+	if minetest.get_modpath("mcl_core") then
+		tinkering.materials.flint.default = "mcl_core:flint"
+		tinkering.materials.obsidian.default = "mcl_core:obsidian"
+		tinkering.materials.steel.name = "Iron"
+		tinkering.materials.steel.default = "mcl_core:iron_ingot"
+		tinkering.materials.copper.default = "mcl_copper:copper_ingot"
+		tinkering.materials.gold.default = "mcl_core:gold_ingot"
+		tinkering.materials.mese.name = "Redstone"
+		tinkering.materials.mese.default = "mesecons:redstone"
+		tinkering.modifiers.diamond.default = "mcl_core:diamond"
+	end
 end)

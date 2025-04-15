@@ -1,3 +1,7 @@
+
+local mer = fluidity.external.ref
+local mei = fluidity.external.items
+
 -- Melts metals using lava as a heat source.
 
 -- Max lava that can be held by the melter.
@@ -15,6 +19,7 @@ metal_melter.spec = {
 	crystal = 144,
 	block   = 1296,
 	lump    = 288,
+	raw     = 288,
 	cast    = 288,
 	ore     = 288,
 }
@@ -50,34 +55,40 @@ function metal_melter.get_metal_from_stack(stack)
 end
 
 function metal_melter.get_metal_melter_formspec(lava, metal)
-	local metal_formspec = "tooltip[6.68,0;0.8,2.45;No Molten Metal]"
+	local metal_formspec = "tooltip[10.375,0.375;1,2.8;No Molten Metal]"
 
 	if metal ~= nil then
-		metal_formspec = "tooltip[6.68,0;0.8,2.45;"..fluid_lib.buffer_to_string(metal).."]"
+		metal_formspec = "tooltip[10.375,0.375;1,2.8;"..fluid_lib.buffer_to_string(metal).."]"
 	end
 
-	return "size[8,8.5]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		"image[2.25,0.2;1,1;metal_melter_gui_lump.png]"..
-		"list[context;input;2.25,0.2;1,1;]"..
-		"image[2.25,1.4;1,1;metal_melter_gui_bucket.png]"..
-		"list[context;heat;2.25,1.4;1,1;]"..
-		"image[1.3,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
-		metal_melter.fluid_bar(0.08, 0, lava)..
-		"tooltip[0.08,0;0.8,2.45;".. fluid_lib.buffer_to_string(lava) .."]"..
-		metal_melter.fluid_bar(6.68, 0, metal)..
+	return "formspec_version[6]size[11.75,10.45]"..
+		mer.get_itemslot_bg(2.875, 0.375, 1, 1) ..
+		"image[2.875,0.375;1,1;metal_melter_gui_lump.png]"..
+		"list[context;input;2.875,0.375;1,1;]"..
+
+		mer.get_itemslot_bg(2.875, 1.625, 1, 1) ..
+		"image[2.875,1.625;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;heat;2.875,1.625;1,1;]"..
+		"image[1.625,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformR90]"..
+
+		metal_melter.fluid_bar(0.375, 0.375, lava)..
+		"tooltip[0.375,0.375;1,2.8;".. fluid_lib.buffer_to_string(lava) .."]"..
+		metal_melter.fluid_bar(10.375, 0.375, metal)..
 		metal_formspec..
-		"image[4.7,0.2;1,1;metal_melter_gui_bucket.png]"..
-		"image[4.7,1.4;1,1;metal_melter_gui_bucket.png]"..
-		"list[context;bucket_in;4.7,0.2;1,1;]"..
-		"list[context;bucket_out;4.7,1.4;1,1;]"..
-		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"image[5.7,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
-		"button[6.68,2.48;1.33,1;dump;Dump]"..
-		"list[current_player;main;0,4.25;8,1;]"..
-		"list[current_player;main;0,5.5;8,3;8]"..
+
+		mer.get_itemslot_bg(7.875,0.375, 1, 1) ..
+		"image[7.875,0.375;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;bucket_in;7.875,0.375;1,1;]"..
+
+		mer.get_itemslot_bg(7.875,1.625, 1, 1) ..
+		"image[7.875,1.625;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;bucket_out;7.875,1.625;1,1;]"..
+
+		"image[9.125,0.375;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
+		"image[9.125,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformR90]"..
+
+		"button[10.375,3.425;1,0.75;dump;Dump]"..
+		mer.gui_player_inv()..
 		"listring[context;heat]"..
 		"listring[current_player;main]"..
 		"listring[context;input]"..
@@ -85,14 +96,7 @@ function metal_melter.get_metal_melter_formspec(lava, metal)
 		"listring[context;bucket_in]"..
 		"listring[current_player;main]"..
 		"listring[context;bucket_out]"..
-		"listring[current_player;main]"..
-		default.get_hotbar_bg(0, 4.25)
-end
-
-local function get_bucket_for_fluid(src)
-	local bucket = bucket.liquids[src]
-	if not bucket then return nil end
-	return bucket.itemname
+		"listring[current_player;main]"
 end
 
 local function allow_metadata_inventory_put (pos, listname, index, stack, player)
@@ -101,7 +105,7 @@ local function allow_metadata_inventory_put (pos, listname, index, stack, player
 	end
 
 	if listname == "bucket_out" then
-		if stack:get_name() ~= "bucket:bucket_empty" and not fluidity.florbs.get_is_florb(stack) then
+		if stack:get_name() ~= mei.bucket_empty and not fluidity.florbs.get_is_florb(stack) then
 			return 0
 		end
 
@@ -109,7 +113,7 @@ local function allow_metadata_inventory_put (pos, listname, index, stack, player
 	end
 
 	if listname == "heat" then
-		if stack:get_name() ~= "bucket:bucket_lava" then
+		if stack:get_name() ~= mei.bucket_lava then
 			return 0
 		end
 	end
@@ -171,10 +175,10 @@ local function melter_node_timer(pos, elapsed)
 	end
 
 	-- Insert lava bucket into tank, return empty bucket
-	if inv:get_stack("heat", 1):get_name() == "bucket:bucket_lava" then
+	if inv:get_stack("heat", 1):get_name() == mei.bucket_lava then
 		if lava.amount + 1000 <= metal_melter.max_fuel then
 			lava.amount = lava.amount + 1000
-			inv:set_list("heat", {"bucket:bucket_empty"})
+			inv:set_list("heat", {mei.bucket_empty})
 			refresh = true
 		end
 	end
@@ -182,7 +186,7 @@ local function melter_node_timer(pos, elapsed)
 	-- Handle input bucket, only allow a molten metal
 	local bucket_in   = inv:get_stack("bucket_in", 1)
 	local bucket_name = bucket_in:get_name()
-	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
+	if (bucket_name:find("bucket") and bucket_name ~= mei.bucket_empty) or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
 			fluidity.florbs.get_is_florb(bucket_in)) then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_in)
 		if is_florb then
@@ -207,7 +211,7 @@ local function melter_node_timer(pos, elapsed)
 				refresh = true
 			end
 		else
-			local bucket_fluid = bucket.get_liquid_for_bucket(bucket_name)
+			local bucket_fluid = fluid_lib.get_source_for_bucket(bucket_name)
 			local fluid_is_metal = fluidity.get_metal_for_fluid(bucket_fluid) ~= nil
 			local empty_bucket = false
 
@@ -225,7 +229,7 @@ local function melter_node_timer(pos, elapsed)
 			end
 
 			if empty_bucket then
-				inv:set_list("bucket_in", {"bucket:bucket_empty"})
+				inv:set_list("bucket_in", {mei.bucket_empty})
 				refresh = true
 			end
 		end
@@ -234,7 +238,7 @@ local function melter_node_timer(pos, elapsed)
 	-- Handle bucket output, only allow empty buckets in this slot
 	local bucket_out = inv:get_stack("bucket_out", 1)
 	bucket_name      = bucket_out:get_name()
-	if (bucket_name == "bucket:bucket_empty" or fluidity.florbs.get_is_florb(bucket_out)) and metal.fluid ~= "" and bucket_out:get_count() == 1 then
+	if (bucket_name == mei.bucket_empty or fluidity.florbs.get_is_florb(bucket_out)) and metal.fluid ~= "" and bucket_out:get_count() == 1 then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_out)
 		if is_florb then
 			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_out)
@@ -261,7 +265,7 @@ local function melter_node_timer(pos, elapsed)
 				end
 			end
 		else
-			local bucket = get_bucket_for_fluid(metal.fluid)
+			local bucket = fluid_lib.get_bucket_for_source(metal.fluid)
 			if bucket and metal.amount >= 1000 then
 				metal.amount = metal.amount - 1000
 				inv:set_list("bucket_out", {bucket})
@@ -298,7 +302,7 @@ local function melter_node_timer(pos, elapsed)
 	meta:set_int("lava_fluid_storage", lava.amount)
 	meta:set_int("metal_fluid_storage", metal.amount)
 	meta:set_string("metal_fluid", metal.fluid)
-	meta:set_string("lava_fluid", "default:lava_source")
+	meta:set_string("lava_fluid", mei.lava)
 
 	local infotext = "Metal Melter\n"
 	infotext = infotext .. fluid_lib.buffer_to_string(lava) .. "\n"
@@ -334,7 +338,7 @@ local function on_construct(pos)
 	inv:set_size('bucket_out', 1)
 
 	-- Lava source block
-	meta:set_string('lava_fluid', 'default:lava_source')
+	meta:set_string('lava_fluid', mei.lava)
 
 	-- Default infotext
 	meta:set_string("infotext", "Metal Melter Inactive")
@@ -370,9 +374,9 @@ if minetest.get_modpath("pipeworks") ~= nil then
 
 		minetest.get_node_timer(pos):start(1.0)
 
-		if stack_name == "bucket:bucket_empty" or fluidity.florbs.get_is_empty_florb(stack) then
+		if stack_name == mei.bucket_empty or fluidity.florbs.get_is_empty_florb(stack) then
 			return inv:add_item("bucket_out", stack)
-		elseif stack_name == "bucket:bucket_lava" then
+		elseif stack_name == mei.bucket_lava then
 			return inv:add_item("heat", stack)
 		elseif stack_name:find(":bucket_") ~= nil or fluidity.florbs.get_is_florb(stack) then
 			return inv:add_item("bucket_in", stack)
@@ -404,7 +408,7 @@ minetest.register_node("metal_melter:metal_melter", {
 	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
 
 	can_dig = can_dig,
 	on_timer = melter_node_timer,
@@ -434,7 +438,7 @@ minetest.register_node("metal_melter:metal_melter", {
 	fluid_buffers = {
 		lava = {
 			capacity  = metal_melter.max_fuel,
-			accepts   = {"default:lava_source"},
+			accepts   = {mei.lava},
 			drainable = false,
 		},
 		metal = {
@@ -461,7 +465,7 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
 
 	drop = "metal_melter:metal_melter",
 	light_source = 8,
@@ -484,7 +488,7 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	fluid_buffers = {
 		lava = {
 			capacity  = metal_melter.max_fuel,
-			accepts   = {"default:lava_source"},
+			accepts   = {mei.lava},
 			drainable = false,
 		},
 		metal = {
@@ -493,6 +497,9 @@ minetest.register_node("metal_melter:metal_melter_filled", {
 	},
 
 	tube = pipeworks,
+
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 fluid_lib.register_node("metal_melter:metal_melter")

@@ -10,6 +10,9 @@ function fluidity.fluid_short(str)
 	return string.lower(str):gsub("%s", "_")
 end
 
+-- External mod/game compatibilty
+dofile(mpath.."/compatibility.lua")
+
 -- Molten metals
 dofile(mpath.."/molten.lua")
 

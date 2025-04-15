@@ -1,6 +1,7 @@
 -- Metal Melter for Minetest 5.0.0+
 -- Copyright (c) 2019 Evert "Diamond" Prants <evert@lunasqu.ee>
 
+local mer = fluidity.external.ref
 local modpath = minetest.get_modpath("metal_melter")
 metal_melter = {}
 
@@ -9,7 +10,7 @@ dofile(modpath.."/components.lua")
 
 -- Fluid bar for formspec
 function metal_melter.fluid_bar(x, y, fluid_buffer)
-	local texture = "default_water.png"
+	local texture = mer.default_water
 	local metric  = 0
 
 	if fluid_buffer and fluid_buffer.fluid and fluid_buffer.fluid ~= "" and

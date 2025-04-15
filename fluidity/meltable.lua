@@ -15,8 +15,8 @@ function fluidity.register_melt(item, metal, type)
 end
 
 -- Autofind meltable
-local autofind = {"ingot", "lump", "crystal", "ore", "block"}
-local modfind = {"default", "technic", "moreores", "elepower_dynamics"}
+local autofind = {"ingot", "lump", "crystal", "ore", "block", "raw"}
+local modfind = {"default", "technic", "moreores", "elepower_dynamics", "mcl_core", "mcl_raw_ores", "mcl_copper"}
 
 function fluidity.auto_detect_metal_forms(metal, mod)
 	if mod then
@@ -26,9 +26,12 @@ function fluidity.auto_detect_metal_forms(metal, mod)
 	for i, v in pairs(modfind) do
 		for j, k in pairs(autofind) do
 			local name = v .. ":" .. metal .. "_" .. k
+			local name2 = v .. ":" .. k .. "_" .. metal
 
 			if minetest.registered_items[name] then
 				fluidity.register_melt(name, metal, k)
+			elseif minetest.registered_items[name2] then
+				fluidity.register_melt(name2, metal, k)
 			end
 		end
 	end

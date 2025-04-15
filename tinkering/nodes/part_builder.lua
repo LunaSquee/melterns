@@ -1,25 +1,30 @@
+
+local mer = fluidity.external.ref
+
 part_builder = {}
 
 function part_builder.get_formspec()
-	return "size[8,8.5]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		"label[0,0;Part Builder]"..
-		"list[context;pattern;1,1.5;1,1;]"..
-		"list[context;input;2,1;1,2;]"..
-		"list[context;output;6,1.5;1,1;]"..
-		"image[4,1.5;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"list[current_player;main;0,4.25;8,1;]"..
-		"list[current_player;main;0,5.5;8,3;8]"..
+	return "formspec_version[6]size[11.75,10.45]"..
+		"label[0.375,0.375;Part Builder]"..
+
+		mer.get_itemslot_bg(2.125, 2, 1, 1) ..
+		"list[context;pattern;2.125,2;1,1;]"..
+
+		mer.get_itemslot_bg(3.375,1.375, 1, 2) ..
+		"list[context;input;3.375,1.375;1,2;]"..
+
+		mer.get_itemslot_bg(8.075, 2, 1, 1) ..
+		"list[context;output;8.075,2;1,1;]"..
+
+		"image[6.825,2;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
+		mer.gui_player_inv()..
 		"listring[current_player;main]"..
 		"listring[context;pattern]"..
 		"listring[current_player;main]"..
 		"listring[context;input]"..
 		"listring[current_player;main]"..
 		"listring[context;output]"..
-		"listring[current_player;main]"..
-		default.get_hotbar_bg(0, 4.25)
+		"listring[current_player;main]"
 end
 
 local function get_template_group(groups)
@@ -226,7 +231,7 @@ minetest.register_node("tinkering:part_builder", {
 	on_construct = on_construct,
 	legacy_facedir_simple = true,
 	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+	sounds = fluidity.external.sounds.node_sound_wood,
 
 	can_dig = can_dig,
 	on_timer = on_timer,
@@ -245,5 +250,8 @@ minetest.register_node("tinkering:part_builder", {
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 
-	groups = {choppy = 2, oddly_breakable_by_hand = 2}
+	groups = {choppy = 2, oddly_breakable_by_hand = 2},
+
+	_mcl_hardness = 1,
+	_mcl_blast_resistance = 1,
 })
