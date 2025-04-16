@@ -191,8 +191,11 @@ function metal_caster.find_castable(metal_name, cast_name)
 	local typeres = types[cast.result]
 	if not typeres then return nil end
 
-	if #typeres > 0 then
-		return typeres[1]
+	-- Find first that actually exists
+	for _,k in pairs(typeres) do
+		if core.registered_items[k] then
+			return k
+		end
 	end
 
 	return nil

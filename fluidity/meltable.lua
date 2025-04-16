@@ -36,7 +36,7 @@ function fluidity.auto_detect_metal_forms(metal, mod)
 			local typename = remap[k] or k
 
 			for _, name in pairs(configurations) do
-				if name ~= metal and name ~= typename then
+				if name ~= metal and name ~= k then
 					local name_w_mod = v .. ":" ..name
 					if minetest.registered_items[name_w_mod] then
 						-- core.debug("Registered "..name_w_mod .. " metal "..metal.. " " ..typename)
@@ -63,7 +63,7 @@ fluidity.register_melt("default:iron_lump", "steel", "lump")
 fluidity.register_melt("mcl_copper:block", "copper", "block")
 fluidity.register_melt("mcl_core:ironblock", "steel", "block")
 fluidity.register_melt("mcl_core:iron_ingot", "steel", "ingot")
-fluidity.register_melt("mcl_core:raw_iron", "steel", "lump")
+fluidity.register_melt("mcl_raw_ores:raw_iron", "steel", "lump")
 fluidity.register_melt("mcl_core:obsidian", "obsidian", "block")
 fluidity.register_melt("mesecons_torch:redstoneblock", "mese", "block")
 
