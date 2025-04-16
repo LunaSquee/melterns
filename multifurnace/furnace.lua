@@ -172,21 +172,16 @@ end
 
 -- Detect a structure based on controller
 local function detect_structure (pos)
-	local node = minetest.get_node(pos)
-	local back = vector.add(pos, minetest.facedir_to_dir(node.param2))
-
-	local center = multifurnace.api.detect_center(back, 32)
-
-	-- TODO...
-end
-
--- If pos is part of the structure, this will return a position
-local function get_controller (pos)
-	-- body
+	multifurnace.api.check_controller(pos)
 end
 
 local function controller_timer (pos, elapsed)
 	local refresh = false
+	local info = multifurnace.api.get_controller_info(pos)
+	if not info then
+		return false
+	end
+
 	local meta = minetest.get_meta(pos)
 
 	return refresh
@@ -206,6 +201,9 @@ minetest.register_node("multifurnace:controller", {
 	paramtype2 = "facedir",
 	is_ground_content = false,
 	on_timer = controller_timer,
+	on_destruct = function (pos)
+		multifurnace.api.remove_controller(pos)
+	end,
 	on_rightclick = function (pos)
 		detect_structure(pos)
 	end
@@ -221,4 +219,7 @@ minetest.register_node("multifurnace:port", {
 	groups = {cracky = 3, multifurnace = 2},
 	paramtype2 = "facedir",
 	is_ground_content = false,
+	on_destruct = function (pos)
+		multifurnace.api.remove_port(pos)
+	end,
 })

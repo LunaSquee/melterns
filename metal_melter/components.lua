@@ -72,7 +72,8 @@ fluid_tanks.register_tank("metal_melter:heated_tank",{
 	description = "Heated Tank",
 	capacity    = 8000,
 	tiles       = {"melter_heated_tank.png"},
-	accepts     = {mei.lava}
+	accepts     = {mei.lava},
+	groups      = {multifurnace = 1}
 })
 
 -- Crafting
