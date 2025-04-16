@@ -121,6 +121,7 @@ local function apply_modifiers(materials, basegroup, dgroup)
 
 	local incr = 0.00
 	local uses = 0
+	local maxlevel = 0
 	local dmg = {}
 
 	-- Apply material modifiers
@@ -137,6 +138,10 @@ local function apply_modifiers(materials, basegroup, dgroup)
 
 				if mp.uses then
 					uses = uses + mp.uses
+				end
+
+				if mp.maxlevel and maxlevel < mp.maxlevel then
+					maxlevel = mp.maxlevel
 				end
 
 				if mp.damage then
@@ -168,6 +173,10 @@ local function apply_modifiers(materials, basegroup, dgroup)
 		end
 
 		groups[grp].uses = d.uses + uses
+
+		if groups[grp].maxlevel and maxlevel < groups[grp].maxlevel then
+			maxlevel = groups[grp].maxlevel
+		end
 	end
 
 	-- Apply damage group modifications
@@ -177,7 +186,7 @@ local function apply_modifiers(materials, basegroup, dgroup)
 		end
 	end
 
-	return groups, dmg, tags
+	return groups, dmg, tags, maxlevel
 end
 
 -- Generate a tool texture based on tool type, main material (head) and rod material (handle).
@@ -237,10 +246,10 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	end
 
 	-- Apply all modifiers
-	local fg, fd, tags = apply_modifiers(materials, groups, dgroups)
+	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups)
 	local tool_caps = {
 		full_punch_interval = 1.0,
-		max_drop_level = 0,
+		max_drop_level = maxlevel,
 		groupcaps = fg,
 		damage_groups = fd,
 	}
