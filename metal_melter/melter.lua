@@ -19,7 +19,6 @@ metal_melter.spec = {
 	crystal = 144,
 	block   = 1296,
 	lump    = 288,
-	raw     = 288,
 	cast    = 288,
 	ore     = 288,
 }

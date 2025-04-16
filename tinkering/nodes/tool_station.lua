@@ -80,7 +80,7 @@ end
 
 local function get_metalgroup(groups)
 	if not groups then return nil end
-	for g,i in pairs(groups) do
+	for g in pairs(groups) do
 		if g:find("material_") == 1 then
 			return g:gsub("^material_", "")
 		end
@@ -108,7 +108,7 @@ function tool_station.get_types(list, tool_type)
 					local mtg = get_metalgroup(minetest.registered_items[stack_name].groups)
 					if mtg ~= nil then
 						result[tt] = mtg
-						
+
 						if not items_required[stack_name] then
 							items_required[stack_name] = 0
 						end
@@ -181,7 +181,7 @@ local function find_material(stack)
 			for _,st in pairs(stacks) do
 				if st == stack then
 					return metal, type
-				end 
+				end
 			end
 		end
 	end
@@ -294,7 +294,7 @@ local function handle_take_output(pos, listname)
 				local materials = decode_meta(comp_mats)
 				-- Material list found, now we can start doing repair work or replacing a component
 				local mat_grid = get_materials_in_list(list, tool:get_name())
-				
+
 				-- Find components to remove
 				local for_removal = {}
 				local removed_types = {}
@@ -383,7 +383,7 @@ local function on_timer(pos, elapsed)
 				local materials = decode_meta(comp_mats)
 				-- Material list found, now we can start doing repair work or replacing a component
 				local mat_grid = get_materials_in_list(list, tool:get_name())
-				
+
 				-- Find components to replace
 				local comp_repl = {}
 				local repair = true
@@ -430,7 +430,7 @@ local function on_timer(pos, elapsed)
 						local tool_wear = 65535 - tool:get_wear()
 						local repair_cnt = (0.33 * 65535) * repair_cap
 						local new_wear = 65535 - (tool_wear + repair_cnt)
-						
+
 						if new_wear < 0 then
 							new_wear = 0
 						end
@@ -485,7 +485,7 @@ end
 local function on_construct(pos)
 	local meta = minetest.get_meta(pos)
 	meta:set_string("formspec", tool_station.get_formspec())
-	
+
 	-- Create inventory
 	local inv = meta:get_inventory()
 	inv:set_size('input', 9)

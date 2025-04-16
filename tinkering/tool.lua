@@ -206,7 +206,7 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	-- Get main material
 	local main = tinkering.materials[materials.main]
 	if not main then return nil end
-	
+
 	-- Tool data
 	local tool_data = tinkering.tools[tool_type]
 
@@ -376,11 +376,11 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	description = description.."\n"
 
 	for cmp, mat in pairs(materials) do
-		local mat  = tinkering.materials[mat]
+		local info = tinkering.materials[mat]
 		local comp = tool_data.components[cmp]
-		local desc = tinkering.components[comp].description:format(mat.name)
+		local desc = tinkering.components[comp].description:format(info.name)
 
-		description = description .. "\n" .. minetest.colorize(mat.color, desc)
+		description = description .. "\n" .. minetest.colorize(info.color, desc)
 	end
 
 	-- Add tags to description
@@ -400,7 +400,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	end
 
 	meta:set_string("description", description)
-	meta:set_string("texture_string", tool_def.inventory_image) -- NOT IMPLEMENTED YET!
+	meta:set_string("inventory_image", tool_def.inventory_image)
 	meta:set_tool_capabilities(tool_def.tool_capabilities)
 	meta:set_string("materials", mat_names)
 
