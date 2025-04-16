@@ -5,8 +5,13 @@ local mtg = core.get_modpath("default") ~= nil
 local mcl = core.get_modpath("mcl_core") ~= nil
 
 fluidity.external = {}
-
 fluidity.external.ref = {}
+fluidity.external.sounds = {}
+fluidity.external.items = {}
+
+-------------------------
+-- Formspec references --
+-------------------------
 
 -- All of these can be configured with setting "melterns_resource_" + last table key
 -- e.g. melterns_resource_player_inv_width = 9
@@ -27,7 +32,9 @@ fluidity.external.ref.gui_player_inv   = function(center_on, y)
 		   "list[current_player;main;"..x..","..(y + 1.375)..";"..width..",3;"..width.."]"
 end
 
-fluidity.external.sounds = {}
+------------
+-- Sounds --
+------------
 
 -- All of the ingredients can be configured with setting "melterns_resource_sound_" + last table key
 -- e.g. melterns_resource_sound_node_sound_stone = sound.ogg
@@ -35,7 +42,9 @@ fluidity.external.sounds.node_sound_stone = ""
 fluidity.external.sounds.node_sound_gravel = ""
 fluidity.external.sounds.node_sound_wood = ""
 
-fluidity.external.items = {}
+-----------------
+-- Ingredients --
+-----------------
 
 -- All of the ingredients can be configured with setting "melterns_resource_" + last table key
 -- e.g. melterns_resource_bucket_empty = bucket:bucket_empty
@@ -50,6 +59,10 @@ fluidity.external.items.sand = "default:sand"
 fluidity.external.items.clay = "default:clay"
 fluidity.external.items.glass = "default:glass"
 fluidity.external.items.steel_ingot = "default:steel_ingot"
+
+-------------------------------
+-- Built-in Game/Mod support --
+-------------------------------
 
 -- Minetest Game support
 if mtg then
@@ -93,7 +106,9 @@ if mcl then
   fluidity.external.items.steel_ingot = "mcl_core:iron_ingot"
 end
 
--- Settings overrides
+------------------------
+-- Settings overrides --
+------------------------
 
 if cset:has(prefix .. "player_inv_width") then
   fluidity.external.ref.player_inv_width = tonumber(cset:get(prefix .. "player_inv_width"))
