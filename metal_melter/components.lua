@@ -16,11 +16,13 @@ minetest.register_craftitem("metal_melter:heated_brick", {
 minetest.register_node("metal_melter:heated_bricks", {
 	description = "Heatbricks",
 	tiles = {"metal_melter_heatbrick.png"},
-	groups = {cracky = 3},
+	groups = {cracky = 3, multifurnace = 1},
 	paramtype2 = "facedir",
 	place_param2 = 0,
 	is_ground_content = false,
 	sounds = fluidity.external.sounds.node_sound_stone,
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 minetest.register_node("metal_melter:heat_gravel", {
@@ -45,7 +47,9 @@ minetest.register_node("metal_melter:heat_exchanger", {
 		fixed = {
 			{-0.5000, -0.5000, -0.5000, 0.5000, -0.4375, 0.5000}
 		}
-	}
+	},
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 minetest.register_node('metal_melter:casting_table', {
@@ -66,6 +70,8 @@ minetest.register_node('metal_melter:casting_table', {
 	groups = {cracky = 3},
 	sunlight_propagates = true,
 	is_ground_content = false,
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 fluid_tanks.register_tank("metal_melter:heated_tank",{

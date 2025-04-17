@@ -96,8 +96,9 @@ end
 
 local function register_florbfluid(data)
 	local source_node = minetest.registered_nodes[data.source_name]
-	local fluid       = fluid_lib.cleanse_node_description(data.source_name)
-	local internal    = fluidity.fluid_short(fluid)
+	if not source_node then return end
+	local fluid = fluid_lib.cleanse_node_description(data.source_name)
+	local internal = fluidity.fluid_short(fluid)
 
 	local itemname = data.mod_name..":"..data.florb_name.."_"..internal
 

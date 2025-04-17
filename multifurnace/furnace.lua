@@ -108,7 +108,8 @@ end
 
 -- Calculate furnace fluid capacity
 local function total_capacity(pos)
-    return 8000 -- TODO
+    local info = multifurnace.api.get_controller_info(pos)
+    return info and (info.volume * 1000) or 1000
 end
 
 -- Can you fit this liquid inside the furnace
@@ -232,16 +233,34 @@ local function get_fluids_formspec(stacks, max, x, y, w, h)
                ";melter_gui_gauge.png]"
 end
 
+local function get_slot_progress_bars(progresses, x, y, columns, rows)
+    local spec = ""
+    for i, v in pairs(progresses) do
+        local slot_i = i - 1
+        local slot_x_i = slot_i % columns
+        local slot_y_i = math.floor(slot_i / columns)
+        local slot_x = x + slot_x_i + (slot_x_i * 0.25) + 1
+        local slot_y = y + slot_y_i + (slot_y_i * 0.25)
+        local bar = "multifurnace_temp_gradient_bg.png^[lowpart:" .. v ..
+                        ":multifurnace_temp_gradient.png"
+        spec =
+            spec .. "image[" .. slot_x .. "," .. slot_y .. ";0.15,1;" .. bar ..
+                "]"
+    end
+    return spec
+end
+
 local function get_formspec(info, progresses, stacks, total, capacity,
                             lava_count, lava_capacity)
     local columns = 5
     local max_rows = 5
     local rows = math.ceil(info.volume / columns)
     local actual_columns = (info.volume < columns) and info.volume or columns
-    local actual_rows = math.min(rows, max_rows)
 
     local fluids_spec = get_fluids_formspec(stacks, capacity, 7.75, 0.375, 2.5,
                                             max_rows + ((max_rows - 1) * 0.25))
+    local slot_progress_bars = get_slot_progress_bars(progresses, 0.15, 0.15,
+                                                      actual_columns, rows)
     local lava_buffer = metal_melter.fluid_bar(10.5, 0.375, {
         fluid = mei.lava,
         amount = lava_count,
@@ -249,10 +268,15 @@ local function get_formspec(info, progresses, stacks, total, capacity,
     })
 
     return "formspec_version[6]size[11.75,12.75]" ..
-               mer.get_itemslot_bg(0.375, 0.375, actual_columns, actual_rows) ..
-               "list[context;melt;0.375,0.375;" .. actual_columns .. "," ..
-               actual_rows .. "]" .. fluids_spec .. lava_buffer ..
-               mer.gui_player_inv(nil, 7.625)
+               "scroll_container[0.375,0.375;6.75,6;meltscroll;vertical]" ..
+               mer.get_itemslot_bg(0.15, 0.15, actual_columns, rows) ..
+               "list[context;melt;0.15,0.15;" .. actual_columns .. "," .. rows .. "]" ..
+               slot_progress_bars .. "scroll_container_end[]" ..
+               "scrollbaroptions[max=" .. (rows * 10) .. "]" ..
+               "scrollbar[6.95,0.375;0.5,6;vertical;meltscroll;]" .. fluids_spec ..
+               lava_buffer .. mer.gui_player_inv(nil, 7.35) ..
+               "listring[current_player;main]" .. "listring[context;melt]" ..
+               "listring[current_player;main]"
 end
 
 local function controller_timer(pos, elapsed)
@@ -314,8 +338,6 @@ local function controller_timer(pos, elapsed)
     inv:set_size("melt", info.volume)
 
     local stacks, total = all_liquids(pos)
-    core.debug(dump(progresses))
-    core.debug(dump(stacks))
     meta:set_string("formspec",
                     get_formspec(info, progresses, stacks, total, capacity,
                                  lava_count, lava_capacity))
@@ -383,7 +405,9 @@ minetest.register_node("multifurnace:controller", {
     on_metadata_inventory_take = update_timer,
     allow_metadata_inventory_put = allow_metadata_inventory_put,
     allow_metadata_inventory_move = allow_metadata_inventory_move,
-    allow_metadata_inventory_take = allow_metadata_inventory_take
+    allow_metadata_inventory_take = allow_metadata_inventory_take,
+		_mcl_hardness = 2,
+		_mcl_blast_resistance = 2,
 })
 
 minetest.register_node("multifurnace:port", {
@@ -426,7 +450,9 @@ minetest.register_node("multifurnace:port", {
     on_destruct = function(pos) multifurnace.api.remove_port(pos) end,
     on_construct = function(pos)
         multifurnace.api.component_changed_nearby(pos)
-    end
+    end,
+		_mcl_hardness = 2,
+		_mcl_blast_resistance = 2,
 })
 
 core.override_item("metal_melter:heated_bricks", {
@@ -442,7 +468,13 @@ core.register_abm({
     label = "Update Multifurnace structures",
     nodenames = {"multifurnace:controller"},
     without_neighbors = {"multifurnace:controller"},
-    interval = 1,
+    interval = 5,
     chance = 1,
+    action = function(pos) multifurnace.api.detect_changes(pos) end
+})
+
+core.register_lbm({
+    name = "multifurnace:load_controllers",
+    nodenames = {"multifurnace:controller"},
     action = function(pos) multifurnace.api.detect_changes(pos) end
 })
