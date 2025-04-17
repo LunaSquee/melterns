@@ -91,6 +91,7 @@ end
 
 local function continuous_sides(min, dimensions, max_height)
     local ports = {}
+    local tanks = {}
     local height = 0
 
     local function check_pos(pos)
@@ -101,6 +102,7 @@ local function continuous_sides(min, dimensions, max_height)
         end
 
         local group = core.get_item_group(node.name, "multifurnace")
+        local tank_group = core.get_item_group(node.name, "fluid_container")
         if group == 0 then
             -- core.debug("Node at "..core.pos_to_string(pos, 1).." is not in group, is "..node.name)
             return false
@@ -110,6 +112,8 @@ local function continuous_sides(min, dimensions, max_height)
             -- core.debug("  Node at "..core.pos_to_string(pos, 1).." is a port")
             table.insert(ports, pos)
         end
+
+        if tank_group > 0 then table.insert(tanks, pos) end
 
         return true
     end
@@ -145,11 +149,11 @@ local function continuous_sides(min, dimensions, max_height)
         end
     end
 
-    return height, ports
+    return height, ports, tanks
 end
 
 local function calculate_volume(dimensions)
-	return (dimensions.x + 1) * (dimensions.z + 1) * dimensions.y
+    return (dimensions.x + 1) * (dimensions.z + 1) * dimensions.y
 end
 
 local function notify_ports_removal(pos)
@@ -179,7 +183,7 @@ function multifurnace.api.structure_detect(node, pos)
         return nil, {}
     end
 
-    local max_height, ports = continuous_sides(min, dimensions, 16)
+    local max_height, ports, tanks = continuous_sides(min, dimensions, 16)
     if max_height == 0 then
         -- core.debug("Zero continuous height")
         return nil, {}
@@ -187,7 +191,7 @@ function multifurnace.api.structure_detect(node, pos)
 
     dimensions.y = max_height
 
-    return dimensions, ports, center, min, max
+    return dimensions, ports, tanks, center, min, max
 end
 
 function multifurnace.api.check_controller(pos)
@@ -198,7 +202,8 @@ function multifurnace.api.check_controller(pos)
         return
     end
 
-    local dimensions, ports, min = multifurnace.api.structure_detect(node, pos)
+    local dimensions, ports, tanks, min =
+        multifurnace.api.structure_detect(node, pos)
     local key = core.pos_to_string(pos)
     local ctrl_meta = core.get_meta(pos)
 
@@ -217,14 +222,15 @@ function multifurnace.api.check_controller(pos)
     end
 
     local bounds_end = vector.add(min, dimensions)
-	local volume = calculate_volume(dimensions)
+    local volume = calculate_volume(dimensions)
     multifurnace.loaded_controllers[key] = {
         controller = pos,
         serial = check_serial,
-		volume = volume,
+        volume = volume,
         box_min = min,
         box_max = bounds_end,
-        ports = ports
+        ports = ports,
+				tanks = tanks,
     }
     update_timer(pos)
 end

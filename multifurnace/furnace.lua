@@ -1,11 +1,12 @@
-
+local mer = fluidity.external.ref
+local mei = fluidity.external.items
 local furnaces = {}
 
-local function update_timer (pos)
-	local t = minetest.get_node_timer(pos)
-	if not t:is_started() then
-		t:start(1.0)
-	end
+local fuel_consumption = 5
+
+local function update_timer(pos)
+    local t = minetest.get_node_timer(pos)
+    if not t:is_started() then t:start(1.0) end
 end
 
 -----------------------
@@ -13,226 +14,346 @@ end
 -----------------------
 
 -- List liquids in the controller
-local function all_liquids (pos)
-	local meta = minetest.get_meta(pos)
-	local count = meta:get_int("buffers")
-	local stacks = {}
-	local total = 0
+local function all_liquids(pos)
+    local meta = minetest.get_meta(pos)
+    local count = meta:get_int("buffers")
+    local stacks = {}
+    local total = 0
 
-	if count == 0 then return stacks, total end
+    if count == 0 then return stacks, total end
 
-	for i = 1, count do
-		stacks[i] = ItemStack(meta:get_string("buffer" .. i))
-		total = total + stacks[i]:get_count()
-	end
+    for i = 1, count do
+        stacks[i] = ItemStack(meta:get_string("buffer" .. i))
+        total = total + stacks[i]:get_count()
+    end
 
-	return stacks, total
+    return stacks, total
 end
 
 -- Set the bottom-most buffer
-local function set_hot (pos, buf)
-	local meta = minetest.get_meta(pos)
-	local stacks, total = all_liquids(pos)
+local function set_hot(pos, buf, empty)
+    local meta = minetest.get_meta(pos)
+    local stacks, total = all_liquids(pos)
 
-	if not stacks[buf] or stacks[buf]:is_empty() then
-		return false
-	end
+    if not stacks[buf] or stacks[buf]:is_empty() then return false end
 
-	local current_one = stacks[1]
-	local new_one = stacks[buf]
+    local current_one = stacks[1]
+    local new_one = stacks[buf]
 
-	meta:set_string("buffer1", new_one:to_string())
-	meta:set_string("buffer" .. buf, current_one:to_string())
+    meta:set_string("buffer1", new_one:to_string())
+    meta:set_string("buffer" .. buf, empty and "" or current_one:to_string())
+    if empty then meta:set_int("buffers", #stacks - 1) end
 
-	return true
+    return true
 end
 
 -- Reorganize the buffers, remove empty ones
-local function clean_buffer_list (pos)
-	local meta = minetest.get_meta(pos)
-	local stacks, total = all_liquids(pos)
-	local new = {}
+local function clean_buffer_list(pos)
+    local meta = minetest.get_meta(pos)
+    local stacks, total = all_liquids(pos)
+    local new = {}
 
-	for i,v in pairs(stacks) do
-		if not v:is_empty() then
-			table.insert(new, v)
-		end
-	end
+    for i, v in pairs(stacks) do
+        if not v:is_empty() then table.insert(new, v) end
+    end
 
-	for i, v in pairs(new) do
-		meta:set_string("buffer" .. i, v:to_string())
-	end
+    for i, v in pairs(new) do meta:set_string("buffer" .. i, v:to_string()) end
 
-	meta:set_int("buffers", #new)
+    meta:set_int("buffers", #new)
 end
 
 -- Returns how much of the first buffer fluid can be extracted
-local function can_take_liquid (pos, want_mb)
-	local meta = minetest.get_meta(pos)
-	local stacks = all_liquids(pos)
-	local found = stacks[1]
+local function can_take_liquid(pos, want_mb)
+    local meta = minetest.get_meta(pos)
+    local stacks = all_liquids(pos)
+    local found = stacks[1]
 
-	if found and found:is_empty() then
-		clean_buffer_list(pos)
-		return "", 0
-	end
+    if found and found:is_empty() then
+        clean_buffer_list(pos)
+        return "", 0
+    end
 
-	if not found then return "", 0 end
+    if not found then return "", 0 end
 
-	local count = 0
-	if found:get_count() < want_mb then
-		count = found:get_count()
-	else
-		count = want_mb
-	end
+    local count = 0
+    if found:get_count() < want_mb then
+        count = found:get_count()
+    else
+        count = want_mb
+    end
 
-	return found:get_name(), count
+    return found:get_name(), count
 end
 
-
 -- Take liquid from the first buffer
-local function take_liquid (pos, want_mb)
-	local meta = minetest.get_meta(pos)
-	local stacks = all_liquids(pos)
-	local found = stacks[1]
-	local fluid,count = can_take_liquid(pos, want_mb)
+local function take_liquid(pos, want_mb)
+    local meta = minetest.get_meta(pos)
+    local stacks = all_liquids(pos)
+    local found = stacks[1]
+    local fluid, count = can_take_liquid(pos, want_mb)
 
-	if fluid == "" or count == 0 or fluid ~= found:get_name() then
-		return fluid, 0
-	end
+    if fluid == "" or count == 0 or fluid ~= found:get_name() then
+        return fluid, 0
+    end
 
-	found = ItemStack(fluid)
-	found:set_count(count)
+    local previous_count = found:get_count()
+    local new_count = previous_count - count
+    local new_stack = ItemStack(found:get_name() .. " " .. new_count)
+    meta:set_string("buffer1", new_stack:to_string())
 
-	meta:set_string("buffer1", found:to_string())
+    if new_count == 0 then clean_buffer_list(pos) end
 
-	return fluid, count
+    return fluid, count
 end
 
 -- Calculate furnace fluid capacity
-local function total_capacity (pos)
-	return 8000 -- TODO
+local function total_capacity(pos)
+    return 8000 -- TODO
 end
 
 -- Can you fit this liquid inside the furnace
-local function can_put_liquid (pos, liquid)
-	local stacks, storage = all_liquids(pos)
-	local total = total_capacity(pos)
-	local append = liquid:get_count()
+local function can_put_liquid(pos, liquid)
+    local stacks, storage = all_liquids(pos)
+    local total = total_capacity(pos)
+    local append = liquid:get_count()
 
-	if total == storage or storage + liquid:get_count() > total then
-		return false
-	end
+    if total == storage or storage + liquid:get_count() > total then
+        return false
+    end
 
-	return true
+    return true
 end
 
-local function put_liquid (pos, liquid)
-	local stacks, storage = all_liquids(pos)
-	local total = total_capacity(pos)
-	local append = liquid:get_count()
-	
-	if not can_put_liquid(pos, liquid) then
-		return false
-	end
+local function put_liquid(pos, liquid)
+    local meta = minetest.get_meta(pos)
+    local stacks, storage = all_liquids(pos)
+    local total = total_capacity(pos)
+    local append = liquid:get_count()
 
-	-- Find a buffer, if not available, create a new one
-	local buf = nil
-	for i,v in pairs(stacks) do
-		if v:get_name() == liquid:get_name() then
-			buf = i
-			break
-		end
-	end
+    if not can_put_liquid(pos, liquid) then return false end
 
-	if not buf then
-		buf = #stacks + 1
-	end
+    -- Find a buffer, if not available, create a new one
+    local buf = nil
+    for i, v in pairs(stacks) do
+        if v:get_name() == liquid:get_name() or v:is_empty() then
+            buf = i
+            break
+        end
+    end
 
-	if stacks[buf] then
-		local st = stacks[buf]
-		local stc = st:get_count() + append
-		st:set_count(stc)
-		meta:set_string("buffer" .. buf, st:to_string())
-	else
-		liquid:set_count(append)
-		meta:set_string("buffer" .. buf, liquid:to_string())
-	end
+    if not buf then buf = #stacks + 1 end
 
-	return true
+    if stacks[buf] then
+        local st = stacks[buf]
+        local stc = st:get_count() + append
+        st:set_count(stc)
+        meta:set_string("buffer" .. buf, st:to_string())
+    else
+        liquid:set_count(append)
+        meta:set_string("buffer" .. buf, liquid:to_string())
+        meta:set_int("buffers", buf)
+    end
+
+    return true
+end
+
+local function furnace_lava_count(tanks)
+    local total = 0
+    local capacity = 0
+    for _, tank in pairs(tanks) do
+        local buf = fluid_lib.get_buffer_data(tank, "buffer")
+        if buf then
+            if buf.fluid == mei.lava and buf.amount > 0 and buf.drainable then
+                total = total + buf.amount
+            end
+            capacity = capacity + buf.capacity
+        end
+    end
+    return total, capacity
+end
+
+local function furnace_take_lava(tanks, amount)
+    local left_to_take = amount
+    for _, tank in pairs(tanks) do
+        if left_to_take <= 0 then break end
+        local buf = fluid_lib.get_buffer_data(tank, "buffer")
+        if buf then
+            if buf.fluid == mei.lava and buf.amount > 0 and buf.drainable then
+                local can_take = fluid_lib.can_take_from_buffer(tank, "buffer",
+                                                                left_to_take)
+                if can_take > 0 then
+                    fluid_lib.take_from_buffer(tank, "buffer", can_take)
+                    left_to_take = left_to_take - can_take
+                    update_timer(tank)
+                end
+
+                if can_take == amount then break end
+            end
+        end
+    end
 end
 
 --------------------------
 -- Controller Operation --
 --------------------------
 
-local function get_formspec (info, progresses, stacks, total)
-	local columns = 5
-	local max_rows = 6
-	local rows = math.ceil(info.volume / columns)
-	local scrollback = rows - max_rows
+local function fluid_bar(fluid, amount, x, y, w, h)
+    local texture = mer.default_water
+    local name = ""
+    local metric = 0
 
-	return "formspec_version[6]size[11.75,10.45]"..
-		mer.get_itemslot_bg(0.375, 0.375, columns, max_rows) ..
-		"list[context;melt;0.375,0.375;"..columns..","..max_rows.."]"..
-		mer.gui_player_inv()
+    if fluid and fluid ~= "" and minetest.registered_nodes[fluid] ~= nil then
+        texture = minetest.registered_nodes[fluid].tiles[1]
+        name = fluid_lib.cleanse_node_description(fluid) .. " (" ..
+                   fluid_lib.comma_value(amount) .. " " .. fluid_lib.unit .. ")"
+        if type(texture) == "table" then texture = texture.name end
+    end
+
+    return
+        "image[" .. x .. "," .. y .. ";" .. w .. "," .. h .. ";" .. texture ..
+            "^[resize:64x128]" .. "tooltip[" .. x .. "," .. y .. ";" .. w .. "," ..
+            h .. ";" .. name .. "]"
 end
 
-local function controller_timer (pos, elapsed)
-	local meta = minetest.get_meta(pos)
-	local inv = meta:get_inventory()
-	local refresh = false
-	local info = multifurnace.api.get_controller_info(pos)
+local function get_fluids_formspec(stacks, max, x, y, w, h)
+    local spec = "image[" .. x .. "," .. y .. ";" .. w .. "," .. h ..
+                     ";melter_gui_barbg.png]"
+    local last_y = h + y
 
-	if not info then
-		meta:set_string("formspec", "")
-		return false
-	end
+    for i, k in pairs(stacks) do
+        local count = k:get_count()
+        local percent = count / max
+        local height = math.max(h * percent, 0.05)
+        last_y = last_y - height
+        spec = spec .. fluid_bar(k:get_name(), count, x, last_y, w, height)
+    end
 
-	local items = inv:get_items("melt")
-	local progresses = {}
+    return spec .. "image[" .. x .. "," .. y .. ";" .. w .. "," .. h ..
+               ";melter_gui_gauge.png]"
+end
 
-	for index, stack in pairs(items) do
-		local melt_item = stack:get_name()
-		if melt_item ~= "" then
-			progresses[index] = -1
-			local melt_metal, metal_type = metal_melter.get_metal_from_stack(melt_item)
-			if melt_metal then
-				local item_progress = meta:get_int("melt"..index)
-				if not item_progess then
-					-- not started yet
-					item_progress = 10
-					meta:set_int("melt"..index, item_progress)
-					refresh = true
-				elseif item_progess < 100 then
-					-- increment melt timer
-					item_progress = item_progress + 10
-					meta:set_int("melt"..index, item_progress)
-					refresh = true
-				else
-					-- melt item down
-					meta:set_string("melt"..index, "")
-					inv:set_stack("melt", index, "")
-					item_progress = 0
+local function get_formspec(info, progresses, stacks, total, capacity,
+                            lava_count, lava_capacity)
+    local columns = 5
+    local max_rows = 5
+    local rows = math.ceil(info.volume / columns)
+    local actual_columns = (info.volume < columns) and info.volume or columns
+    local actual_rows = math.min(rows, max_rows)
 
-					-- put fluid into a buffer
-					local fluid = fluidity.molten_metals[metal_type]
-					local count = metal_melter.spec[metal_type]
-					put_liquid(pos, ItemStack(fluid .. " " .. count))
+    local fluids_spec = get_fluids_formspec(stacks, capacity, 7.75, 0.375, 2.5,
+                                            max_rows + ((max_rows - 1) * 0.25))
+    local lava_buffer = metal_melter.fluid_bar(10.5, 0.375, {
+        fluid = mei.lava,
+        amount = lava_count,
+        capacity = lava_capacity
+    })
 
-					refresh = true
-				end
-				progresses[index] = item_progress
-			end
-		end
-	end
+    return "formspec_version[6]size[11.75,12.75]" ..
+               mer.get_itemslot_bg(0.375, 0.375, actual_columns, actual_rows) ..
+               "list[context;melt;0.375,0.375;" .. actual_columns .. "," ..
+               actual_rows .. "]" .. fluids_spec .. lava_buffer ..
+               mer.gui_player_inv(nil, 7.625)
+end
 
-	inv:set_size("melt", info.volume)
+local function controller_timer(pos, elapsed)
+    local meta = minetest.get_meta(pos)
+    local inv = meta:get_inventory()
+    local refresh = false
+    local info = multifurnace.api.get_controller_info(pos)
 
-	local stacks, total = all_liquids(pos)
-	meta:set_string("formspec", get_formspec(info, progresses, stacks, total))
+    if not info then
+        meta:set_string("formspec", "")
+        return false
+    end
 
-	return refresh
+    local items = inv:get_list("melt")
+    local lava_count, lava_capacity = furnace_lava_count(info.tanks)
+    local capacity = total_capacity(pos)
+    local progresses = {}
+
+    for index, stack in pairs(items) do
+        local melt_item = stack:get_name()
+        if melt_item ~= "" then
+            progresses[index] = -1
+            local melt_metal, metal_type =
+                metal_melter.get_metal_from_stack(melt_item)
+            if melt_metal then
+                local item_progress = meta:get_int("melt" .. index)
+                if lava_count > fuel_consumption then
+                    if not item_progress then
+                        -- not started yet
+                        item_progress = 10
+                        meta:set_int("melt" .. index, item_progress)
+                        furnace_take_lava(info.tanks, fuel_consumption)
+                        refresh = true
+                    elseif item_progress < 100 then
+                        -- increment melt timer
+                        item_progress = item_progress + 10
+                        meta:set_int("melt" .. index, item_progress)
+                        furnace_take_lava(info.tanks, fuel_consumption)
+                        refresh = true
+                    else
+                        -- melt item down
+                        meta:set_string("melt" .. index, "")
+                        inv:set_stack("melt", index, "")
+                        item_progress = 0
+
+                        -- put fluid into a buffer
+                        local fluid = fluidity.molten_metals[melt_metal]
+                        local count = metal_melter.spec[metal_type]
+                        put_liquid(pos, ItemStack(fluid .. " " .. count))
+
+                        refresh = true
+                    end
+                end
+                progresses[index] = item_progress
+            end
+        end
+    end
+
+    inv:set_size("melt", info.volume)
+
+    local stacks, total = all_liquids(pos)
+    core.debug(dump(progresses))
+    core.debug(dump(stacks))
+    meta:set_string("formspec",
+                    get_formspec(info, progresses, stacks, total, capacity,
+                                 lava_count, lava_capacity))
+
+    return refresh
+end
+
+local function allow_metadata_inventory_put(pos, listname, index, stack, player)
+    if minetest.is_protected(pos, player:get_player_name()) then return 0 end
+
+    local meta = minetest.get_meta(pos)
+    local inv = meta:get_inventory()
+    local current = inv:get_stack(listname, index)
+    if current:get_name() == "" or current:get_count() < 1 then return 1 end
+
+    return 0
+end
+
+local function allow_metadata_inventory_move(pos, from_list, from_index,
+                                             to_list, to_index, count, player)
+    local meta = minetest.get_meta(pos)
+    local inv = meta:get_inventory()
+    local stack = inv:get_stack(from_list, from_index)
+    return allow_metadata_inventory_put(pos, to_list, to_index, stack, player)
+end
+
+local function allow_metadata_inventory_take(pos, listname, index, stack, player)
+    if minetest.is_protected(pos, player:get_player_name()) then return 0 end
+    return stack:get_count()
+end
+
+local function get_port_controller(pos)
+    local meta = minetest.get_meta(pos)
+    local key = meta:get_string("controller")
+    if not key or key == "" then return nil end
+    local ctrl_pos = core.string_to_pos(key)
+    local ctrl_meta = minetest.get_meta(ctrl_pos)
+    return ctrl_pos, ctrl_meta
 end
 
 -------------------
@@ -240,59 +361,88 @@ end
 -------------------
 
 minetest.register_node("multifurnace:controller", {
-	description = "Multifurnace Controller",
-	tiles = {
-		"metal_melter_heatbrick.png", "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
-		"metal_melter_heatbrick.png", "metal_melter_heatbrick.png", "metal_melter_heatbrick.png^multifurnace_controller_face.png",
-	},
-	groups = {cracky = 3, multifurnace = 1},
-	paramtype2 = "facedir",
-	is_ground_content = false,
-	on_timer = controller_timer,
-	on_construct = function (pos)
-		local meta = core.get_meta(pos)
-		local inv = meta:get_inventory()
-		inv:set_size("melt", 1)
-	end,
-	on_destruct = function (pos)
-		multifurnace.api.remove_controller(pos)
-	end,
+    description = "Multifurnace Controller",
+    tiles = {
+        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png^multifurnace_controller_face.png"
+    },
+    groups = {cracky = 3, multifurnace = 1},
+    paramtype2 = "facedir",
+    is_ground_content = false,
+    on_timer = controller_timer,
+    on_construct = function(pos)
+        local meta = core.get_meta(pos)
+        local inv = meta:get_inventory()
+        inv:set_size("melt", 1)
+    end,
+    on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
+    on_metadata_inventory_move = update_timer,
+    on_metadata_inventory_put = update_timer,
+    on_metadata_inventory_take = update_timer,
+    allow_metadata_inventory_put = allow_metadata_inventory_put,
+    allow_metadata_inventory_move = allow_metadata_inventory_move,
+    allow_metadata_inventory_take = allow_metadata_inventory_take
 })
 
 minetest.register_node("multifurnace:port", {
-	description = "Multifurnace Port",
-	tiles = {
-		"metal_melter_heatbrick.png", "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
-		"metal_melter_heatbrick.png", "metal_melter_heatbrick.png^multifurnace_intake_back.png",
-		"metal_melter_heatbrick.png^multifurnace_intake_face.png",
-	},
-	groups = {cracky = 3, multifurnace = 2},
-	paramtype2 = "facedir",
-	is_ground_content = false,
-	on_destruct = function (pos)
-		multifurnace.api.remove_port(pos)
-	end,
-	on_construct = function (pos)
-		multifurnace.api.component_changed_nearby(pos)
-	end
+    description = "Multifurnace Port",
+    tiles = {
+        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png^multifurnace_intake_back.png",
+        "metal_melter_heatbrick.png^multifurnace_intake_face.png"
+    },
+    groups = {cracky = 3, multifurnace = 2, fluid_container = 1},
+    fluid_buffers = {},
+    node_io_can_put_liquid = function(pos, node, side) return false end,
+    node_io_can_take_liquid = function(pos, node, side) return true end,
+    node_io_accepts_millibuckets = function(pos, node, side) return true end,
+    node_io_take_liquid = function(pos, node, side, taker, want_liquid,
+                                   want_millibuckets)
+        local ctrl, ctrl_meta = get_port_controller(pos)
+        if not ctrl then return nil end
+        local name, took = take_liquid(ctrl, want_millibuckets)
+        update_timer(ctrl)
+        return {name = name, millibuckets = took}
+    end,
+    node_io_get_liquid_size = function(pos, node, side) return 1 end,
+    node_io_get_liquid_name = function(pos, node, side, index)
+        local ctrl, ctrl_meta = get_port_controller(pos)
+        if not ctrl then return "" end
+        local can_take = can_take_liquid(ctrl, total_capacity(ctrl))
+        return can_take
+    end,
+    node_io_get_liquid_stack = function(pos, node, side, index)
+        local ctrl, ctrl_meta = get_port_controller(pos)
+        if not ctrl then return ItemStack(nil) end
+        local can_take, count = can_take_liquid(ctrl, total_capacity(ctrl))
+        if can_take == "" then return ItemStack(nil) end
+        return ItemStack(can_take .. " " .. count)
+    end,
+    paramtype2 = "facedir",
+    is_ground_content = false,
+    on_destruct = function(pos) multifurnace.api.remove_port(pos) end,
+    on_construct = function(pos)
+        multifurnace.api.component_changed_nearby(pos)
+    end
 })
 
 core.override_item("metal_melter:heated_bricks", {
-	on_destruct = function (pos)
-		multifurnace.api.component_changed_nearby(pos)
-	end,
-	on_construct = function (pos)
-		multifurnace.api.component_changed_nearby(pos)
-	end
+    on_destruct = function(pos)
+        multifurnace.api.component_changed_nearby(pos)
+    end,
+    on_construct = function(pos)
+        multifurnace.api.component_changed_nearby(pos)
+    end
 })
 
 core.register_abm({
-	label = "Update Multifurnace structures",
-	nodenames = {"multifurnace:controller"},
-	without_neighbors = {"multifurnace:controller"},
-	interval = 5.0,
-	chance = 50,
-	action = function(pos)
-		multifurnace.api.detect_changes(pos)
-	end
+    label = "Update Multifurnace structures",
+    nodenames = {"multifurnace:controller"},
+    without_neighbors = {"multifurnace:controller"},
+    interval = 1,
+    chance = 1,
+    action = function(pos) multifurnace.api.detect_changes(pos) end
 })
