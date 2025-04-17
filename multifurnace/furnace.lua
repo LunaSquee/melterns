@@ -120,24 +120,20 @@ local function can_put_liquid (pos, liquid)
 	local total = total_capacity(pos)
 	local append = liquid:get_count()
 
-	if total == storage then
-		append = 0
-	elseif storage + liquid:get_count() > total then
-		append = total - storage
+	if total == storage or storage + liquid:get_count() > total then
+		return false
 	end
 
-	return append
+	return true
 end
 
--- Returns leftovers
 local function put_liquid (pos, liquid)
 	local stacks, storage = all_liquids(pos)
 	local total = total_capacity(pos)
-	local append = can_put_liquid(pos, liquid)
-	local leftovers = liquid:get_count() - append
-
-	if append == 0 then
-		return leftovers
+	local append = liquid:get_count()
+	
+	if not can_put_liquid(pos, liquid) then
+		return false
 	end
 
 	-- Find a buffer, if not available, create a new one
@@ -163,26 +159,78 @@ local function put_liquid (pos, liquid)
 		meta:set_string("buffer" .. buf, liquid:to_string())
 	end
 
-	return leftovers
+	return true
 end
 
 --------------------------
 -- Controller Operation --
 --------------------------
 
--- Detect a structure based on controller
-local function detect_structure (pos)
-	multifurnace.api.check_controller(pos)
+local function get_formspec (info, progresses, stacks, total)
+	local columns = 5
+	local max_rows = 6
+	local rows = math.ceil(info.volume / columns)
+	local scrollback = rows - max_rows
+
+	return "formspec_version[6]size[11.75,10.45]"..
+		mer.get_itemslot_bg(0.375, 0.375, columns, max_rows) ..
+		"list[context;melt;0.375,0.375;"..columns..","..max_rows.."]"..
+		mer.gui_player_inv()
 end
 
 local function controller_timer (pos, elapsed)
+	local meta = minetest.get_meta(pos)
+	local inv = meta:get_inventory()
 	local refresh = false
 	local info = multifurnace.api.get_controller_info(pos)
+
 	if not info then
+		meta:set_string("formspec", "")
 		return false
 	end
 
-	local meta = minetest.get_meta(pos)
+	local items = inv:get_items("melt")
+	local progresses = {}
+
+	for index, stack in pairs(items) do
+		local melt_item = stack:get_name()
+		if melt_item ~= "" then
+			progresses[index] = -1
+			local melt_metal, metal_type = metal_melter.get_metal_from_stack(melt_item)
+			if melt_metal then
+				local item_progress = meta:get_int("melt"..index)
+				if not item_progess then
+					-- not started yet
+					item_progress = 10
+					meta:set_int("melt"..index, item_progress)
+					refresh = true
+				elseif item_progess < 100 then
+					-- increment melt timer
+					item_progress = item_progress + 10
+					meta:set_int("melt"..index, item_progress)
+					refresh = true
+				else
+					-- melt item down
+					meta:set_string("melt"..index, "")
+					inv:set_stack("melt", index, "")
+					item_progress = 0
+
+					-- put fluid into a buffer
+					local fluid = fluidity.molten_metals[metal_type]
+					local count = metal_melter.spec[metal_type]
+					put_liquid(pos, ItemStack(fluid .. " " .. count))
+
+					refresh = true
+				end
+				progresses[index] = item_progress
+			end
+		end
+	end
+
+	inv:set_size("melt", info.volume)
+
+	local stacks, total = all_liquids(pos)
+	meta:set_string("formspec", get_formspec(info, progresses, stacks, total))
 
 	return refresh
 end
@@ -201,12 +249,14 @@ minetest.register_node("multifurnace:controller", {
 	paramtype2 = "facedir",
 	is_ground_content = false,
 	on_timer = controller_timer,
+	on_construct = function (pos)
+		local meta = core.get_meta(pos)
+		local inv = meta:get_inventory()
+		inv:set_size("melt", 1)
+	end,
 	on_destruct = function (pos)
 		multifurnace.api.remove_controller(pos)
 	end,
-	on_rightclick = function (pos)
-		detect_structure(pos)
-	end
 })
 
 minetest.register_node("multifurnace:port", {
@@ -222,4 +272,27 @@ minetest.register_node("multifurnace:port", {
 	on_destruct = function (pos)
 		multifurnace.api.remove_port(pos)
 	end,
+	on_construct = function (pos)
+		multifurnace.api.component_changed_nearby(pos)
+	end
+})
+
+core.override_item("metal_melter:heated_bricks", {
+	on_destruct = function (pos)
+		multifurnace.api.component_changed_nearby(pos)
+	end,
+	on_construct = function (pos)
+		multifurnace.api.component_changed_nearby(pos)
+	end
+})
+
+core.register_abm({
+	label = "Update Multifurnace structures",
+	nodenames = {"multifurnace:controller"},
+	without_neighbors = {"multifurnace:controller"},
+	interval = 5.0,
+	chance = 50,
+	action = function(pos)
+		multifurnace.api.detect_changes(pos)
+	end
 })
