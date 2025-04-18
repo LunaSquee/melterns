@@ -128,15 +128,6 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = 'metal_melter:casting_table',
-	recipe = {
-		{'metal_melter:heated_brick', 'metal_melter:heated_brick', 'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', '',                          'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', '',                          'metal_melter:heated_brick'},
-	}
-})
-
-minetest.register_craft({
 	output = 'metal_melter:metal_melter',
 	recipe = {
 		{'metal_melter:heated_bricks', 'metal_melter:heated_tank',    'metal_melter:heated_bricks'},

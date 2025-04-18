@@ -81,9 +81,11 @@ function tinkering.create_material_component(data)
 	groups["material_"..data.metal] = 1
 
 	minetest.register_craftitem(mod..":"..name, {
-		description     = desc,
-		groups          = groups,
-		inventory_image = data.image
+		description       = desc,
+		groups            = groups,
+		_tinker_component = data.component,
+		_tinker_material  = data.metal,
+		inventory_image   = data.image
 	})
 end
 

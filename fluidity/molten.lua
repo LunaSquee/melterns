@@ -107,7 +107,7 @@ function fluidity.register_molten_metal(metal)
 		liquid_renewable = false,
 		damage_per_second = 4 * 2,
 		post_effect_color = {a = 191, r = 255, g = 64, b = 0},
-		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1, 
+		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1,
 			not_in_creative_inventory = 1},
 	})
 

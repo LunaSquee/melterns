@@ -26,7 +26,7 @@ function metal_caster.get_metal_caster_formspec(water, metal)
 		metal_formspec = "tooltip[10.375,0.375;1,2.8;"..fluid_lib.buffer_to_string(metal).."]"
 	end
 
-	return "formspec_version[6]size[11.75,10.45]"..
+	return "formspec_version[4]size[11.75,10.45]"..
 		mer.get_itemslot_bg(2.875, 0.375, 1, 1) ..
 		"list[context;cast;2.875,0.375;1,1;]"..
 		"image[2.875,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformFY]"..
@@ -449,6 +449,7 @@ function metal_caster.register_cast(name, data)
 
 	if not metal_caster.casts[name] then
 		data.mod_name = mod
+		data.castname = castname
 		metal_caster.casts[name] = data
 	end
 

@@ -4,7 +4,7 @@ local mer = fluidity.external.ref
 part_builder = {}
 
 function part_builder.get_formspec()
-	return "formspec_version[6]size[11.75,10.45]"..
+	return "formspec_version[4]size[11.75,10.45]"..
 		"label[0.375,0.375;Part Builder]"..
 
 		mer.get_itemslot_bg(2.125, 2, 1, 1) ..

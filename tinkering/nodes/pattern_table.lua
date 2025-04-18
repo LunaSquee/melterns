@@ -23,7 +23,7 @@ end
 
 function pattern_table.get_formspec()
 	local pattern_list = pattern_table.get_tool_type_list(11.75, 0.375, 6.25)
-	return "formspec_version[6]size[18,10.45]"..
+	return "formspec_version[4]size[18,10.45]"..
 		"label[0.375,0.375;Pattern Table]"..
 		mer.get_itemslot_bg(4.125, 2, 1, 1) ..
 		"list[context;input;4.125,2;1,1;]"..

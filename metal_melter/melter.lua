@@ -60,7 +60,7 @@ function metal_melter.get_metal_melter_formspec(lava, metal)
 		metal_formspec = "tooltip[10.375,0.375;1,2.8;"..fluid_lib.buffer_to_string(metal).."]"
 	end
 
-	return "formspec_version[6]size[11.75,10.45]"..
+	return "formspec_version[4]size[11.75,10.45]"..
 		mer.get_itemslot_bg(2.875, 0.375, 1, 1) ..
 		"image[2.875,0.375;1,1;metal_melter_gui_lump.png]"..
 		"list[context;input;2.875,0.375;1,1;]"..

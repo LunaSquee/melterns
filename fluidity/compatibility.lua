@@ -59,6 +59,7 @@ fluidity.external.items.sand = "default:sand"
 fluidity.external.items.clay = "default:clay"
 fluidity.external.items.glass = "default:glass"
 fluidity.external.items.steel_ingot = "default:steel_ingot"
+fluidity.external.items.furnace = "default:furnace"
 
 -------------------------------
 -- Built-in Game/Mod support --
@@ -104,6 +105,7 @@ if mcl then
   fluidity.external.items.clay = "mcl_core:clay_lump"
   fluidity.external.items.glass = "mcl_core:glass"
   fluidity.external.items.steel_ingot = "mcl_core:iron_ingot"
+  fluidity.external.items.furnace = "mcl_blast_furnace:blast_furnace"
 end
 
 ------------------------

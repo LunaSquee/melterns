@@ -256,7 +256,7 @@ function multifurnace.api.remove_port(pos)
 
     local meta = core.get_meta(pos)
     local controller = meta:get_string("controller")
-    if not controller then return end
+    if not controller or controller == "" then return end
 
     local ctrl_pos = core.string_to_pos(controller)
     local key = core.pos_to_string(ctrl_pos)

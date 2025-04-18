@@ -61,7 +61,7 @@ function tool_station.get_formspec(comp_list)
 		w = 3
 	end
 
-	return "formspec_version[6]size[18,10.45]"..
+	return "formspec_version[4]size[18,10.45]"..
 		"label[0.375,0.375;Tool Station]"..
 		mer.get_itemslot_bg(2.125, 0.75, w, h) ..
 		til..

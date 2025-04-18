@@ -81,6 +81,15 @@ local function cast_amount (ctype)
 	return metal_caster.spec.ingot * (metal_caster.casts[ctype].cost or 1)
 end
 
+local function get_part_recipe(part)
+	local itemdef = core.registered_items[part]
+	local typename = itemdef._tinker_component
+	if not typename then return nil end
+	local cast = metal_caster.casts[typename]
+	if not cast then return nil end
+	return typename, cast.castname
+end
+
 local function on_timer(pos, elapsed)
 	local refresh = false
 	local meta = minetest.get_meta(pos)
@@ -95,8 +104,9 @@ local function on_timer(pos, elapsed)
 	local liqc   = meta:get_int("liquid_amount")
 	local liqt   = meta:get_int("liquid_total")
 
-	-- TODO: cast creation
-	local ctype  = metal_caster.get_cast_for_name(cast:get_name())
+	local name = cast:get_name()
+	local recipe, res_cast = get_part_recipe(name)
+	local ctype = recipe or metal_caster.get_cast_for_name(name)
 	local amount = cast_amount(ctype)
 
 	if not ctype then
@@ -111,7 +121,7 @@ local function on_timer(pos, elapsed)
 
 	if not amount then return false end
 
-	local result = metal_caster.find_castable(liqt, ctype)
+	local result = res_cast or metal_caster.find_castable(liqt, ctype)
 	if not result then return false end
 
 	local solidify = meta:get_int("solidify")
@@ -133,6 +143,10 @@ local function on_timer(pos, elapsed)
 			meta:set_int("solidify", 0)
 
 			inv:set_stack("item", 1, item)
+
+			if res_cast then
+				inv:set_stack("cast", 1, "")
+			end
 
 			set_item_entities(inv, pos)
 		end
@@ -174,14 +188,12 @@ minetest.register_node("multifurnace:casting_table", {
 		local inv = meta:get_inventory()
 
 		local cast = metal_caster.get_cast_for_name(i)
+		local recipe = get_part_recipe(i)
 
-		if inv:get_stack("cast", 1):is_empty() and cast then
+		if inv:get_stack("cast", 1):is_empty() and (cast or recipe) then
 			inv:set_stack("cast", 1, itemstack:take_item(1))
 			set_item_entities(inv, pos)
 			update_timer(pos)
-		--elseif inv:get_stack("item", 1):is_empty() and not cast then
-		--	inv:set_stack("item", 1, itemstack:take_item(1))
-		--	set_item_entities(inv, pos)
 		end
 
 		return itemstack
@@ -287,6 +299,8 @@ minetest.register_node("multifurnace:casting_table", {
 		return ItemStack(meta:get_string("liquid") .. " " ..
 			meta:get_int("liquid_amount"))
 	end,
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2
 })
 
 minetest.register_entity("multifurnace:table_item", {
