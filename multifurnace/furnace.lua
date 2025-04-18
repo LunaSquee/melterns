@@ -305,26 +305,27 @@ local function controller_timer(pos, elapsed)
     local capacity = total_capacity(pos)
     local progresses = {}
 
-    for index, stack in pairs(items) do
-        local melt_item = stack:get_name()
-        if melt_item ~= "" then
-            progresses[index] = -1
-            local melt_metal, metal_type =
-                metal_melter.get_metal_from_stack(melt_item)
-            if melt_metal then
-                local item_progress = meta:get_int("melt" .. index)
-                if lava_count > fuel_consumption then
+    local take_lava = 0
+    if lava_count > multifurnace.fuel_consumption then
+        for index, stack in pairs(items) do
+            local melt_item = stack:get_name()
+            if melt_item ~= "" then
+                progresses[index] = -1
+                local melt_metal, metal_type =
+                    metal_melter.get_metal_from_stack(melt_item)
+                if melt_metal then
+                    local item_progress = meta:get_int("melt" .. index)
                     if not item_progress then
                         -- not started yet
                         item_progress = 10
                         meta:set_int("melt" .. index, item_progress)
-                        furnace_take_lava(info.tanks, fuel_consumption)
+                        take_lava = multifurnace.fuel_consumption
                         refresh = true
                     elseif item_progress < 100 then
                         -- increment melt timer
                         item_progress = item_progress + 10
                         meta:set_int("melt" .. index, item_progress)
-                        furnace_take_lava(info.tanks, fuel_consumption)
+                        take_lava = multifurnace.fuel_consumption
                         refresh = true
                     else
                         -- melt item down
@@ -340,11 +341,13 @@ local function controller_timer(pos, elapsed)
                             refresh = true
                         end
                     end
+                    progresses[index] = item_progress
                 end
-                progresses[index] = item_progress
             end
         end
     end
+
+    if take_lava > 0 then furnace_take_lava(info.tanks, take_lava) end
 
     inv:set_size("melt", info.volume)
 

@@ -1,6 +1,8 @@
 multifurnace.api = {}
 multifurnace.loaded_controllers = {}
 multifurnace.check_controllers = {}
+multifurnace.fuel_consumption = 5
+multifurnace.max_dim = 8
 
 local function is_inner(pos)
     local node = minetest.get_node_or_nil(pos)
@@ -170,7 +172,7 @@ end
 
 function multifurnace.api.structure_detect(node, pos)
     local back = vector.add(pos, minetest.facedir_to_dir(node.param2))
-    local center, min, max = detect_center(back, 16)
+    local center, min, max = detect_center(back, multifurnace.max_dim)
 
     local dimensions = vector.subtract(max, min)
 
@@ -183,7 +185,7 @@ function multifurnace.api.structure_detect(node, pos)
         return nil, {}
     end
 
-    local max_height, ports, tanks = continuous_sides(min, dimensions, 16)
+    local max_height, ports, tanks = continuous_sides(min, dimensions, multifurnace.max_dim)
     if max_height == 0 then
         -- core.debug("Zero continuous height")
         return nil, {}
@@ -288,7 +290,7 @@ end
 function multifurnace.api.component_changed_nearby(pos)
     for key, ctrl in pairs(multifurnace.loaded_controllers) do
         local close = vector.distance(pos, ctrl.controller)
-        if close <= 32 then
+        if close <= (multifurnace.max_dim + 2) then
             local key = core.pos_to_string(ctrl.controller)
             multifurnace.check_controllers[key] = ctrl.serial
         end
