@@ -486,6 +486,7 @@ core.register_node("multifurnace:port", {
         return millibuckets
     end,
     node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
+        if not fluidity.get_metal_for_fluid(liquid) then return 0 end
         local ctrl, ctrl_meta = get_port_controller(pos)
         if not ctrl then return 0 end
 
