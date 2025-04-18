@@ -497,12 +497,14 @@ end
 -- Currently, we just allow any tinker tool to break anything.
 -- This should be addressed properly in the future.
 if core.get_modpath("_mcl_autogroup") then
-	local original_can_harvest = mcl_autogroup.can_harvest
-	mcl_autogroup.can_harvest = function (nodename, toolname, player)
-		local can_dig = original_can_harvest(nodename, toolname, player)
-		if not can_dig and core.get_item_group(toolname, "tinker_tool") > 0 then
-			return true
+	core.register_on_mods_loaded(function()
+		local original_can_harvest = mcl_autogroup.can_harvest
+		mcl_autogroup.can_harvest = function (nodename, toolname, player)
+			local can_dig = original_can_harvest(nodename, toolname, player)
+			if not can_dig and core.get_item_group(toolname, "tinker_tool") > 0 then
+				return true
+			end
+			return can_dig
 		end
-		return can_dig
-	end
+	end)
 end
