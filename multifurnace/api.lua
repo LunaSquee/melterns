@@ -224,6 +224,16 @@ function multifurnace.api.check_controller(pos)
         return
     end
 
+    -- Check for overlapping volumes
+    local bounds_end = vector.add(min, dimensions)
+    for other_key, other_ctrl in pairs(multifurnace.loaded_controllers) do
+        if key ~= other_key and vector.equals(other_ctrl.box_min, min) and
+            vector.equals(other_ctrl.box_max, bounds_end) then
+            update_timer(pos)
+            return
+        end
+    end
+
     ctrl_meta:set_int("serial", check_serial)
     for _, port in pairs(ports) do
         local meta = core.get_meta(port)
@@ -231,7 +241,6 @@ function multifurnace.api.check_controller(pos)
         meta:set_int("serial", check_serial)
     end
 
-    local bounds_end = vector.add(min, dimensions)
     local volume = calculate_volume(dimensions)
     multifurnace.loaded_controllers[key] = {
         controller = pos,
@@ -257,6 +266,7 @@ function multifurnace.api.remove_controller(pos)
     local key = core.pos_to_string(pos)
     notify_ports_removal(pos)
     multifurnace.loaded_controllers[key] = nil
+    multifurnace.api.component_changed_nearby(pos)
 end
 
 function multifurnace.api.remove_port(pos)
@@ -316,7 +326,10 @@ function multifurnace.api.detect_changes(pos)
 
     if loaded and (serial == nil or loaded.serial ~= serial) then return end
 
-    multifurnace.api.check_controller(pos)
+    -- Need to defer the change detection a little bit
+    -- TODO: find a better method, this is currently required to prevent two controllers using the same volume
+    core.after(math.random(1, 10) / 10,
+               function() multifurnace.api.check_controller(pos) end)
 end
 
 -----------------------

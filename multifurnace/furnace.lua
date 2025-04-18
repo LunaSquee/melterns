@@ -409,6 +409,7 @@ core.register_node("multifurnace:controller", {
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
         inv:set_size("melt", 1)
+        multifurnace.api.component_changed_nearby(pos)
     end,
     on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
     on_receive_fields = function(pos, formname, fields, sender)
@@ -439,7 +440,7 @@ core.register_node("multifurnace:controller", {
     _mcl_hardness = 2,
     _mcl_blast_resistance = 2,
     _multifurnace_fuel_consumption = 5,
-    _multifurnace_max_dimensions = 8
+    _multifurnace_max_dimensions = 8,
 })
 
 core.register_node("multifurnace:port", {
