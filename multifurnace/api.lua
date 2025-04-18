@@ -300,7 +300,7 @@ end
 function multifurnace.api.component_changed_nearby(pos)
     for key, ctrl in pairs(multifurnace.loaded_controllers) do
         local close = vector.distance(pos, ctrl.controller)
-        if close <= (multifurnace.max_dim + 2) then
+        if close <= (ctrl.max_dim + 2) then
             local key = core.pos_to_string(ctrl.controller)
             multifurnace.check_controllers[key] = ctrl.serial
         end
