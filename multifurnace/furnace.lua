@@ -430,7 +430,7 @@ core.register_node("multifurnace:port", {
     },
     groups = {cracky = 3, multifurnace = 2, fluid_container = 1},
     fluid_buffers = {},
-    node_io_can_put_liquid = function(pos, node, side) return false end,
+    node_io_can_put_liquid = function(pos, node, side) return true end,
     node_io_can_take_liquid = function(pos, node, side) return true end,
     node_io_accepts_millibuckets = function(pos, node, side) return true end,
     node_io_take_liquid = function(pos, node, side, taker, want_liquid,
@@ -455,6 +455,27 @@ core.register_node("multifurnace:port", {
         if can_take == "" then return ItemStack(nil) end
         return ItemStack(can_take .. " " .. count)
     end,
+	node_io_put_liquid = function(pos, node, side, putter, liquid, millibuckets)
+		local ctrl, ctrl_meta = get_port_controller(pos)
+		if not ctrl then return millibuckets end
+
+		if put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
+            update_timer(ctrl)
+            return 0
+        end
+        
+        return millibuckets
+	end,
+	node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
+		local ctrl, ctrl_meta = get_port_controller(pos)
+		if not ctrl then return 0 end
+
+		if can_put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
+            return millibuckets
+        end
+
+		return 0
+	end,
     paramtype2 = "facedir",
     is_ground_content = false,
     on_destruct = function(pos) multifurnace.api.remove_port(pos) end,

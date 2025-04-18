@@ -77,6 +77,7 @@ local function set_item_entities(inv, pos)
 end
 
 local function cast_amount (ctype)
+	if ctype == fluid_lib.get_empty_bucket() then return 1000 end
 	if not metal_caster.casts[ctype] then return nil end
 	return metal_caster.spec.ingot * (metal_caster.casts[ctype].cost or 1)
 end
@@ -88,6 +89,39 @@ local function get_part_recipe(part)
 	local cast = metal_caster.casts[typename]
 	if not cast then return nil end
 	return typename, cast.castname
+end
+
+local function get_recipe(cast_item, liquid, current_total)
+	local part_name, new_cast = get_part_recipe(cast_item)
+	local bucket = cast_item == fluid_lib.get_empty_bucket() and cast_item or nil
+	local ctype = bucket or part_name or metal_caster.get_cast_for_name(cast_item)
+	local amount = cast_amount(ctype)
+	local required = current_total
+
+	if not ctype then
+		required = metal_caster.spec.ingot
+	elseif current_total ~= amount then
+		required = amount
+	end
+
+	if liquid == "" or not ctype then return nil, required, false end
+
+	local metal = fluidity.get_metal_for_fluid(liquid)
+	if new_cast and metal ~= "gold" then return nil, required, false end
+
+	local result = nil
+	local output_cast = false
+	if new_cast then
+		result = new_cast
+		output_cast = true
+	elseif bucket then
+		result = fluid_lib.get_bucket_for_source(liquid)
+		output_cast = true
+	else
+		result = metal_caster.find_castable(metal, ctype)
+	end
+
+	return result, required, output_cast
 end
 
 local function on_timer(pos, elapsed)
@@ -105,28 +139,14 @@ local function on_timer(pos, elapsed)
 	local liqt   = meta:get_int("liquid_total")
 
 	local name = cast:get_name()
-	local recipe, res_cast = get_part_recipe(name)
-	local ctype = recipe or metal_caster.get_cast_for_name(name)
-	local amount = cast_amount(ctype)
+	local result, required, output_cast = get_recipe(name, liquid, liqt)
+	meta:set_int("liquid_total", required)
 
-	if not ctype then
-		meta:set_int("liquid_total", metal_caster.spec.ingot)
-	elseif liqt ~= amount then
-		meta:set_int("liquid_total", amount)
-	end
-
-	if liquid == "" or not ctype then return false end
-
-	local liqt = fluidity.get_metal_for_fluid(liquid)
-
-	if not amount then return false end
-
-	local result = res_cast or metal_caster.find_castable(liqt, ctype)
 	if not result then return false end
 
 	local solidify = meta:get_int("solidify")
 
-	if liqc >= amount then
+	if liqc >= required then
 		if solidify < 3 then
 			refresh = true
 			meta:set_int("solidify", solidify + 1)
@@ -142,10 +162,11 @@ local function on_timer(pos, elapsed)
 			meta:set_int("liquid_amount", liqc)
 			meta:set_int("solidify", 0)
 
-			inv:set_stack("item", 1, item)
-
-			if res_cast then
-				inv:set_stack("cast", 1, "")
+			if output_cast then
+				inv:set_stack("item", 1, "")
+				inv:set_stack("cast", 1, item)
+			else
+				inv:set_stack("item", 1, item)
 			end
 
 			set_item_entities(inv, pos)
@@ -189,8 +210,9 @@ minetest.register_node("multifurnace:casting_table", {
 
 		local cast = metal_caster.get_cast_for_name(i)
 		local recipe = get_part_recipe(i)
+		local bucket = i == fluid_lib.get_empty_bucket()
 
-		if inv:get_stack("cast", 1):is_empty() and (cast or recipe) then
+		if inv:get_stack("cast", 1):is_empty() and (cast or recipe or bucket) then
 			inv:set_stack("cast", 1, itemstack:take_item(1))
 			set_item_entities(inv, pos)
 			update_timer(pos)

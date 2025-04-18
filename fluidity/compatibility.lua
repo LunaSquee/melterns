@@ -47,8 +47,7 @@ fluidity.external.sounds.node_sound_wood = ""
 -----------------
 
 -- All of the ingredients can be configured with setting "melterns_resource_" + last table key
--- e.g. melterns_resource_bucket_empty = bucket:bucket_empty
-fluidity.external.items.bucket_empty = "bucket:bucket_empty"
+-- e.g. melterns_resource_bucket_water = bucket:bucket_water
 fluidity.external.items.bucket_water = "bucket:bucket_water"
 fluidity.external.items.bucket_lava = "bucket:bucket_lava"
 fluidity.external.items.lava = "default:lava_source"
@@ -92,7 +91,6 @@ if mcl then
   fluidity.external.sounds.node_sound_gravel = mcl_sounds.node_sound_gravel_defaults()
   fluidity.external.sounds.node_sound_wood = mcl_sounds.node_sound_wood_defaults()
 
-  fluidity.external.items.bucket_empty = "mcl_buckets:bucket_empty"
   fluidity.external.items.bucket_water = "mcl_buckets:bucket_water"
   fluidity.external.items.bucket_lava = "mcl_buckets:bucket_lava"
 

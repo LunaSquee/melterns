@@ -85,7 +85,7 @@ local function allow_metadata_inventory_put (pos, listname, index, stack, player
 	end
 
 	if listname == "bucket_out" then
-		if stack:get_name() ~= mei.bucket_empty and not fluidity.florbs.get_is_florb(stack) then
+		if stack:get_name() ~= fluid_lib.get_empty_bucket() and not fluidity.florbs.get_is_florb(stack) then
 			return 0
 		end
 
@@ -227,6 +227,7 @@ local function caster_node_timer(pos, elapsed)
 	local metal_type = ""
 
 	local dumping = meta:get_int("dump")
+	local empty = fluid_lib.get_empty_bucket()
 	if dumping == 1 then
 		metal.amount = 0
 		metal.fluid = ""
@@ -238,7 +239,7 @@ local function caster_node_timer(pos, elapsed)
 	if inv:get_stack("coolant", 1):get_name() == mei.bucket_water then
 		if coolant.amount + 1000 <= metal_caster.max_coolant then
 			coolant.amount = coolant.amount + 1000
-			inv:set_list("coolant", {mei.bucket_empty})
+			inv:set_list("coolant", {empty})
 			refresh = true
 		end
 	end
@@ -246,7 +247,7 @@ local function caster_node_timer(pos, elapsed)
 	-- Handle input bucket, only allow a molten metal
 	local bucket_in   = inv:get_stack("bucket_in", 1)
 	local bucket_name = bucket_in:get_name()
-	if (bucket_name:find("bucket") and bucket_name ~= mei.bucket_empty) or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
+	if (bucket_name:find("bucket") and bucket_name ~= empty) or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
 			fluidity.florbs.get_is_florb(bucket_in)) then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_in)
 		if is_florb then
@@ -289,7 +290,7 @@ local function caster_node_timer(pos, elapsed)
 			end
 
 			if empty_bucket then
-				inv:set_list("bucket_in", {mei.bucket_empty})
+				inv:set_list("bucket_in", {empty})
 				refresh = true
 			end
 		end
@@ -298,7 +299,7 @@ local function caster_node_timer(pos, elapsed)
 	-- Handle bucket output, only allow empty buckets in this slot
 	local bucket_out = inv:get_stack("bucket_out", 1)
 	bucket_name      = bucket_out:get_name()
-	if (bucket_name == mei.bucket_empty or fluidity.florbs.get_is_florb(bucket_out)) and metal and metal.fluid ~= "" and bucket_out:get_count() == 1 then
+	if (bucket_name == empty or fluidity.florbs.get_is_florb(bucket_out)) and metal and metal.fluid ~= "" and bucket_out:get_count() == 1 then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_out)
 		if is_florb then
 			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_out)
@@ -388,7 +389,7 @@ local function caster_node_timer(pos, elapsed)
 						if metal.amount == 0 then
 							metal.fluid = ""
 						end
-						
+
 						refresh = true
 					end
 				end
@@ -403,7 +404,7 @@ local function caster_node_timer(pos, elapsed)
 
 	local infotext = "Metal Caster\n"
 	infotext = infotext .. fluid_lib.buffer_to_string(coolant) .. "\n"
-	
+
 	if metal and metal.fluid ~= "" then
 		infotext = infotext .. fluid_lib.buffer_to_string(metal)
 	else
@@ -480,7 +481,7 @@ if minetest.get_modpath("pipeworks") ~= nil then
 
 		minetest.get_node_timer(pos):start(1.0)
 
-		if stack_name == mei.bucket_empty or fluidity.florbs.get_is_empty_florb(stack) then
+		if stack_name == fluid_lib.get_empty_bucket() or fluidity.florbs.get_is_empty_florb(stack) then
 			return inv:add_item("bucket_out", stack)
 		elseif stack_name == mei.bucket_water then
 			return inv:add_item("coolant", stack)

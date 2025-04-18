@@ -60,7 +60,7 @@ minetest.register_craft({
 	output = 'fluidity:florb',
 	recipe = {
 		{mei.glass},
-		{mei.bucket_empty},
+		{fluid_lib.get_empty_bucket()},
 	},
 })
 
