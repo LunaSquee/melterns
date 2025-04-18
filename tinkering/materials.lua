@@ -1,4 +1,6 @@
 
+local mei = fluidity.external.items
+
 local modifiers = {
 	flint = {
 		cracky = {times={[3]=1.20}, uses=5, maxlevel=1},
@@ -262,72 +264,45 @@ local modifiers = {
 
 tinkering.materials = {
 	-- Materials
-	flint    = {name = "Flint",    default = "default:flint",    color = "#514E49", base = "item",               modifier = modifiers.flint},
-	wood     = {name = "Wood",     default = "wood",             color = "#634623", base = "group",              modifier = modifiers.wood},
-	stone    = {name = "Stone",    default = "stone",            color = "#8D8988", base = "group",              modifier = modifiers.stone},
-	obsidian = {name = "Obsidian", default = "default:obsidian", color = "#2C384E", base = "node",  cast = true, modifier = modifiers.obsidian},
+	flint    = {name = "Flint",    default = mei.flint,       color = "#514E49", base = "item",               modifier = modifiers.flint},
+	wood     = {name = "Wood",     default = mei.group_wood,  color = "#634623", base = "group",              modifier = modifiers.wood},
+	stone    = {name = "Stone",    default = mei.group_stone, color = "#8D8988", base = "group",              modifier = modifiers.stone},
+	obsidian = {name = "Obsidian",                            color = "#2C384E", base = "node",  cast = true, modifier = modifiers.obsidian},
 
 	-- Metals
-	steel  = {name = "Steel",  default = "default:steel_ingot",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.steel},
-	copper = {name = "Copper", default = "default:copper_ingot", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
-	tin    = {name = "Tin",    default = "default:tin_ingot",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
-	bronze = {name = "Bronze", default = "default:bronze_ingot", color = "#C14E19", base = "ingot", cast = true, modifier = modifiers.bronze},
-	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
-	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
+	steel  = {name = "Steel",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.steel},
+	copper = {name = "Copper", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
+	tin    = {name = "Tin",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
+	bronze = {name = "Bronze", color = "#C14E19", base = "ingot", cast = true, modifier = modifiers.bronze},
+	gold   = {name = "Gold",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
+	mese   = {name = "Mese",   color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
 
 	-- From moreores
-	silver  = {name = "Silver",  default = "moreores:silver_ingot",  color = "#D7E2E8", base = "ingot", cast = true, modifier = modifiers.silver},
-	mithril = {name = "Mithril", default = "moreores:mithril_ingot", color = "#6868D7", base = "ingot", cast = true, modifier = modifiers.mithril}
+	silver  = {name = "Silver",  color = "#D7E2E8", base = "ingot", cast = true, modifier = modifiers.silver},
+	mithril = {name = "Mithril", color = "#6868D7", base = "ingot", cast = true, modifier = modifiers.mithril},
+
+	-- From technic / elepower
+	lead     = {name = "Lead",     color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead},
+	chromium = {name = "Chromium", color = "#DFE8E8", base = "ingot", cast = true, modifier = modifiers.chromium},
+	zinc     = {name = "Zinc",     color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc},
 }
 
 tinkering.modifiers = {
-	diamond = {name = "Diamond", default = "default:diamond", modifier = modifiers.diamond}
+	diamond = {name = "Diamond", default = mei.diamond, modifier = modifiers.diamond}
 }
 
--- Add mod-based materials
-minetest.register_on_mods_loaded(function ()
-	if minetest.get_modpath("technic") then
-		-- From technic
-		tinkering.materials["lead"]     = {name = "Lead",     default = "technic:lead_ingot",
-			color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead}
-
-		tinkering.materials["chromium"] = {name = "Chromium", default = "technic:chromium_ingot",
-			color = "#DFE8E8", base = "ingot", cast = true, modifier = modifiers.chromium}
-
-		tinkering.materials["zinc"]     = {name = "Zinc",     default = "technic:zinc_ingot",
-			color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
-	end
-
-	if minetest.get_modpath("elepower_dynamics") then
-		-- From elepower
-		tinkering.materials["lead"]     = {name = "Lead",     default = "elepower_dynamics:lead_ingot",
-			color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead}
-
-		tinkering.materials["zinc"]     = {name = "Zinc",     default = "elepower_dynamics:zinc_ingot",
-			color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
-	end
-
-	if minetest.get_modpath("mcl_core") then
-		tinkering.materials.flint.default = "mcl_core:flint"
-		tinkering.materials.obsidian.default = "mcl_core:obsidian"
-		tinkering.materials.steel.name = "Iron"
-		tinkering.materials.steel.default = "mcl_core:iron_ingot"
-		tinkering.materials.copper.default = "mcl_copper:copper_ingot"
-		tinkering.materials.gold.default = "mcl_core:gold_ingot"
-		tinkering.materials.mese.name = "Redstone"
-		tinkering.materials.mese.default = "mesecons:redstone"
-		tinkering.modifiers.diamond.default = "mcl_core:diamond"
-		tinkering.modifiers.netherite = {
-			name = "netherite", default = "mcl_nether:netherite_ingot",
-			modifier = {
-				uses = 30,
-				increase = 0.35,
-				count = 1,
-				maxlevel = 5,
-				tags = {
-					{name = "netherite", description = "Netherite"}
-				}
+if core.get_modpath("mcl_core") then
+	tinkering.materials.mese.name = "Redstone"
+	tinkering.modifiers.netherite = {
+		name = "netherite", default = "mcl_nether:netherite_ingot",
+		modifier = {
+			uses = 30,
+			increase = 0.35,
+			count = 1,
+			maxlevel = 5,
+			tags = {
+				{name = "netherite", description = "Netherite"}
 			}
 		}
-	end
-end)
+	}
+end

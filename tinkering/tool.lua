@@ -70,6 +70,13 @@ tinkering.components = {
 	tool_binding = {description = "%s Tool Binding", material_cost = 2, image = "tinkering_tool_binding.png"}
 }
 
+local mcl_group_translations = {
+	crumbly = "shovely",
+	cracky = "pickaxey",
+	snappy = "swordy",
+	choppy = "axey"
+}
+
 -- Create component for material
 function tinkering.create_material_component(data)
 	local desc = data.description
@@ -249,6 +256,16 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 
 	-- Apply all modifiers
 	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups)
+
+	-- Use MCL tool capabilities
+	if core.get_modpath("mcl_core") ~= nil then
+		for grp, val in pairs(mcl_group_translations) do
+			if fg[grp] then
+				fg[val] = fg[grp]
+			end
+		end
+	end
+
 	local tool_caps = {
 		full_punch_interval = 1.0,
 		max_drop_level = maxlevel,
@@ -350,6 +367,8 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	if custom_name ~= nil and custom_name ~= "" then
 		tool_def.description = custom_name
 	end
+
+	tool_def._mcl_toollike_wield = true
 
 	-- Create internal name
 	local internal_name = mod_name..":"..materials.main.."_"..tool_type
@@ -469,5 +488,21 @@ function tinkering.register_component(name, data)
 
 		-- Make all components meltable
 		fluidity.register_melt(mod..":"..component, m, name)
+	end
+end
+
+-- TODO: this is a workaround to enable digging using tinkering tools
+-- VoxeLibre will only work if you use _mcl_diggroups and that is not compatible with
+-- metadata tool capabilities at all. Not exactly sure why they did it like this.
+-- Currently, we just allow any tinker tool to break anything.
+-- This should be addressed properly in the future.
+if core.get_modpath("_mcl_autogroup") then
+	local original_can_harvest = mcl_autogroup.can_harvest
+	mcl_autogroup.can_harvest = function (nodename, toolname, player)
+		local can_dig = original_can_harvest(nodename, toolname, player)
+		if not can_dig and core.get_item_group(toolname, "tinker_tool") > 0 then
+			return true
+		end
+		return can_dig
 	end
 end
