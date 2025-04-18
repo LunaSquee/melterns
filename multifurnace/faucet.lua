@@ -121,6 +121,8 @@ minetest.register_node("multifurnace:faucet", {
 	is_ground_content = false,
 	on_rightclick = faucet_activate,
 	on_timer = faucet_timer,
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 -- Flow entity

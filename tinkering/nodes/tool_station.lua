@@ -1,3 +1,6 @@
+
+local mer = fluidity.external.ref
+
 tool_station = {}
 
 local tool_list_cache = nil
@@ -6,16 +9,16 @@ function tool_station.get_tool_type_list(ix, iy, mx)
 	local x        = 0
 	local y        = 0
 
-	formspec = formspec..("button[%d,%d;1,1;anvil;Anvil]"):format(x + ix, y + iy)
-	x = x + 1
+	formspec = formspec..("button[%f,%f;1,1;anvil;Anvil]"):format(x + ix, y + iy)
+	x = x + 1.25
 
 	for t, tool in pairs(tinkering.tools) do
 		local toolmod = tool.mod_name or "tinkering"
-		formspec = formspec.. ("item_image_button[%d,%d;1,1;%s;%s;]"):format(x + ix, y + iy, toolmod..":steel_"..t, t)
+		formspec = formspec.. ("item_image_button[%f,%f;1,1;%s;%s;]"):format(x + ix, y + iy, toolmod..":steel_"..t, t)
 		formspec = formspec.. ("tooltip[%s;%s]"):format(t, tool.description)
-		x = x + 1
+		x = x + 1.25
 		if x >= mx then
-			y = y + 1
+			y = y + 1.25
 			x = 0
 		end
 	end
@@ -25,27 +28,27 @@ end
 
 function tool_station.get_formspec(comp_list)
 	if not tool_list_cache then
-		tool_list_cache = tool_station.get_tool_type_list(8, 0, 5)
+		tool_list_cache = tool_station.get_tool_type_list(11.75, 0.375, 6.25)
 	end
 
 	local w = 1
 	local h = 0
 
-	local x = 1
-	local y = 0
+	local x = 2.125
+	local y = 0.75
 
 	local til = ""
 
 	if comp_list then
 		for _,comp in pairs(comp_list) do
 			local img = tinkering.components[comp].image .. "^[colorize:#1e1e1e:255"
-			til = til .. "image[" .. (x * 1) .. "," .. (y + 0.8) .. ";1,1;".. img .. "]"
-			y = y + 1
+			til = til .. "image[" .. x .. "," .. y .. ";1,1;".. img .. "]"
+			y = y + 1.25
 			h = h + 1
 
-			if y > 2 then
+			if y > 3.25 then
 				y = 0
-				x = x + 1
+				x = x + 1.25
 			end
 
 			if h > 3 then
@@ -58,29 +61,26 @@ function tool_station.get_formspec(comp_list)
 		w = 3
 	end
 
-	return "size[13,8.5]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		"label[0,0;Tool Station]"..
+	return "formspec_version[4]size[18,10.45]"..
+		"label[0.375,0.375;Tool Station]"..
+		mer.get_itemslot_bg(2.125, 0.75, w, h) ..
 		til..
-		"list[context;input;1,0.8;" .. w .. "," .. h .. ";]"..
-		"list[context;output;5,1.8;1,1;]"..
-		"image[4,1.8;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"list[current_player;main;0,4.25;8,1;]"..
-		"list[current_player;main;0,5.5;8,3;8]"..
+		"list[context;input;2.125,0.75;" .. w .. "," .. h .. ";]"..
+		mer.get_itemslot_bg(7.125, 2, 1, 1) ..
+		"list[context;output;7.125,2;1,1;]"..
+		"image[5.875,2;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
+		mer.gui_player_inv()..
 		tool_list_cache..
 		"listring[current_player;main]"..
 		"listring[context;input]"..
 		"listring[current_player;main]"..
 		"listring[context;output]"..
-		"listring[current_player;main]"..
-		default.get_hotbar_bg(0, 4.25)
+		"listring[current_player;main]"
 end
 
 local function get_metalgroup(groups)
 	if not groups then return nil end
-	for g,i in pairs(groups) do
+	for g in pairs(groups) do
 		if g:find("material_") == 1 then
 			return g:gsub("^material_", "")
 		end
@@ -108,7 +108,7 @@ function tool_station.get_types(list, tool_type)
 					local mtg = get_metalgroup(minetest.registered_items[stack_name].groups)
 					if mtg ~= nil then
 						result[tt] = mtg
-						
+
 						if not items_required[stack_name] then
 							items_required[stack_name] = 0
 						end
@@ -181,7 +181,7 @@ local function find_material(stack)
 			for _,st in pairs(stacks) do
 				if st == stack then
 					return metal, type
-				end 
+				end
 			end
 		end
 	end
@@ -294,7 +294,7 @@ local function handle_take_output(pos, listname)
 				local materials = decode_meta(comp_mats)
 				-- Material list found, now we can start doing repair work or replacing a component
 				local mat_grid = get_materials_in_list(list, tool:get_name())
-				
+
 				-- Find components to remove
 				local for_removal = {}
 				local removed_types = {}
@@ -383,7 +383,7 @@ local function on_timer(pos, elapsed)
 				local materials = decode_meta(comp_mats)
 				-- Material list found, now we can start doing repair work or replacing a component
 				local mat_grid = get_materials_in_list(list, tool:get_name())
-				
+
 				-- Find components to replace
 				local comp_repl = {}
 				local repair = true
@@ -430,7 +430,7 @@ local function on_timer(pos, elapsed)
 						local tool_wear = 65535 - tool:get_wear()
 						local repair_cnt = (0.33 * 65535) * repair_cap
 						local new_wear = 65535 - (tool_wear + repair_cnt)
-						
+
 						if new_wear < 0 then
 							new_wear = 0
 						end
@@ -485,7 +485,7 @@ end
 local function on_construct(pos)
 	local meta = minetest.get_meta(pos)
 	meta:set_string("formspec", tool_station.get_formspec())
-	
+
 	-- Create inventory
 	local inv = meta:get_inventory()
 	inv:set_size('input', 9)
@@ -545,7 +545,7 @@ minetest.register_node("tinkering:tool_station", {
 	on_construct = on_construct,
 	legacy_facedir_simple = true,
 	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+	sounds = fluidity.external.sounds.node_sound_wood,
 
 	can_dig = can_dig,
 	on_timer = on_timer,
@@ -564,5 +564,8 @@ minetest.register_node("tinkering:tool_station", {
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 
-	groups = {choppy = 2, oddly_breakable_by_hand = 2}
+	groups = {choppy = 2, oddly_breakable_by_hand = 2},
+
+	_mcl_hardness = 1,
+	_mcl_blast_resistance = 1,
 })

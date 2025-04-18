@@ -46,7 +46,7 @@ function fluidity.register_molten_metal(metal)
 			},
 		},
 		paramtype = "light",
-		light_source = default.LIGHT_MAX - 1,
+		light_source = core.LIGHT_MAX - 1,
 		walkable = false,
 		pointable = false,
 		diggable = false,
@@ -92,7 +92,7 @@ function fluidity.register_molten_metal(metal)
 		},
 		paramtype = "light",
 		paramtype2 = "flowingliquid",
-		light_source = default.LIGHT_MAX - 1,
+		light_source = core.LIGHT_MAX - 1,
 		walkable = false,
 		pointable = false,
 		diggable = false,
@@ -107,11 +107,11 @@ function fluidity.register_molten_metal(metal)
 		liquid_renewable = false,
 		damage_per_second = 4 * 2,
 		post_effect_color = {a = 191, r = 255, g = 64, b = 0},
-		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1, 
+		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1,
 			not_in_creative_inventory = 1},
 	})
 
-	bucket.register_liquid(
+	fluid_lib.register_liquid(
 		mod_name..":"..metal.."_source",
 		mod_name..":"..metal.."_flowing",
 		mod_name..":bucket_"..metal,

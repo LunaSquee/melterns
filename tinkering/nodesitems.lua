@@ -1,4 +1,6 @@
 
+local mei = fluidity.external.items
+
 -- Common nodebox
 tinkering.bench = {
 	type = "fixed",
@@ -24,8 +26,8 @@ dofile(tinkering.modpath.."/nodes/pattern_table.lua")
 minetest.register_craft({
 	output = 'tinkering:blank_pattern 16',
 	recipe = {
-		{'default:stick', 'group:wood'},
-		{'group:wood',    'default:stick'},
+		{mei.stick, 'group:wood'},
+		{'group:wood', mei.stick},
 	},
 })
 
@@ -57,8 +59,8 @@ minetest.register_craft({
 minetest.register_craft({
 	output = 'fluidity:florb',
 	recipe = {
-		{'default:glass'},
-		{'bucket:bucket_empty'},
+		{mei.glass},
+		{fluid_lib.get_empty_bucket()},
 	},
 })
 

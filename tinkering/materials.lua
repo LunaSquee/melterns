@@ -1,4 +1,6 @@
 
+local mei = fluidity.external.items
+
 local modifiers = {
 	flint = {
 		cracky = {times={[3]=1.20}, uses=5, maxlevel=1},
@@ -30,10 +32,10 @@ local modifiers = {
 		}
 	},
 	stone = {
-		cracky = {times={[2]=2.0, [3]=1.00}, uses=20, maxlevel=1},
-		crumbly = {times={[1]=1.80, [2]=1.20, [3]=0.50}, uses=20, maxlevel=1},
-		snappy = {times={[2]=1.4, [3]=0.40}, uses=20, maxlevel=1},
-		choppy = {times={[1]=3.00, [2]=2.00, [3]=1.30}, uses=20, maxlevel=1},
+		cracky = {times={[2]=2.0, [3]=1.00}, uses=20, maxlevel=2},
+		crumbly = {times={[1]=1.80, [2]=1.20, [3]=0.50}, uses=20, maxlevel=2},
+		snappy = {times={[2]=1.4, [3]=0.40}, uses=20, maxlevel=2},
+		choppy = {times={[1]=3.00, [2]=2.00, [3]=1.30}, uses=20, maxlevel=2},
 		damagegroups = {fleshy = 4},
 		explody = nil,
 
@@ -45,10 +47,10 @@ local modifiers = {
 		}
 	},
 	steel = {
-		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=30, maxlevel=2},
-		snappy = {times={[1]=2.5, [2]=1.20, [3]=0.35}, uses=30, maxlevel=2},
-		choppy = {times={[1]=2.50, [2]=1.40, [3]=1.00}, uses=20, maxlevel=2},
+		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=20, maxlevel=4},
+		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=30, maxlevel=4},
+		snappy = {times={[1]=2.5, [2]=1.20, [3]=0.35}, uses=30, maxlevel=4},
+		choppy = {times={[1]=2.50, [2]=1.40, [3]=1.00}, uses=20, maxlevel=4},
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
@@ -60,10 +62,10 @@ local modifiers = {
 		}
 	},
 	copper = {
-		cracky = {times={[1]=3.80, [2]=1.50, [3]=0.70}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.30, [2]=0.80, [3]=0.30}, uses=30, maxlevel=2},
-		snappy = {times={[1]=2.30, [2]=1.10, [3]=0.20}, uses=30, maxlevel=2},
-		choppy = {times={[1]=2.30, [2]=1.30, [3]=0.90}, uses=20, maxlevel=2},
+		cracky = {times={[1]=3.80, [2]=1.50, [3]=0.70}, uses=20, maxlevel=4},
+		crumbly = {times={[1]=1.30, [2]=0.80, [3]=0.30}, uses=30, maxlevel=4},
+		snappy = {times={[1]=2.30, [2]=1.10, [3]=0.20}, uses=30, maxlevel=4},
+		choppy = {times={[1]=2.30, [2]=1.30, [3]=0.90}, uses=20, maxlevel=4},
 		damagegroups = {fleshy = 5},
 		explody = nil,
 
@@ -88,10 +90,10 @@ local modifiers = {
 		}
 	},
 	bronze = {
-		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=30, maxlevel=2},
-		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=40, maxlevel=2},
-		snappy = {times={[1]=2.50, [2]=1.20, [3]=0.35}, uses=40, maxlevel=2},
-		choppy = {times={[1]=2.50, [2]=1.40, [3]=1.00}, uses=30, maxlevel=2},
+		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=30, maxlevel=3},
+		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=40, maxlevel=3},
+		snappy = {times={[1]=2.50, [2]=1.20, [3]=0.35}, uses=40, maxlevel=3},
+		choppy = {times={[1]=2.50, [2]=1.40, [3]=1.00}, uses=30, maxlevel=3},
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
@@ -130,10 +132,10 @@ local modifiers = {
 		}
 	},
 	obsidian = {
-		cracky = {times={[1]=2.3, [2]=1.0, [3]=0.40}, uses=30, maxlevel=3},
-		crumbly = {times={[1]=1.10, [2]=0.50, [3]=0.20}, uses=30, maxlevel=3},
-		snappy = {times={[1]=1.85, [2]=0.85, [3]=0.25}, uses=40, maxlevel=3},
-		choppy = {times={[1]=2.00, [2]=0.85, [3]=0.40}, uses=30, maxlevel=3},
+		cracky = {times={[1]=2.3, [2]=1.0, [3]=0.40}, uses=30, maxlevel=4},
+		crumbly = {times={[1]=1.10, [2]=0.50, [3]=0.20}, uses=30, maxlevel=4},
+		snappy = {times={[1]=1.85, [2]=0.85, [3]=0.25}, uses=40, maxlevel=4},
+		choppy = {times={[1]=2.00, [2]=0.85, [3]=0.40}, uses=30, maxlevel=4},
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
@@ -145,10 +147,10 @@ local modifiers = {
 	},
 	lead = {
 		-- TODO: tweak
-		cracky = {times={[1]=3.70, [2]=1.30, [3]=0.60}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.20, [2]=0.60, [3]=0.20}, uses=30, maxlevel=2},
-		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel=2},
-		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.60}, uses=20, maxlevel=2},
+		cracky = {times={[1]=3.70, [2]=1.30, [3]=0.60}, uses=20, maxlevel=4},
+		crumbly = {times={[1]=1.20, [2]=0.60, [3]=0.20}, uses=30, maxlevel=4},
+		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel=4},
+		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.60}, uses=20, maxlevel=4},
 		damagegroups = {fleshy = 7},
 		explody = nil,
 
@@ -160,10 +162,10 @@ local modifiers = {
 	},
 	chromium = {
 		-- TODO: tweak
-		cracky = {times={[1]=3.70, [2]=1.30, [3]=0.60}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.20, [2]=0.60, [3]=0.20}, uses=30, maxlevel=2},
-		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel=2},
-		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.60}, uses=20, maxlevel=2},
+		cracky = {times={[1]=3.70, [2]=1.30, [3]=0.60}, uses=20, maxlevel=4},
+		crumbly = {times={[1]=1.20, [2]=0.60, [3]=0.20}, uses=30, maxlevel=4},
+		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel=4},
+		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.60}, uses=20, maxlevel=4},
 		damagegroups = {fleshy = 5},
 		explody = nil,
 
@@ -175,10 +177,10 @@ local modifiers = {
 	},
 	zinc = {
 		-- TODO: tweak
-		cracky = {times={[1]=3.70, [2]=1.30, [3]=0.60}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.20, [2]=0.60, [3]=0.20}, uses=30, maxlevel=2},
-		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel=2},
-		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.60}, uses=20, maxlevel=2},
+		cracky = {times={[1]=3.70, [2]=1.30, [3]=0.60}, uses=20, maxlevel = 3},
+		crumbly = {times={[1]=1.20, [2]=0.60, [3]=0.20}, uses=30, maxlevel = 3},
+		snappy = {times={[1]=2.20, [2]=1.00, [3]=0.10}, uses=30, maxlevel = 3},
+		choppy = {times={[1]=2.20, [2]=1.20, [3]=0.60}, uses=20, maxlevel = 3},
 		damagegroups = {fleshy = 5},
 		explody = nil,
 
@@ -189,10 +191,10 @@ local modifiers = {
 		}
 	},
 	silver = {
-		cracky = {times = {[1] = 2.60, [2] = 1.00, [3] = 0.60}, uses = 100, maxlevel= 1},
-		crumbly = {times = {[1] = 1.10, [2] = 0.40, [3] = 0.25}, uses = 100, maxlevel= 1},
-		snappy = {times = {[2] = 0.70, [3] = 0.30}, uses = 100, maxlevel= 1},
-		choppy = {times = {[1] = 2.50, [2] = 0.80, [3] = 0.50}, uses = 100, maxlevel= 1},
+		cracky = {times = {[1] = 2.60, [2] = 1.00, [3] = 0.60}, uses = 30, maxlevel = 4},
+		crumbly = {times = {[1] = 1.10, [2] = 0.40, [3] = 0.25}, uses = 30, maxlevel = 4},
+		snappy = {times = {[2] = 0.70, [3] = 0.30}, uses = 30, maxlevel = 4},
+		choppy = {times = {[1] = 2.50, [2] = 0.80, [3] = 0.50}, uses = 30, maxlevel = 4},
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
@@ -204,10 +206,10 @@ local modifiers = {
 		}
 	},
 	mithril = {
-		cracky = {times = {[1] = 2.25, [2] = 0.55, [3] = 0.35}, uses = 200, maxlevel= 2},
-		crumbly = {times = {[1] = 0.70, [2] = 0.35, [3] = 0.20}, uses = 200, maxlevel= 2},
-		snappy = {times = {[2] = 0.70, [3] = 0.25}, uses = 200, maxlevel= 2},
-		choppy = {times = {[1] = 1.75, [2] = 0.45, [3] = 0.45}, uses = 200, maxlevel= 2},
+		cracky = {times = {[1] = 2.25, [2] = 0.55, [3] = 0.35}, uses = 40, maxlevel = 4},
+		crumbly = {times = {[1] = 0.70, [2] = 0.35, [3] = 0.20}, uses = 40, maxlevel = 4},
+		snappy = {times = {[2] = 0.70, [3] = 0.25}, uses = 40, maxlevel = 4},
+		choppy = {times = {[1] = 1.75, [2] = 0.45, [3] = 0.45}, uses = 40, maxlevel = 4},
 		damagegroups = {fleshy = 9},
 		explody = nil,
 
@@ -223,6 +225,7 @@ local modifiers = {
 		uses = 20,
 		increase = 0.25,
 		count = 1,
+		maxlevel = 4,
 		tags = {
 			{name = "diamond", description = "Diamond"}
 		}
@@ -261,48 +264,45 @@ local modifiers = {
 
 tinkering.materials = {
 	-- Materials
-	flint    = {name = "Flint",    default = "default:flint",    color = "#514E49", base = "item",               modifier = modifiers.flint},
-	wood     = {name = "Wood",     default = "wood",             color = "#634623", base = "group",              modifier = modifiers.wood},
-	stone    = {name = "Stone",    default = "stone",            color = "#8D8988", base = "group",              modifier = modifiers.stone},
-	obsidian = {name = "Obsidian", default = "default:obsidian", color = "#2C384E", base = "node",  cast = true, modifier = modifiers.obsidian},
+	flint    = {name = "Flint",    default = mei.flint,       color = "#514E49", base = "item",               modifier = modifiers.flint},
+	wood     = {name = "Wood",     default = mei.group_wood,  color = "#634623", base = "group",              modifier = modifiers.wood},
+	stone    = {name = "Stone",    default = mei.group_stone, color = "#8D8988", base = "group",              modifier = modifiers.stone},
+	obsidian = {name = "Obsidian",                            color = "#2C384E", base = "node",  cast = true, modifier = modifiers.obsidian},
 
 	-- Metals
-	steel  = {name = "Steel",  default = "default:steel_ingot",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.steel},
-	copper = {name = "Copper", default = "default:copper_ingot", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
-	tin    = {name = "Tin",    default = "default:tin_ingot",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
-	bronze = {name = "Bronze", default = "default:bronze_ingot", color = "#C14E19", base = "ingot", cast = true, modifier = modifiers.bronze},
-	gold   = {name = "Gold",   default = "default:gold_ingot",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
-	mese   = {name = "Mese",   default = "default:mese_crystal", color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
+	steel  = {name = "Steel",  color = "#FFF",    base = "ingot", cast = true, modifier = modifiers.steel},
+	copper = {name = "Copper", color = "#E87945", base = "ingot", cast = true, modifier = modifiers.copper},
+	tin    = {name = "Tin",    color = "#C1C1C1", base = "ingot", cast = true, modifier = modifiers.tin},
+	bronze = {name = "Bronze", color = "#C14E19", base = "ingot", cast = true, modifier = modifiers.bronze},
+	gold   = {name = "Gold",   color = "#FFFF54", base = "ingot", cast = true, modifier = modifiers.gold},
+	mese   = {name = "Mese",   color = "#FFFF02", base = "gem",   cast = true, modifier = modifiers.mese},
 
 	-- From moreores
-	silver  = {name = "Silver",  default = "moreores:silver_ingot",  color = "#D7E2E8", base = "ingot", cast = true, modifier = modifiers.silver},
-	mithril = {name = "Mithril", default = "moreores:mithril_ingot", color = "#6868D7", base = "ingot", cast = true, modifier = modifiers.mithril}
+	silver  = {name = "Silver",  color = "#D7E2E8", base = "ingot", cast = true, modifier = modifiers.silver},
+	mithril = {name = "Mithril", color = "#6868D7", base = "ingot", cast = true, modifier = modifiers.mithril},
+
+	-- From technic / elepower
+	lead     = {name = "Lead",     color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead},
+	chromium = {name = "Chromium", color = "#DFE8E8", base = "ingot", cast = true, modifier = modifiers.chromium},
+	zinc     = {name = "Zinc",     color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc},
 }
 
 tinkering.modifiers = {
-	diamond = {name = "Diamond", default = "default:diamond", modifier = modifiers.diamond}
+	diamond = {name = "Diamond", default = mei.diamond, modifier = modifiers.diamond}
 }
 
--- Add mod-based materials
-minetest.register_on_mods_loaded(function ()
-	if minetest.get_modpath("technic") then
-		-- From technic
-		tinkering.materials["lead"]     = {name = "Lead",     default = "technic:lead_ingot",
-			color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead}
-
-		tinkering.materials["chromium"] = {name = "Chromium", default = "technic:chromium_ingot",
-			color = "#DFE8E8", base = "ingot", cast = true, modifier = modifiers.chromium}
-
-		tinkering.materials["zinc"]     = {name = "Zinc",     default = "technic:zinc_ingot",
-			color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
-	end
-
-	if minetest.get_modpath("elepower_dynamics") then
-		-- From elepower
-		tinkering.materials["lead"]     = {name = "Lead",     default = "elepower_dynamics:lead_ingot",
-			color = "#C6C6C6", base = "ingot", cast = true, modifier = modifiers.lead}
-
-		tinkering.materials["zinc"]     = {name = "Zinc",     default = "elepower_dynamics:zinc_ingot",
-			color = "#CEE8EF", base = "ingot", cast = true, modifier = modifiers.zinc}
-	end
-end)
+if core.get_modpath("mcl_core") then
+	tinkering.materials.mese.name = "Redstone"
+	tinkering.modifiers.netherite = {
+		name = "netherite", default = "mcl_nether:netherite_ingot",
+		modifier = {
+			uses = 30,
+			increase = 0.35,
+			count = 1,
+			maxlevel = 5,
+			tags = {
+				{name = "netherite", description = "Netherite"}
+			}
+		}
+	}
+end

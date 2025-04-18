@@ -6,10 +6,9 @@ multifurnace = rawget(_G, "multifurnace") or {}
 local modpath = minetest.get_modpath(minetest.get_current_modname())
 multifurnace.modpath = modpath
 
-dofile(modpath .. "/multi.lua")
+dofile(modpath .. "/api.lua")
 
 dofile(modpath .. "/faucet.lua")
 dofile(modpath .. "/casting_table.lua")
 dofile(modpath .. "/furnace.lua")
-dofile(modpath .. "/nodes.lua")
 dofile(modpath .. "/crafting.lua")

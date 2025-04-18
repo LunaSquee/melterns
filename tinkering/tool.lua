@@ -70,6 +70,13 @@ tinkering.components = {
 	tool_binding = {description = "%s Tool Binding", material_cost = 2, image = "tinkering_tool_binding.png"}
 }
 
+local mcl_group_translations = {
+	crumbly = "shovely",
+	cracky = "pickaxey",
+	snappy = "swordy",
+	choppy = "axey"
+}
+
 -- Create component for material
 function tinkering.create_material_component(data)
 	local desc = data.description
@@ -81,9 +88,11 @@ function tinkering.create_material_component(data)
 	groups["material_"..data.metal] = 1
 
 	minetest.register_craftitem(mod..":"..name, {
-		description     = desc,
-		groups          = groups,
-		inventory_image = data.image
+		description       = desc,
+		groups            = groups,
+		_tinker_component = data.component,
+		_tinker_material  = data.metal,
+		inventory_image   = data.image
 	})
 end
 
@@ -121,6 +130,7 @@ local function apply_modifiers(materials, basegroup, dgroup)
 
 	local incr = 0.00
 	local uses = 0
+	local maxlevel = 0
 	local dmg = {}
 
 	-- Apply material modifiers
@@ -137,6 +147,10 @@ local function apply_modifiers(materials, basegroup, dgroup)
 
 				if mp.uses then
 					uses = uses + mp.uses
+				end
+
+				if mp.maxlevel and maxlevel < mp.maxlevel then
+					maxlevel = mp.maxlevel
 				end
 
 				if mp.damage then
@@ -168,6 +182,10 @@ local function apply_modifiers(materials, basegroup, dgroup)
 		end
 
 		groups[grp].uses = d.uses + uses
+
+		if groups[grp].maxlevel and maxlevel < groups[grp].maxlevel then
+			maxlevel = groups[grp].maxlevel
+		end
 	end
 
 	-- Apply damage group modifications
@@ -177,7 +195,7 @@ local function apply_modifiers(materials, basegroup, dgroup)
 		end
 	end
 
-	return groups, dmg, tags
+	return groups, dmg, tags, maxlevel
 end
 
 -- Generate a tool texture based on tool type, main material (head) and rod material (handle).
@@ -206,7 +224,7 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	-- Get main material
 	local main = tinkering.materials[materials.main]
 	if not main then return nil end
-	
+
 	-- Tool data
 	local tool_data = tinkering.tools[tool_type]
 
@@ -237,10 +255,20 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	end
 
 	-- Apply all modifiers
-	local fg, fd, tags = apply_modifiers(materials, groups, dgroups)
+	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups)
+
+	-- Use MCL tool capabilities
+	if core.get_modpath("mcl_core") ~= nil then
+		for grp, val in pairs(mcl_group_translations) do
+			if fg[grp] then
+				fg[val] = fg[grp]
+			end
+		end
+	end
+
 	local tool_caps = {
 		full_punch_interval = 1.0,
-		max_drop_level = 0,
+		max_drop_level = maxlevel,
 		groupcaps = fg,
 		damage_groups = fd,
 	}
@@ -315,8 +343,6 @@ end
 
 -- Create a new tool based on parameters specified.
 function tinkering.create_tool(tool_type, materials, want_tool, custom_name, overrides)
-	-- TODO: Add texture as metadata (https://github.com/minetest/minetest/issues/5686)
-
 	-- Not a valid tool type
 	if not tinkering.tools[tool_type] then return nil end
 	local tool_data = tinkering.tools[tool_type]
@@ -341,6 +367,8 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	if custom_name ~= nil and custom_name ~= "" then
 		tool_def.description = custom_name
 	end
+
+	tool_def._mcl_toollike_wield = true
 
 	-- Create internal name
 	local internal_name = mod_name..":"..materials.main.."_"..tool_type
@@ -376,11 +404,11 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	description = description.."\n"
 
 	for cmp, mat in pairs(materials) do
-		local mat  = tinkering.materials[mat]
+		local info = tinkering.materials[mat]
 		local comp = tool_data.components[cmp]
-		local desc = tinkering.components[comp].description:format(mat.name)
+		local desc = tinkering.components[comp].description:format(info.name)
 
-		description = description .. "\n" .. minetest.colorize(mat.color, desc)
+		description = description .. "\n" .. minetest.colorize(info.color, desc)
 	end
 
 	-- Add tags to description
@@ -400,7 +428,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	end
 
 	meta:set_string("description", description)
-	meta:set_string("texture_string", tool_def.inventory_image) -- NOT IMPLEMENTED YET!
+	meta:set_string("inventory_image", tool_def.inventory_image)
 	meta:set_tool_capabilities(tool_def.tool_capabilities)
 	meta:set_string("materials", mat_names)
 
@@ -461,4 +489,22 @@ function tinkering.register_component(name, data)
 		-- Make all components meltable
 		fluidity.register_melt(mod..":"..component, m, name)
 	end
+end
+
+-- TODO: this is a workaround to enable digging using tinkering tools
+-- VoxeLibre will only work if you use _mcl_diggroups and that is not compatible with
+-- metadata tool capabilities at all. Not exactly sure why they did it like this.
+-- Currently, we just allow any tinker tool to break anything.
+-- This should be addressed properly in the future.
+if core.get_modpath("_mcl_autogroup") then
+	core.register_on_mods_loaded(function()
+		local original_can_harvest = mcl_autogroup.can_harvest
+		mcl_autogroup.can_harvest = function (nodename, toolname, player)
+			local can_dig = original_can_harvest(nodename, toolname, player)
+			if not can_dig and core.get_item_group(toolname, "tinker_tool") > 0 then
+				return true
+			end
+			return can_dig
+		end
+	end)
 end

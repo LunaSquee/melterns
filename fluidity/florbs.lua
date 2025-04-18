@@ -96,21 +96,27 @@ end
 
 local function register_florbfluid(data)
 	local source_node = minetest.registered_nodes[data.source_name]
-	local fluid       = fluid_lib.cleanse_node_description(data.source_name)
-	local internal    = fluidity.fluid_short(fluid)
+	if not source_node then return end
+	local fluid = fluid_lib.cleanse_node_description(data.source_name)
+	local internal = fluidity.fluid_short(fluid)
 
 	local itemname = data.mod_name..":"..data.florb_name.."_"..internal
 
-	if minetest.registered_items[itemname] then
-		return
+	if minetest.registered_items[itemname] then return end
+
+	local texture = source_node.tiles[1]
+	if not texture then return end
+	if type(texture) == "table" then
+		texture = texture.name
 	end
 
-	local stationary_name = source_node.tiles[1].name:gsub("_source_animated", "")
+	if not texture then return end
+	texture = texture:gsub("_source_animated", "")
 
 	-- Register base item
 	minetest.register_craftitem(itemname, {
 		description     = data.florb_description.." ("..fluid..")",
-		inventory_image = stationary_name.."^[noalpha^"..data.textures[1].."^"..data.textures[2].."^[makealpha:255,0,0,",
+		inventory_image = texture.."^[noalpha^"..data.textures[1].."^"..data.textures[2].."^[makealpha:255,0,0,",
 		_florb_capacity = data.capacity,
 		_florb_source   = data.source_name,
 		_florb_blank    = data.mod_name..":"..data.florb_name,
@@ -154,7 +160,7 @@ function fluidity.florbs.register_florb(data)
 		end
 	else
 		-- Get all fluids and buckets and cache them
-		for i, v in pairs(bucket.liquids) do
+		for i in pairs(fluid_lib.get_liquid_list()) do
 			if (i:find("source") ~= nil) then
 				-- Add tank
 				register_florbfluid({
@@ -163,7 +169,7 @@ function fluidity.florbs.register_florb(data)
 					florb_description = florb_desc,
 					textures          = textures,
 					capacity          = capacity,
-					source_name       = v["source"]
+					source_name       = i
 				})
 			end
 		end

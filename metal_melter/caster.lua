@@ -1,5 +1,8 @@
 -- Casts molten metals into a solid form
 
+local mer = fluidity.external.ref
+local mei = fluidity.external.items
+
 metal_caster = {}
 
 metal_caster.max_coolant = 8000
@@ -17,34 +20,44 @@ metal_caster.casts = {
 local metal_cache = {}
 
 function metal_caster.get_metal_caster_formspec(water, metal)
-	local metal_formspec = "tooltip[6.68,0;0.8,2.45;No Molten Metal]"
+	local metal_formspec = "tooltip[10.375,0.375;1,2.8;No Molten Metal]"
 
 	if metal ~= nil then
-		metal_formspec = "tooltip[6.68,0;0.8,2.45;"..fluid_lib.buffer_to_string(metal).."]"
+		metal_formspec = "tooltip[10.375,0.375;1,2.8;"..fluid_lib.buffer_to_string(metal).."]"
 	end
 
-	return "size[8,8.5]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		"list[context;cast;2.7,0.2;1,1;]"..
-		"image[2.7,1.35;1,1;gui_furnace_arrow_bg.png^[transformFY]"..
-		"list[context;output;2.7,2.5;1,1;]"..
-		"image[0.08,2.5;1,1;metal_melter_gui_bucket.png]"..
-		"list[context;coolant;0.08,2.5;1,1;]"..
-		metal_melter.fluid_bar(0.08, 0, water)..
-		"tooltip[0.08,0;0.8,2.45;".. fluid_lib.buffer_to_string(water) .."]"..
-		metal_melter.fluid_bar(6.68, 0, metal)..
+	return "formspec_version[4]size[11.75,10.45]"..
+		mer.get_itemslot_bg(2.875, 0.375, 1, 1) ..
+		"list[context;cast;2.875,0.375;1,1;]"..
+		"image[2.875,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformFY]"..
+
+		mer.get_itemslot_bg(2.875, 2.875, 1, 1) ..
+		"list[context;output;2.875,2.875;1,1;]"..
+
+		mer.get_itemslot_bg(0.375, 3.425, 1, 1) ..
+		"image[0.375,3.425;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;coolant;0.375,3.425;1,1;]"..
+
+		metal_melter.fluid_bar(0.375, 0.375, water)..
+		"tooltip[0.375,0.375;1,2.8;".. fluid_lib.buffer_to_string(water) .."]"..
+
+		metal_melter.fluid_bar(10.375, 0.375, metal)..
 		metal_formspec..
-		"image[4.7,0.2;1,1;metal_melter_gui_bucket.png]"..
-		"image[4.7,1.4;1,1;metal_melter_gui_bucket.png]"..
-		"list[context;bucket_in;4.7,0.2;1,1;]"..
-		"list[context;bucket_out;4.7,1.4;1,1;]"..
-		"image[5.7,0.2;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"image[5.7,1.4;1,1;gui_furnace_arrow_bg.png^[transformR90]"..
-		"button[6.68,2.48;1.33,1;dump;Dump]"..
-		"list[current_player;main;0,4.25;8,1;]"..
-		"list[current_player;main;0,5.5;8,3;8]"..
+
+		mer.get_itemslot_bg(7.875,0.375, 1, 1) ..
+		"image[7.875,0.375;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;bucket_in;7.875,0.375;1,1;]"..
+
+		mer.get_itemslot_bg(7.875,1.625, 1, 1) ..
+		"image[7.875,1.625;1,1;metal_melter_gui_bucket.png]"..
+		"list[context;bucket_out;7.875,1.625;1,1;]"..
+
+		"image[9.125,0.375;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
+		"image[9.125,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformR90]"..
+
+		"button[10.375,3.425;1,0.75;dump;Dump]"..
+
+		mer.gui_player_inv()..
 		"listring[context;coolant]"..
 		"listring[current_player;main]"..
 		"listring[context;cast]"..
@@ -54,8 +67,7 @@ function metal_caster.get_metal_caster_formspec(water, metal)
 		"listring[context;bucket_in]"..
 		"listring[current_player;main]"..
 		"listring[context;bucket_out]"..
-		"listring[current_player;main]"..
-		default.get_hotbar_bg(0, 4.25)
+		"listring[current_player;main]"
 end
 
 -- Check to see if this cast is able to cast this metal type
@@ -67,19 +79,13 @@ local function can_dig(pos, player)
 		inv:is_empty("output")
 end
 
-local function get_bucket_for_fluid(src)
-	local bucket = bucket.liquids[src]
-	if not bucket then return nil end
-	return bucket.itemname
-end
-
 local function allow_metadata_inventory_put (pos, listname, index, stack, player)
 	if minetest.is_protected(pos, player:get_player_name()) then
 		return 0
 	end
 
 	if listname == "bucket_out" then
-		if stack:get_name() ~= "bucket:bucket_empty" and not fluidity.florbs.get_is_florb(stack) then
+		if stack:get_name() ~= fluid_lib.get_empty_bucket() and not fluidity.florbs.get_is_florb(stack) then
 			return 0
 		end
 
@@ -87,7 +93,7 @@ local function allow_metadata_inventory_put (pos, listname, index, stack, player
 	end
 
 	if listname == "coolant" then
-		if stack:get_name() ~= "bucket:bucket_water" then
+		if stack:get_name() ~= mei.bucket_water then
 			return 0
 		end
 	end
@@ -185,8 +191,11 @@ function metal_caster.find_castable(metal_name, cast_name)
 	local typeres = types[cast.result]
 	if not typeres then return nil end
 
-	if #typeres > 0 then
-		return typeres[1]
+	-- Find first that actually exists
+	for _,k in pairs(typeres) do
+		if core.registered_items[k] then
+			return k
+		end
 	end
 
 	return nil
@@ -218,6 +227,7 @@ local function caster_node_timer(pos, elapsed)
 	local metal_type = ""
 
 	local dumping = meta:get_int("dump")
+	local empty = fluid_lib.get_empty_bucket()
 	if dumping == 1 then
 		metal.amount = 0
 		metal.fluid = ""
@@ -226,10 +236,10 @@ local function caster_node_timer(pos, elapsed)
 	end
 
 	-- Insert water bucket into tank, return empty bucket
-	if inv:get_stack("coolant", 1):get_name() == "bucket:bucket_water" then
+	if inv:get_stack("coolant", 1):get_name() == mei.bucket_water then
 		if coolant.amount + 1000 <= metal_caster.max_coolant then
 			coolant.amount = coolant.amount + 1000
-			inv:set_list("coolant", {"bucket:bucket_empty"})
+			inv:set_list("coolant", {empty})
 			refresh = true
 		end
 	end
@@ -237,7 +247,7 @@ local function caster_node_timer(pos, elapsed)
 	-- Handle input bucket, only allow a molten metal
 	local bucket_in   = inv:get_stack("bucket_in", 1)
 	local bucket_name = bucket_in:get_name()
-	if (bucket_name:find("bucket") and bucket_name ~= "bucket:bucket_empty") or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
+	if (bucket_name:find("bucket") and bucket_name ~= empty) or (not fluidity.florbs.get_is_empty_florb(bucket_in) and
 			fluidity.florbs.get_is_florb(bucket_in)) then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_in)
 		if is_florb then
@@ -262,7 +272,7 @@ local function caster_node_timer(pos, elapsed)
 				refresh = true
 			end
 		else
-			local bucket_fluid = bucket.get_liquid_for_bucket(bucket_name)
+			local bucket_fluid = fluid_lib.get_source_for_bucket(bucket_name)
 			local fluid_is_metal = fluidity.get_metal_for_fluid(bucket_fluid) ~= nil
 			local empty_bucket = false
 
@@ -280,7 +290,7 @@ local function caster_node_timer(pos, elapsed)
 			end
 
 			if empty_bucket then
-				inv:set_list("bucket_in", {"bucket:bucket_empty"})
+				inv:set_list("bucket_in", {empty})
 				refresh = true
 			end
 		end
@@ -289,7 +299,7 @@ local function caster_node_timer(pos, elapsed)
 	-- Handle bucket output, only allow empty buckets in this slot
 	local bucket_out = inv:get_stack("bucket_out", 1)
 	bucket_name      = bucket_out:get_name()
-	if (bucket_name == "bucket:bucket_empty" or fluidity.florbs.get_is_florb(bucket_out)) and metal and metal.fluid ~= "" and bucket_out:get_count() == 1 then
+	if (bucket_name == empty or fluidity.florbs.get_is_florb(bucket_out)) and metal and metal.fluid ~= "" and bucket_out:get_count() == 1 then
 		local is_florb = fluidity.florbs.get_is_florb(bucket_out)
 		if is_florb then
 			local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(bucket_out)
@@ -316,7 +326,7 @@ local function caster_node_timer(pos, elapsed)
 				end
 			end
 		else
-			local bucket = get_bucket_for_fluid(metal.fluid)
+			local bucket = fluid_lib.get_bucket_for_source(metal.fluid)
 			if bucket and metal.amount >= 1000 then
 				metal.amount = metal.amount - 1000
 				inv:set_list("bucket_out", {bucket})
@@ -379,7 +389,7 @@ local function caster_node_timer(pos, elapsed)
 						if metal.amount == 0 then
 							metal.fluid = ""
 						end
-						
+
 						refresh = true
 					end
 				end
@@ -390,11 +400,11 @@ local function caster_node_timer(pos, elapsed)
 	meta:set_int("water_fluid_storage", coolant.amount)
 	meta:set_int("metal_fluid_storage", metal.amount)
 	meta:set_string("metal_fluid", metal.fluid)
-	meta:set_string("water_fluid", "default:water_source")
+	meta:set_string("water_fluid", mei.water)
 
 	local infotext = "Metal Caster\n"
 	infotext = infotext .. fluid_lib.buffer_to_string(coolant) .. "\n"
-	
+
 	if metal and metal.fluid ~= "" then
 		infotext = infotext .. fluid_lib.buffer_to_string(metal)
 	else
@@ -420,7 +430,7 @@ local function on_construct(pos)
 	inv:set_size('bucket_out', 1)
 
 	-- Water source block
-	meta:set_string('water_fluid', 'default:water_source')
+	meta:set_string('water_fluid', mei.water)
 
 	-- Default infotext
 	meta:set_string("infotext", "Metal Caster Inactive")
@@ -438,10 +448,9 @@ function metal_caster.register_cast(name, data)
 		groups          = {tinker_cast=1}
 	})
 
-	if not metal_caster.casts[name] then
-		data.mod_name = mod
-		metal_caster.casts[name] = data
-	end
+	data.mod_name = mod
+	data.castname = castname
+	metal_caster.casts[name] = data
 
 	fluidity.register_melt(castname, "gold", "cast")
 end
@@ -470,9 +479,9 @@ if minetest.get_modpath("pipeworks") ~= nil then
 
 		minetest.get_node_timer(pos):start(1.0)
 
-		if stack_name == "bucket:bucket_empty" or fluidity.florbs.get_is_empty_florb(stack) then
+		if stack_name == fluid_lib.get_empty_bucket() or fluidity.florbs.get_is_empty_florb(stack) then
 			return inv:add_item("bucket_out", stack)
-		elseif stack_name == "bucket:bucket_water" then
+		elseif stack_name == mei.bucket_water then
 			return inv:add_item("coolant", stack)
 		elseif stack_name:find(":bucket_") ~= nil or fluidity.florbs.get_is_florb(stack) then
 			return inv:add_item("bucket_in", stack)
@@ -505,7 +514,7 @@ minetest.register_node("metal_melter:metal_caster", {
 	},
 	legacy_facedir_simple = true,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
 
 	can_dig = can_dig,
 	on_timer = caster_node_timer,
@@ -539,7 +548,7 @@ minetest.register_node("metal_melter:metal_caster", {
 	fluid_buffers = {
 		water = {
 			capacity  = metal_caster.max_coolant,
-			accepts   = {"default:water_source"},
+			accepts   = {mei.water},
 			drainable = false,
 		},
 		metal = {
@@ -549,6 +558,9 @@ minetest.register_node("metal_melter:metal_caster", {
 	},
 
 	tube = pipeworks,
+
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 fluid_lib.register_node("metal_melter:metal_caster")

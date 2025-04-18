@@ -1,3 +1,6 @@
+
+local mer = fluidity.external.ref
+
 pattern_table = {}
 
 function pattern_table.get_tool_type_list(ix, iy, mx)
@@ -7,10 +10,10 @@ function pattern_table.get_tool_type_list(ix, iy, mx)
 
 	for t, pattern in pairs(tinkering.patterns) do
 		local mod = pattern.mod_name or "tinkering"
-		formspec = formspec.. ("item_image_button[%d,%d;1,1;%s;%s;]"):format(x + ix, y + iy, mod..":"..t.."_pattern", t)
-		x = x + 1
+		formspec = formspec.. ("item_image_button[%f,%f;1,1;%s;%s;]"):format(x + ix, y + iy, mod..":"..t.."_pattern", t)
+		x = x + 1.25
 		if x >= mx then
-			y = y + 1
+			y = y + 1.25
 			x = 0
 		end
 	end
@@ -19,24 +22,21 @@ function pattern_table.get_tool_type_list(ix, iy, mx)
 end
 
 function pattern_table.get_formspec()
-	local pattern_list = pattern_table.get_tool_type_list(8, 0, 5)
-	return "size[13,8.5]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		"label[0,0;Pattern Table]"..
-		"list[context;input;2.5,1.25;1,1;]"..
-		"list[context;output;4.5,1.25;1,1;]"..
-		"image[3.5,1.25;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-		"list[current_player;main;0,4.25;8,1;]"..
-		"list[current_player;main;0,5.5;8,3;8]"..
+	local pattern_list = pattern_table.get_tool_type_list(11.75, 0.375, 6.25)
+	return "formspec_version[4]size[18,10.45]"..
+		"label[0.375,0.375;Pattern Table]"..
+		mer.get_itemslot_bg(4.125, 2, 1, 1) ..
+		"list[context;input;4.125,2;1,1;]"..
+		mer.get_itemslot_bg(6.625, 2, 1, 1) ..
+		"list[context;output;6.625,2;1,1;]"..
+		"image[5.375,2;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
+		mer.gui_player_inv()..
 		pattern_list..
 		"listring[current_player;main]"..
 		"listring[context;input]"..
 		"listring[current_player;main]"..
 		"listring[context;output]"..
-		"listring[current_player;main]"..
-		default.get_hotbar_bg(0, 4.25)
+		"listring[current_player;main]"
 end
 
 local function on_timer(pos, elapsed)
@@ -152,7 +152,7 @@ minetest.register_node("tinkering:pattern_table", {
 	on_construct = on_construct,
 	legacy_facedir_simple = true,
 	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+	sounds = fluidity.external.sounds.node_sound_wood,
 
 	can_dig = can_dig,
 	on_construct = on_construct,
@@ -162,5 +162,8 @@ minetest.register_node("tinkering:pattern_table", {
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 
-	groups = {choppy = 2, oddly_breakable_by_hand = 2}
+	groups = {choppy = 2, oddly_breakable_by_hand = 2},
+
+	_mcl_hardness = 1,
+	_mcl_blast_resistance = 1,
 })

@@ -1,3 +1,6 @@
+
+local mei = fluidity.external.items
+
 -- Crafting components
 
 -- Items
@@ -13,18 +16,20 @@ minetest.register_craftitem("metal_melter:heated_brick", {
 minetest.register_node("metal_melter:heated_bricks", {
 	description = "Heatbricks",
 	tiles = {"metal_melter_heatbrick.png"},
-	groups = {cracky = 3},
+	groups = {cracky = 3, multifurnace = 1},
 	paramtype2 = "facedir",
 	place_param2 = 0,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 minetest.register_node("metal_melter:heat_gravel", {
 	description = "Heat Gravel",
 	tiles = {"metal_melter_heat_gravel.png"},
 	groups = {crumbly = 2, falling_node = 1},
-	sounds = default.node_sound_gravel_defaults()
+	sounds = fluidity.external.sounds.node_sound_gravel
 })
 
 minetest.register_node("metal_melter:heat_exchanger", {
@@ -33,7 +38,7 @@ minetest.register_node("metal_melter:heat_exchanger", {
 	groups = {cracky = 3},
 	place_param2 = 0,
 	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = fluidity.external.sounds.node_sound_stone,
 	drawtype = "nodebox",
 	paramtype = "light",
 	paramtype2 = "facedir",
@@ -42,7 +47,9 @@ minetest.register_node("metal_melter:heat_exchanger", {
 		fixed = {
 			{-0.5000, -0.5000, -0.5000, 0.5000, -0.4375, 0.5000}
 		}
-	}
+	},
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 minetest.register_node('metal_melter:casting_table', {
@@ -63,13 +70,16 @@ minetest.register_node('metal_melter:casting_table', {
 	groups = {cracky = 3},
 	sunlight_propagates = true,
 	is_ground_content = false,
+	_mcl_hardness = 2,
+	_mcl_blast_resistance = 2,
 })
 
 fluid_tanks.register_tank("metal_melter:heated_tank",{
 	description = "Heated Tank",
 	capacity    = 8000,
 	tiles       = {"melter_heated_tank.png"},
-	accepts     = {"default:lava_source"}
+	accepts     = {mei.lava},
+	groups      = {multifurnace = 1}
 })
 
 -- Crafting
@@ -77,18 +87,18 @@ fluid_tanks.register_tank("metal_melter:heated_tank",{
 minetest.register_craft({
     output = 'metal_melter:heat_gravel 4',
     recipe = {
-        {'default:gravel', 'default:sand', 'default:gravel'},
-        {'default:sand',   'default:clay', 'default:sand'},
-        {'default:gravel', 'default:sand', 'default:gravel'},
+        {mei.gravel, mei.sand, mei.gravel},
+        {mei.sand,   mei.clay, mei.sand},
+        {mei.gravel, mei.sand, mei.gravel},
     },
 })
 
 minetest.register_craft({
     output = 'metal_melter:heat_gravel 4',
     recipe = {
-        {'default:sand',   'default:gravel', 'default:sand'},
-        {'default:gravel', 'default:clay',   'default:gravel'},
-        {'default:sand',   'default:gravel', 'default:sand'},
+        {mei.sand,   mei.gravel, mei.sand},
+        {mei.gravel, mei.clay,   mei.gravel},
+        {mei.sand,   mei.gravel, mei.sand},
     },
 })
 
@@ -103,26 +113,17 @@ minetest.register_craft({
 minetest.register_craft({
 	output = 'metal_melter:heated_tank',
 	recipe = {
-		{'metal_melter:heated_brick', 'default:glass', 'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', 'default:glass', 'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', 'default:glass', 'metal_melter:heated_brick'},
+		{'metal_melter:heated_brick', mei.glass, 'metal_melter:heated_brick'},
+		{'metal_melter:heated_brick', mei.glass, 'metal_melter:heated_brick'},
+		{'metal_melter:heated_brick', mei.glass, 'metal_melter:heated_brick'},
 	}
 })
 
 minetest.register_craft({
 	output = 'metal_melter:heat_exchanger',
 	recipe = {
-		{'default:steel_ingot',       'default:steel_ingot',       'default:steel_ingot'},
+		{mei.steel_ingot,       mei.steel_ingot,       mei.steel_ingot},
 		{'metal_melter:heated_brick', 'metal_melter:heated_brick', 'metal_melter:heated_brick'},
-	}
-})
-
-minetest.register_craft({
-	output = 'metal_melter:casting_table',
-	recipe = {
-		{'metal_melter:heated_brick', 'metal_melter:heated_brick', 'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', '',                          'metal_melter:heated_brick'},
-		{'metal_melter:heated_brick', '',                          'metal_melter:heated_brick'},
 	}
 })
 
