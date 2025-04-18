@@ -13,6 +13,20 @@ function fluidity.register_melt(item, metal, type)
                  " (" .. type .. ")")
 end
 
+function fluidity.get_metal_for_item(item, type_check)
+    for metal, types in pairs(fluidity.melts) do
+        for typename, items in pairs(types) do
+            if not type_check or typename == type_check then
+                for _, itemname in pairs(items) do
+                    if itemname == item then
+                        return metal
+                    end
+                end
+            end
+        end
+    end
+end
+
 -- Autofind meltable
 local autofind = {"ingot", "lump", "crystal", "ore", "block", "raw"}
 local modfind = {

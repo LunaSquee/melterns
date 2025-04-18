@@ -1,8 +1,6 @@
 local mer = fluidity.external.ref
 local mei = fluidity.external.items
 
-local fuel_consumption = 5
-
 local function update_timer(pos)
     local t = core.get_node_timer(pos)
     if not t:is_started() then t:start(1.0) end
@@ -306,7 +304,7 @@ local function controller_timer(pos, elapsed)
     local progresses = {}
 
     local take_lava = 0
-    if lava_count > multifurnace.fuel_consumption then
+    if lava_count > info.fuel_consumption then
         for index, stack in pairs(items) do
             local melt_item = stack:get_name()
             if melt_item ~= "" then
@@ -319,13 +317,13 @@ local function controller_timer(pos, elapsed)
                         -- not started yet
                         item_progress = 10
                         meta:set_int("melt" .. index, item_progress)
-                        take_lava = multifurnace.fuel_consumption
+                        take_lava = info.fuel_consumption
                         refresh = true
                     elseif item_progress < 100 then
                         -- increment melt timer
                         item_progress = item_progress + 10
                         meta:set_int("melt" .. index, item_progress)
-                        take_lava = multifurnace.fuel_consumption
+                        take_lava = info.fuel_consumption
                         refresh = true
                     else
                         -- melt item down
@@ -403,7 +401,7 @@ core.register_node("multifurnace:controller", {
         "metal_melter_heatbrick.png",
         "metal_melter_heatbrick.png^multifurnace_controller_face.png"
     },
-    groups = {cracky = 3, multifurnace = 1},
+    groups = {cracky = 3, multifurnace = 1, multifurnace_controller = 1},
     paramtype2 = "facedir",
     is_ground_content = false,
     on_timer = controller_timer,
@@ -439,7 +437,9 @@ core.register_node("multifurnace:controller", {
     allow_metadata_inventory_move = allow_metadata_inventory_move,
     allow_metadata_inventory_take = allow_metadata_inventory_take,
     _mcl_hardness = 2,
-    _mcl_blast_resistance = 2
+    _mcl_blast_resistance = 2,
+    _multifurnace_fuel_consumption = 5,
+    _multifurnace_max_dimensions = 8
 })
 
 core.register_node("multifurnace:port", {

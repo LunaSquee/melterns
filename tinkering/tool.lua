@@ -326,8 +326,6 @@ end
 
 -- Create a new tool based on parameters specified.
 function tinkering.create_tool(tool_type, materials, want_tool, custom_name, overrides)
-	-- TODO: Add texture as metadata (https://github.com/minetest/minetest/issues/5686)
-
 	-- Not a valid tool type
 	if not tinkering.tools[tool_type] then return nil end
 	local tool_data = tinkering.tools[tool_type]

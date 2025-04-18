@@ -448,11 +448,9 @@ function metal_caster.register_cast(name, data)
 		groups          = {tinker_cast=1}
 	})
 
-	if not metal_caster.casts[name] then
-		data.mod_name = mod
-		data.castname = castname
-		metal_caster.casts[name] = data
-	end
+	data.mod_name = mod
+	data.castname = castname
+	metal_caster.casts[name] = data
 
 	fluidity.register_melt(castname, "gold", "cast")
 end

@@ -1,8 +1,10 @@
 multifurnace.api = {}
 multifurnace.loaded_controllers = {}
 multifurnace.check_controllers = {}
-multifurnace.fuel_consumption = 5
-multifurnace.max_dim = 8
+
+-------------------------
+-- Multinode detection --
+-------------------------
 
 local function is_inner(pos)
     local node = minetest.get_node_or_nil(pos)
@@ -170,9 +172,9 @@ local function notify_ports_removal(pos)
     end
 end
 
-function multifurnace.api.structure_detect(node, pos)
+function multifurnace.api.structure_detect(node, pos, max_dim)
     local back = vector.add(pos, minetest.facedir_to_dir(node.param2))
-    local center, min, max = detect_center(back, multifurnace.max_dim)
+    local center, min, max = detect_center(back, max_dim)
 
     local dimensions = vector.subtract(max, min)
 
@@ -185,7 +187,7 @@ function multifurnace.api.structure_detect(node, pos)
         return nil, {}
     end
 
-    local max_height, ports, tanks = continuous_sides(min, dimensions, multifurnace.max_dim)
+    local max_height, ports, tanks = continuous_sides(min, dimensions, max_dim)
     if max_height == 0 then
         -- core.debug("Zero continuous height")
         return nil, {}
@@ -196,6 +198,10 @@ function multifurnace.api.structure_detect(node, pos)
     return dimensions, ports, tanks, center, min, max
 end
 
+-----------------------
+-- Furnace lifecycle --
+-----------------------
+
 function multifurnace.api.check_controller(pos)
     local check_serial = math.random(10000, 99999)
     local node = core.get_node_or_nil(pos)
@@ -204,8 +210,10 @@ function multifurnace.api.check_controller(pos)
         return
     end
 
+    local def = core.registered_nodes[node.name]
     local dimensions, ports, tanks, min =
-        multifurnace.api.structure_detect(node, pos)
+        multifurnace.api.structure_detect(node, pos,
+                                          def._multifurnace_max_dimensions or 8)
     local key = core.pos_to_string(pos)
     local ctrl_meta = core.get_meta(pos)
 
@@ -231,8 +239,10 @@ function multifurnace.api.check_controller(pos)
         volume = volume,
         box_min = min,
         box_max = bounds_end,
+        max_dim = def._multifurnace_max_dimensions,
+        fuel_consumption = def._multifurnace_fuel_consumption,
         ports = ports,
-				tanks = tanks,
+        tanks = tanks
     }
     update_timer(pos)
 end
@@ -307,4 +317,67 @@ function multifurnace.api.detect_changes(pos)
     if loaded and (serial == nil or loaded.serial ~= serial) then return end
 
     multifurnace.api.check_controller(pos)
+end
+
+-----------------------
+-- Casting table API --
+-----------------------
+
+local function cast_amount(ctype)
+    if ctype == fluid_lib.get_empty_bucket() then return 1000 end
+    if not metal_caster.casts[ctype] then return nil end
+    return metal_caster.spec.ingot * (metal_caster.casts[ctype].cost or 1)
+end
+
+function multifurnace.api.get_part_recipe(part)
+    local itemdef = core.registered_items[part]
+    local ingot = fluidity.get_metal_for_item(part, "ingot")
+    local typename = ingot and "ingot" or itemdef._tinker_component
+    if not typename then return nil end
+    local cast = metal_caster.casts[typename]
+    if not cast then return nil end
+    return typename, cast.castname
+end
+
+function multifurnace.api.can_insert_item(item)
+    local cast = metal_caster.get_cast_for_name(item)
+    local recipe = multifurnace.api.get_part_recipe(item)
+    local bucket = item == fluid_lib.get_empty_bucket()
+
+    return cast or recipe or bucket
+end
+
+function multifurnace.api.get_recipe(cast_item, liquid, current_total)
+    local part_name, new_cast = multifurnace.api.get_part_recipe(cast_item)
+    local bucket = cast_item == fluid_lib.get_empty_bucket() and cast_item or
+                       nil
+    local ctype = bucket or part_name or
+                      metal_caster.get_cast_for_name(cast_item)
+    local amount = cast_amount(ctype)
+    local required = current_total
+
+    if not ctype then
+        required = metal_caster.spec.ingot
+    elseif current_total ~= amount then
+        required = amount
+    end
+
+    if liquid == "" or not ctype then return nil, required, false end
+
+    local metal = fluidity.get_metal_for_fluid(liquid)
+    if new_cast and metal ~= "gold" then return nil, required, false end
+
+    local result = nil
+    local output_cast = false
+    if new_cast then
+        result = new_cast
+        output_cast = true
+    elseif bucket then
+        result = fluid_lib.get_bucket_for_source(liquid)
+        output_cast = true
+    else
+        result = metal_caster.find_castable(metal, ctype)
+    end
+
+    return result, required, output_cast
 end
