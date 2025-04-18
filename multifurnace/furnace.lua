@@ -197,7 +197,7 @@ end
 -- Controller Operation --
 --------------------------
 
-local function fluid_bar(fluid, amount, x, y, w, h)
+local function fluid_bar(index, fluid, amount, x, y, w, h)
     local texture = mer.default_water
     local name = ""
     local metric = 0
@@ -209,10 +209,10 @@ local function fluid_bar(fluid, amount, x, y, w, h)
         if type(texture) == "table" then texture = texture.name end
     end
 
-    return
-        "image[" .. x .. "," .. y .. ";" .. w .. "," .. h .. ";" .. texture ..
-            "^[resize:64x128]" .. "tooltip[" .. x .. "," .. y .. ";" .. w .. "," ..
-            h .. ";" .. name .. "]"
+    return "image_button[" .. x .. "," .. y .. ";" .. w .. "," .. h .. ";" ..
+               texture .. "^[resize:64x128;buffer" .. index .. ";;false;false;]" ..
+               "tooltip[" .. x .. "," .. y .. ";" .. w .. "," .. h .. ";" ..
+               name .. "]"
 end
 
 local function get_fluids_formspec(stacks, max, x, y, w, h)
@@ -220,12 +220,12 @@ local function get_fluids_formspec(stacks, max, x, y, w, h)
                      ";melter_gui_barbg.png]"
     local last_y = h + y
 
-    for _, k in pairs(stacks) do
+    for i, k in pairs(stacks) do
         local count = k:get_count()
         local percent = count / max
         local height = math.max(h * percent, 0.05)
         last_y = last_y - height
-        spec = spec .. fluid_bar(k:get_name(), count, x, last_y, w, height)
+        spec = spec .. fluid_bar(i, k:get_name(), count, x, last_y, w, height)
     end
 
     return spec .. "image[" .. x .. "," .. y .. ";" .. w .. "," .. h ..
@@ -410,6 +410,25 @@ core.register_node("multifurnace:controller", {
         inv:set_size("melt", 1)
     end,
     on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
+    on_receive_fields = function(pos, formname, fields, sender)
+        if sender and sender ~= "" and
+            minetest.is_protected(pos, sender:get_player_name()) then
+            return
+        end
+
+        local meta = minetest.get_meta(pos)
+        local set_buffer = nil
+        for field, val in pairs(fields) do
+            if field:match("^buffer") then
+                set_buffer = tonumber(string.sub(field, 7))
+            end
+        end
+
+        if set_buffer then
+            set_hot(pos, set_buffer, false)
+            update_timer(pos)
+        end
+    end,
     on_metadata_inventory_move = update_timer,
     on_metadata_inventory_put = update_timer,
     on_metadata_inventory_take = update_timer,
@@ -455,27 +474,27 @@ core.register_node("multifurnace:port", {
         if can_take == "" then return ItemStack(nil) end
         return ItemStack(can_take .. " " .. count)
     end,
-	node_io_put_liquid = function(pos, node, side, putter, liquid, millibuckets)
-		local ctrl, ctrl_meta = get_port_controller(pos)
-		if not ctrl then return millibuckets end
+    node_io_put_liquid = function(pos, node, side, putter, liquid, millibuckets)
+        local ctrl, ctrl_meta = get_port_controller(pos)
+        if not ctrl then return millibuckets end
 
-		if put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
+        if put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
             update_timer(ctrl)
             return 0
         end
-        
-        return millibuckets
-	end,
-	node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
-		local ctrl, ctrl_meta = get_port_controller(pos)
-		if not ctrl then return 0 end
 
-		if can_put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
+        return millibuckets
+    end,
+    node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
+        local ctrl, ctrl_meta = get_port_controller(pos)
+        if not ctrl then return 0 end
+
+        if can_put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
             return millibuckets
         end
 
-		return 0
-	end,
+        return 0
+    end,
     paramtype2 = "facedir",
     is_ground_content = false,
     on_destruct = function(pos) multifurnace.api.remove_port(pos) end,
