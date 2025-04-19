@@ -263,7 +263,7 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 			if fg[grp] then
 				local temp = {}
 				for i = #fg[grp].times, 1, -1 do
-					table.insert(temp, fg[grp].times[i] + 0.25)
+					table.insert(temp, fg[grp].times[i] + 0.50)
 				end
 				fg[val] = fg[grp]
 				fg[val].times = temp
