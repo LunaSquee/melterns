@@ -32,10 +32,10 @@ local modifiers = {
 		}
 	},
 	stone = {
-		cracky = {times={[2]=2.0, [3]=1.00}, uses=20, maxlevel=2},
-		crumbly = {times={[1]=1.80, [2]=1.20, [3]=0.50}, uses=20, maxlevel=2},
-		snappy = {times={[2]=1.4, [3]=0.40}, uses=20, maxlevel=2},
-		choppy = {times={[1]=3.00, [2]=2.00, [3]=1.30}, uses=20, maxlevel=2},
+		cracky = {times={[2]=2.0, [3]=1.00}, uses=20, maxlevel=3},
+		crumbly = {times={[1]=1.80, [2]=1.20, [3]=0.50}, uses=20, maxlevel=3},
+		snappy = {times={[2]=1.4, [3]=0.40}, uses=20, maxlevel=3},
+		choppy = {times={[1]=3.00, [2]=2.00, [3]=1.30}, uses=20, maxlevel=3},
 		damagegroups = {fleshy = 4},
 		explody = nil,
 

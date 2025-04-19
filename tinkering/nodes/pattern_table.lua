@@ -162,7 +162,7 @@ minetest.register_node("tinkering:pattern_table", {
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
 	allow_metadata_inventory_move = allow_metadata_inventory_move,
 
-	groups = {choppy = 2, oddly_breakable_by_hand = 2},
+	groups = {choppy = 1, axey = 1, oddly_breakable_by_hand = 1},
 
 	_mcl_hardness = 1,
 	_mcl_blast_resistance = 1,
