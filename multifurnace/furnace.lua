@@ -565,3 +565,49 @@ core.register_lbm({
     nodenames = {"multifurnace:controller"},
     action = function(pos) multifurnace.api.detect_changes(pos) end
 })
+
+if core.get_modpath("tubelib") then
+    core.override_item("multifurnace:controller", {
+        after_place_node = function(pos, placer)
+            tubelib.add_node(pos, "multifurnace:controller")
+        end,
+        after_dig_node = function(pos)
+            tubelib.remove_node(pos)
+        end,
+    })
+
+    local function tubelib_insert(pos, side, item)
+        if side == "B" then return false end
+        local meta = minetest.get_meta(pos)
+        local inv = meta:get_inventory()
+        local free_slots = 0
+        for _, i in pairs(inv:get_list("melt")) do
+            if i:is_empty() then free_slots = free_slots + 1 end
+        end
+        if free_slots < item:get_count() then
+            return false
+        end
+        for i, k in pairs(inv:get_list("melt")) do
+            if k:is_empty() then
+                inv:set_stack("melt", i, item:take_item(1))
+                if item:is_empty() then
+                    break
+                end
+            end
+        end
+        update_timer(pos)
+        return true
+    end
+
+    tubelib.register_node("multifurnace:controller", {}, {
+    	on_pull_item = function()
+    		return nil
+    	end,
+    	on_push_item = function(pos, side, item)
+            return tubelib_insert(pos, side, item)
+    	end,
+    	on_unpull_item = function(pos, side, item)
+    		return tubelib_insert(pos, side, item)
+    	end,
+    })	
+end

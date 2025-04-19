@@ -145,7 +145,12 @@ core.register_node("multifurnace:casting_table", {
         }
     },
     tiles = {"multifurnace_table_top.png", "multifurnace_table_side.png"},
-    groups = {cracky = 1, multifurnace_accessory = 1, tubedevice = 1, tubedevice_receiver = 1},
+    groups = {
+        cracky = 1,
+        multifurnace_accessory = 1,
+        tubedevice = 1,
+        tubedevice_receiver = 1
+    },
     tube = {
         can_remove = function(pos, node, stack, dir, invname, spos)
             local meta = core.get_meta(pos)
@@ -176,6 +181,14 @@ core.register_node("multifurnace:casting_table", {
                     inv:get_stack("item", 1):is_empty() and
                     not inv:get_stack("cast", 1):is_empty() then
                     stack = inv:remove_item("cast", stack)
+
+                    local liq = meta:get_int("liquid_amount")
+                    if liq > 0 then
+                        meta:set_int("liquid_amount", 0)
+                        meta:set_string("liquid", "")
+                        meta:set_int("solidify", 0)
+                    end
+
                     set_item_entities(inv, pos)
                     update_timer(pos)
                     return stack
@@ -189,7 +202,7 @@ core.register_node("multifurnace:casting_table", {
             inv:set_stack("cast", 1, stack:take_item(1))
             set_item_entities(inv, pos)
             update_timer(pos)
-            return inv:add_item("cast", stack)
+            return stack
         end,
         can_insert = function(pos, node, stack, direction)
             local meta = core.get_meta(pos)
@@ -357,3 +370,65 @@ core.register_lbm({
         set_item_entities(inv, pos)
     end
 })
+
+if core.get_modpath("tubelib") then
+    core.override_item("multifurnace:casting_table", {
+        after_place_node = function(pos, placer)
+            tubelib.add_node(pos, "multifurnace:casting_table")
+        end,
+        after_dig_node = function(pos) tubelib.remove_node(pos) end
+    })
+
+    local function tubelib_insert(pos, side, item)
+        if side == "U" then return false end
+        local meta = core.get_meta(pos)
+        local inv = meta:get_inventory()
+        if not inv:get_stack("cast", 1):is_empty() or
+            not multifurnace.api.can_insert_item(item:get_name()) then
+            return false
+        end
+        inv:set_stack("cast", 1, item:take_item(1))
+        set_item_entities(inv, pos)
+        update_timer(pos)
+        return item
+    end
+
+    tubelib.register_node("multifurnace:casting_table", {}, {
+        on_pull_item = function(pos, side)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            if meta:get_int("solidify") <= 0 then
+                if not inv:get_stack("item", 1):is_empty() then
+                    local stack = inv:remove_item("item",
+                                                  inv:get_stack("item", 1))
+                    set_item_entities(inv, pos)
+                    update_timer(pos)
+                    return stack
+                end
+
+                if side ~= "D" and inv:get_stack("item", 1):is_empty() and
+                    not inv:get_stack("cast", 1):is_empty() then
+
+                    local liq = meta:get_int("liquid_amount")
+                    if liq > 0 then
+                        meta:set_int("liquid_amount", 0)
+                        meta:set_string("liquid", "")
+                        meta:set_int("solidify", 0)
+                    end
+
+                    local removing = inv:get_stack("cast", 1)
+                    inv:remove_item("cast", removing)
+                    set_item_entities(inv, pos)
+                    update_timer(pos)
+                    return removing
+                end
+            end
+        end,
+        on_push_item = function(pos, side, item)
+            return tubelib_insert(pos, side, item)
+        end,
+        on_unpull_item = function(pos, side, item)
+            return tubelib_insert(pos, side, item)
+        end
+    })
+end
