@@ -8,7 +8,7 @@ local mei = fluidity.external.items
 minetest.register_craftitem("metal_melter:heated_brick", {
 	description = "Heatbrick",
 	inventory_image = "metal_melter_heated_brick.png",
-	groups = {brick=1}
+	groups = { brick = 1 }
 })
 
 -- Nodes
@@ -16,7 +16,7 @@ minetest.register_craftitem("metal_melter:heated_brick", {
 minetest.register_node("metal_melter:heated_bricks", {
 	description = "Heatbricks",
 	tiles = {"metal_melter_heatbrick.png"},
-	groups = {cracky = 3, multifurnace = 1},
+	groups = { cracky = 3, pickaxey = 1, multifurnace = 1},
 	paramtype2 = "facedir",
 	place_param2 = 0,
 	is_ground_content = false,
@@ -28,14 +28,14 @@ minetest.register_node("metal_melter:heated_bricks", {
 minetest.register_node("metal_melter:heat_gravel", {
 	description = "Heat Gravel",
 	tiles = {"metal_melter_heat_gravel.png"},
-	groups = {crumbly = 2, falling_node = 1},
+	groups = {crumbly = 2, shovely = 2, falling_node = 1},
 	sounds = fluidity.external.sounds.node_sound_gravel
 })
 
 minetest.register_node("metal_melter:heat_exchanger", {
 	description = "Heat Exchanger Plate",
 	tiles = {"metal_melter_heat_exchanger.png"},
-	groups = {cracky = 3},
+	groups = { cracky = 3, pickaxey = 1 },
 	place_param2 = 0,
 	is_ground_content = false,
 	sounds = fluidity.external.sounds.node_sound_stone,
@@ -67,7 +67,7 @@ minetest.register_node('metal_melter:casting_table', {
 		}
 	},
 	tiles = {"metal_melter_heat_exchanger.png"},
-	groups = {cracky = 3},
+	groups = {cracky = 3, pickaxey = 1},
 	sunlight_propagates = true,
 	is_ground_content = false,
 	_mcl_hardness = 2,

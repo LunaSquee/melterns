@@ -146,7 +146,8 @@ core.register_node("multifurnace:casting_table", {
     },
     tiles = {"multifurnace_table_top.png", "multifurnace_table_side.png"},
     groups = {
-        cracky = 1,
+        cracky = 2,
+        pickaxey = 2,
         multifurnace_accessory = 1,
         tubedevice = 1,
         tubedevice_receiver = 1

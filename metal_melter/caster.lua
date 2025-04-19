@@ -507,7 +507,8 @@ minetest.register_node("metal_melter:metal_caster", {
 	},
 	paramtype2 = "facedir",
 	groups = {
-		cracky=2,
+		cracky = 2,
+		pickaxey = 2,
 		tubedevice = 1,
 		tubedevice_receiver = 1,
 		fluid_container = 1,

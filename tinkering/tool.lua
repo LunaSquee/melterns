@@ -261,7 +261,12 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	if core.get_modpath("mcl_core") ~= nil then
 		for grp, val in pairs(mcl_group_translations) do
 			if fg[grp] then
+				local temp = {}
+				for i = #fg[grp].times, 1, -1 do
+					table.insert(temp, fg[grp].times[i] + 0.25)
+				end
 				fg[val] = fg[grp]
+				fg[val].times = temp
 			end
 		end
 	end

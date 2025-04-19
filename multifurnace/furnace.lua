@@ -403,6 +403,7 @@ core.register_node("multifurnace:controller", {
     },
     groups = {
         cracky = 3,
+        pickaxey = 1,
         multifurnace = 1,
         multifurnace_controller = 1,
         tubedevice = 1,
@@ -483,7 +484,7 @@ core.register_node("multifurnace:port", {
         "metal_melter_heatbrick.png^multifurnace_intake_back.png",
         "metal_melter_heatbrick.png^multifurnace_intake_face.png"
     },
-    groups = {cracky = 3, multifurnace = 2, fluid_container = 1},
+    groups = {cracky = 3, pickaxey = 1, multifurnace = 2, fluid_container = 1},
     fluid_buffers = {},
     node_io_can_put_liquid = function(pos, node, side) return true end,
     node_io_can_take_liquid = function(pos, node, side) return true end,
@@ -571,9 +572,7 @@ if core.get_modpath("tubelib") then
         after_place_node = function(pos, placer)
             tubelib.add_node(pos, "multifurnace:controller")
         end,
-        after_dig_node = function(pos)
-            tubelib.remove_node(pos)
-        end,
+        after_dig_node = function(pos) tubelib.remove_node(pos) end
     })
 
     local function tubelib_insert(pos, side, item)
@@ -584,15 +583,11 @@ if core.get_modpath("tubelib") then
         for _, i in pairs(inv:get_list("melt")) do
             if i:is_empty() then free_slots = free_slots + 1 end
         end
-        if free_slots < item:get_count() then
-            return false
-        end
+        if free_slots < item:get_count() then return false end
         for i, k in pairs(inv:get_list("melt")) do
             if k:is_empty() then
                 inv:set_stack("melt", i, item:take_item(1))
-                if item:is_empty() then
-                    break
-                end
+                if item:is_empty() then break end
             end
         end
         update_timer(pos)
@@ -600,14 +595,12 @@ if core.get_modpath("tubelib") then
     end
 
     tubelib.register_node("multifurnace:controller", {}, {
-    	on_pull_item = function()
-    		return nil
-    	end,
-    	on_push_item = function(pos, side, item)
+        on_pull_item = function() return nil end,
+        on_push_item = function(pos, side, item)
             return tubelib_insert(pos, side, item)
-    	end,
-    	on_unpull_item = function(pos, side, item)
-    		return tubelib_insert(pos, side, item)
-    	end,
-    })	
+        end,
+        on_unpull_item = function(pos, side, item)
+            return tubelib_insert(pos, side, item)
+        end
+    })
 end
