@@ -401,7 +401,39 @@ core.register_node("multifurnace:controller", {
         "metal_melter_heatbrick.png",
         "metal_melter_heatbrick.png^multifurnace_controller_face.png"
     },
-    groups = {cracky = 3, multifurnace = 1, multifurnace_controller = 1},
+    groups = {
+        cracky = 3,
+        multifurnace = 1,
+        multifurnace_controller = 1,
+        tubedevice = 1,
+        tubedevice_receiver = 1
+    },
+    tube = {
+        can_remove = function() return 0 end,
+        insert_object = function(pos, node, stack, direction)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            for i, k in pairs(inv:get_list("melt")) do
+                if k:is_empty() then
+                    inv:set_stack("melt", i, stack:take_item(1))
+                    break
+                end
+            end
+            update_timer(pos)
+            return stack
+        end,
+        can_insert = function(pos, node, stack, direction)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            local free_slots = 0
+            for _, i in pairs(inv:get_list("melt")) do
+                if i:is_empty() then free_slots = free_slots + 1 end
+            end
+            return stack:get_count() <= free_slots
+        end,
+        input_inventory = "melt",
+        connect_sides = {left = 1, right = 1, bottom = 1, front = 1, top = 1}
+    },
     paramtype2 = "facedir",
     is_ground_content = false,
     on_timer = controller_timer,
@@ -440,7 +472,7 @@ core.register_node("multifurnace:controller", {
     _mcl_hardness = 2,
     _mcl_blast_resistance = 2,
     _multifurnace_fuel_consumption = 5,
-    _multifurnace_max_dimensions = 8,
+    _multifurnace_max_dimensions = 8
 })
 
 core.register_node("multifurnace:port", {

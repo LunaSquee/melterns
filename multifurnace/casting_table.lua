@@ -145,7 +145,61 @@ core.register_node("multifurnace:casting_table", {
         }
     },
     tiles = {"multifurnace_table_top.png", "multifurnace_table_side.png"},
-    groups = {cracky = 1, multifurnace_accessory = 1},
+    groups = {cracky = 1, multifurnace_accessory = 1, tubedevice = 1, tubedevice_receiver = 1},
+    tube = {
+        can_remove = function(pos, node, stack, dir, invname, spos)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            if meta:get_int("solidify") <= 0 then
+                if invname == "item" and not inv:get_stack("item", 1):is_empty() then
+                    return 1
+                end
+                if dir.y ~= -1 and invname == "cast" and
+                    inv:get_stack("item", 1):is_empty() and
+                    not inv:get_stack("cast", 1):is_empty() then
+                    return 1
+                end
+            end
+            return 0
+        end,
+        remove_items = function(pos, node, stack, dir, count, invname, spos)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            if meta:get_int("solidify") <= 0 then
+                if invname == "item" and not inv:get_stack("item", 1):is_empty() then
+                    stack = inv:remove_item("item", stack)
+                    set_item_entities(inv, pos)
+                    update_timer(pos)
+                    return stack
+                end
+                if dir.y ~= -1 and invname == "cast" and
+                    inv:get_stack("item", 1):is_empty() and
+                    not inv:get_stack("cast", 1):is_empty() then
+                    stack = inv:remove_item("cast", stack)
+                    set_item_entities(inv, pos)
+                    update_timer(pos)
+                    return stack
+                end
+            end
+            return ItemStack(nil)
+        end,
+        insert_object = function(pos, node, stack, direction)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            inv:set_stack("cast", 1, stack:take_item(1))
+            set_item_entities(inv, pos)
+            update_timer(pos)
+            return inv:add_item("cast", stack)
+        end,
+        can_insert = function(pos, node, stack, direction)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            return inv:get_stack("cast", 1):is_empty() and
+                       multifurnace.api.can_insert_item(stack:get_name())
+        end,
+        input_inventory = {"item", "cast"},
+        connect_sides = {left = 1, right = 1, back = 1, bottom = 1, front = 1}
+    },
     on_construct = function(pos)
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
@@ -173,19 +227,21 @@ core.register_node("multifurnace:casting_table", {
 
         local to_give = nil
 
-        if not inv:get_stack("item", 1):is_empty() then
-            to_give = inv:get_stack("item", 1)
-            inv:set_list("item", {})
-        elseif not inv:get_stack("cast", 1):is_empty() then
-            local liq = meta:get_int("liquid_amount")
-            if liq > 0 then
-                meta:set_int("liquid_amount", 0)
-                meta:set_string("liquid", "")
-                meta:set_int("solidify", 0)
-            end
+        if meta:get_int("solidify") <= 0 then
+            if not inv:get_stack("item", 1):is_empty() then
+                to_give = inv:get_stack("item", 1)
+                inv:set_list("item", {})
+            elseif not inv:get_stack("cast", 1):is_empty() then
+                local liq = meta:get_int("liquid_amount")
+                if liq > 0 then
+                    meta:set_int("liquid_amount", 0)
+                    meta:set_string("liquid", "")
+                    meta:set_int("solidify", 0)
+                end
 
-            to_give = inv:get_stack("cast", 1)
-            inv:set_list("cast", {})
+                to_give = inv:get_stack("cast", 1)
+                inv:set_list("cast", {})
+            end
         end
 
         if to_give and puncher then
