@@ -390,7 +390,7 @@ if core.get_modpath("tubelib") then
         inv:set_stack("cast", 1, item:take_item(1))
         set_item_entities(inv, pos)
         update_timer(pos)
-        return item
+        return true
     end
 
     tubelib.register_node("multifurnace:casting_table", {}, {
