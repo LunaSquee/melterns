@@ -50,10 +50,10 @@ local modifiers = {
 		}
 	},
 	steel = {
-		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80}, uses=20, maxlevel=4},
-		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40}, uses=30, maxlevel=4},
-		snappy = {times={[1]=2.50, [2]=1.20, [3]=0.35}, uses=30, maxlevel=4},
-		choppy = {times={[1]=2.50, [2]=1.40, [3]=1.00}, uses=20, maxlevel=4},
+		cracky = {times={[1]=4.00, [2]=1.60, [3]=0.80, [4]=0.40}, uses=20, maxlevel=4},
+		crumbly = {times={[1]=1.50, [2]=0.90, [3]=0.40, [4]=0.30}, uses=30, maxlevel=4},
+		snappy = {times={[1]=2.50, [2]=1.20, [3]=0.35, [4]=0.30}, uses=30, maxlevel=4},
+		choppy = {times={[1]=2.50, [2]=1.40, [3]=1.00, [4]=0.80}, uses=20, maxlevel=4},
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
@@ -65,10 +65,10 @@ local modifiers = {
 		}
 	},
 	copper = {
-		cracky = {times={[1]=3.80, [2]=1.50, [3]=0.70}, uses=20, maxlevel=4},
-		crumbly = {times={[1]=1.30, [2]=0.80, [3]=0.30}, uses=30, maxlevel=4},
-		snappy = {times={[1]=2.30, [2]=1.10, [3]=0.20}, uses=30, maxlevel=4},
-		choppy = {times={[1]=2.30, [2]=1.30, [3]=0.90}, uses=20, maxlevel=4},
+		cracky = {times={[1]=3.80, [2]=1.50, [3]=0.85, [4]=0.60}, uses=20, maxlevel=4},
+		crumbly = {times={[1]=1.30, [2]=0.80, [3]=0.45, [4]=0.30}, uses=30, maxlevel=4},
+		snappy = {times={[1]=2.30, [2]=1.10, [3]=0.35, [4]=0.30}, uses=30, maxlevel=4},
+		choppy = {times={[1]=2.30, [2]=1.30, [3]=0.95, [4]=0.60}, uses=20, maxlevel=4},
 		damagegroups = {fleshy = 5},
 		explody = nil,
 
