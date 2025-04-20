@@ -174,7 +174,7 @@ end
 
 function multifurnace.api.structure_detect(node, pos, max_dim)
     local back = vector.add(pos, minetest.facedir_to_dir(node.param2))
-    local center, min, max = detect_center(back, max_dim)
+    local center, min, max = detect_center(back, max_dim - 1)
 
     local dimensions = vector.subtract(max, min)
 

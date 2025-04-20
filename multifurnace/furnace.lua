@@ -472,7 +472,7 @@ core.register_node("multifurnace:controller", {
     allow_metadata_inventory_take = allow_metadata_inventory_take,
     _mcl_hardness = 2,
     _mcl_blast_resistance = 2,
-    _multifurnace_fuel_consumption = 5,
+    _multifurnace_fuel_consumption = 10,
     _multifurnace_max_dimensions = 8
 })
 
