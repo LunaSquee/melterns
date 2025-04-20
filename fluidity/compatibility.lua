@@ -3,6 +3,7 @@ local cset = core.settings
 local prefix = "melterns_resource_"
 local mtg = core.get_modpath("default") ~= nil
 local mcl = core.get_modpath("mcl_core") ~= nil
+local xcm = core.get_modpath("xcompat") ~= nil
 
 fluidity.external = {}
 fluidity.external.ref = {}
@@ -111,6 +112,30 @@ if mcl then
 
   fluidity.external.items.flint = "mcl_core:flint"
   fluidity.external.items.diamond = "mcl_core:diamond"
+end
+
+-----------------------
+-- xcompat overrides --
+-----------------------
+
+if xcm then
+  local xcm_mat = xcompat.materials
+  local xcm_sounds = xcompat.sounds
+
+  fluidity.external.sounds.node_sound_stone = xcm_sounds.node_sound_stone_defaults()
+  fluidity.external.sounds.node_sound_gravel = xcm_sounds.node_sound_gravel_defaults()
+  fluidity.external.sounds.node_sound_wood = xcm_sounds.node_sound_wood_defaults()
+
+  fluidity.external.items.bucket_water = xcm_mat.bucket_water
+  fluidity.external.items.water = xcm_mat.water_source
+  fluidity.external.items.stick = xcm_mat.stick
+  fluidity.external.items.gravel = xcm_mat.gravel
+  fluidity.external.items.sand = xcm_mat.sand
+  fluidity.external.items.clay = xcm_mat.clay_lump
+  fluidity.external.items.glass = xcm_mat.glass
+  fluidity.external.items.steel_ingot = xcm_mat.steel_ingot
+  fluidity.external.items.flint = xcm_mat.flint
+  fluidity.external.items.diamond = xcm_mat.diamond
 end
 
 ------------------------
