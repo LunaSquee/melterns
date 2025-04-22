@@ -6,10 +6,6 @@ fluidity = rawget(_G, "fluidity") or {}
 local mpath = minetest.get_modpath("fluidity")
 fluidity.modpath = mpath
 
-function fluidity.fluid_short(str)
-	return string.lower(str):gsub("%s", "_")
-end
-
 -- External mod/game compatibilty
 dofile(mpath.."/compatibility.lua")
 

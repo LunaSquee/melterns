@@ -43,12 +43,11 @@ end
 function fluidity.florbs.add_fluid(stack, source_name, amount)
 	if not fluidity.florbs.get_is_florb(stack) then return nil end
 	local source_node = minetest.registered_nodes[source_name]
-	local fluid       = fluid_lib.cleanse_node_description(source_name)
-	local internal    = fluidity.fluid_short(fluid)
+	local fluid       = fluid_lib.cleanse_node_name(source_name)
 	local florbname   = stack:get_name()
 
 	if minetest.get_item_group(florbname, "florb_blank") > 0 then
-		stack = ItemStack(florbname.."_"..internal)
+		stack = ItemStack(florbname.."_"..fluid)
 	end
 
 	local meta = stack:get_meta()
@@ -97,10 +96,10 @@ end
 local function register_florbfluid(data)
 	local source_node = minetest.registered_nodes[data.source_name]
 	if not source_node then return end
-	local fluid = fluid_lib.cleanse_node_description(data.source_name)
-	local internal = fluidity.fluid_short(fluid)
+	local fluid = fluid_lib.cleanse_node_name(data.source_name)
+	local fluid_desc = fluid_lib.cleanse_node_description(data.source_name)
 
-	local itemname = data.mod_name..":"..data.florb_name.."_"..internal
+	local itemname = data.mod_name..":"..data.florb_name.."_"..fluid
 
 	if minetest.registered_items[itemname] then return end
 
@@ -115,7 +114,7 @@ local function register_florbfluid(data)
 
 	-- Register base item
 	minetest.register_craftitem(itemname, {
-		description     = data.florb_description.." ("..fluid..")",
+		description     = data.florb_description.." ("..fluid_desc..")",
 		inventory_image = texture.."^[noalpha^"..data.textures[1].."^"..data.textures[2].."^[makealpha:255,0,0,",
 		_florb_capacity = data.capacity,
 		_florb_source   = data.source_name,
