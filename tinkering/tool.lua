@@ -1,6 +1,8 @@
+local S = core.get_translator("melterns")
+
 tinkering.tools = {
 	pick = {
-		description = "Pickaxe",
+		description = S("Pickaxe"),
 		groups = {"cracky"},
 		fleshy_decrement = 1,
 		components = {
@@ -15,7 +17,7 @@ tinkering.tools = {
 		}
 	},
 	axe = {
-		description = "Axe",
+		description = S("Axe"),
 		groups = {"choppy"},
 		fleshy_increment = 1,
 		components = {
@@ -30,7 +32,7 @@ tinkering.tools = {
 		}
 	},
 	sword = {
-		description = "Sword",
+		description = S("Sword"),
 		groups = {"snappy"},
 		fleshy_decrement = 0,
 		components = {
@@ -45,7 +47,7 @@ tinkering.tools = {
 		}
 	},
 	shovel = {
-		description = "Shovel",
+		description = S("Shovel"),
 		groups = {"crumbly"},
 		fleshy_decrement = 1,
 		components = {
@@ -62,12 +64,42 @@ tinkering.tools = {
 }
 
 tinkering.components = {
-	pickaxe_head = {description = "%s Pickaxe Head", material_cost = 2, image = tinkering.tools.pick.textures.main},
-	axe_head     = {description = "%s Axe Head",     material_cost = 2, image = tinkering.tools.axe.textures.main},
-	sword_blade  = {description = "%s Sword Blade",  material_cost = 2, image = tinkering.tools.sword.textures.main},
-	shovel_head  = {description = "%s Shovel Head",  material_cost = 2, image = tinkering.tools.shovel.textures.main},
-	tool_rod     = {description = "%s Tool Rod",     material_cost = 1, image = "tinkering_tool_rod.png"},
-	tool_binding = {description = "%s Tool Binding", material_cost = 2, image = "tinkering_tool_binding.png"}
+	pickaxe_head = {
+		description = S("Pickaxe Head"),
+		compose_description = function(u) S("@1 Pickaxe Head", u) end,
+		material_cost = 2,
+		image = tinkering.tools.pick.textures.main
+	},
+	axe_head = {
+		description = S("Axe Head"),
+		compose_description = function(u) S("@1 Axe Head", u) end,
+		material_cost = 2,
+		image = tinkering.tools.axe.textures.main
+	},
+	sword_blade = {
+		description = S("Sword Blade"),
+		compose_description = function(u) S("@1 Sword Blade", u) end,
+		material_cost = 2,
+		image = tinkering.tools.sword.textures.main
+	},
+	shovel_head = {
+		description = S("Shovel Head"),
+		compose_description = function(u) S("@1 Shovel Head", u) end,
+		material_cost = 2,
+		image = tinkering.tools.shovel.textures.main
+	},
+	tool_rod = {
+		description = S("Tool Rod"),
+		compose_description = function(u) S("@1 Tool Rod", u) end,
+		material_cost = 1,
+		image = "tinkering_tool_rod.png"
+	},
+	tool_binding = {
+		description = S("Tool Binding"),
+		compose_description = function(u) S("@1 Tool Binding", u) end,
+		material_cost = 2,
+		image = "tinkering_tool_binding.png"
+	}
 }
 
 local mcl_group_translations = {
@@ -94,33 +126,6 @@ function tinkering.create_material_component(data)
 		_tinker_material  = data.metal,
 		inventory_image   = data.image
 	})
-end
-
--- Register a tool type
---
---data = {
---	description = "Pickaxe",     -- Name (description) of the tool
---	groups = {"cracky"},  -- Group caps that apply
---  mod = "tinkering",    -- The mod you're registering this tool from
---	fleshy_decrement = 1, -- Amount removed from base damage group "fleshy". Negative value adds.
---	components = {
---		main    = "pickaxe_head", -- Name of the primary component
---		binding = "tool_binding", -- Second component
---		rod     = "tool_rod"      -- Mandatory rod component
---	},
---	textures = {
---		main   = "tinkering_pickaxe_head.png",           -- Head (main) Texture
---		second = "tinkering_overlay_handle_pickaxe.png", -- Overlay (typically a handle)
---		offset = "1,-1"                                  -- Head's offset on the texture
---	}
---}
---
-function tinkering.register_tool_type(name, data)
-	if not data.mod then
-		data.mod = minetest.get_current_modname()
-	end
-
-	tinkering.tools[name] = data
 end
 
 -- Create groups based on materials
@@ -299,7 +304,7 @@ local function after_use_handler(itemstack, user, node, digparams)
 	tool_broken_meta:from_table(meta:to_table())
 	local description = meta:get_string("description")
 	tool_broken_meta:set_string("description_non_broken", description)
-	tool_broken_meta:set_string("description", description .. "\n" .. minetest.colorize("#BB1111", "Broken"))
+	tool_broken_meta:set_string("description", description .. "\n" .. minetest.colorize("#BB1111", S("Broken")))
 	tool_broken_meta:set_string("capabilities_non_broken", minetest.serialize(itemstack:get_tool_capabilities()))
 	itemstack:replace(tool_broken)
 	meta:set_tool_capabilities({})
@@ -330,7 +335,7 @@ end
 -- Compare provided components to the required components of this tool
 local function compare_components_required(tool_spec, materials)
 	local all_match = true
-	
+
 	for i, v in pairs(tool_spec) do
 		if not materials[i] then
 			all_match = false
@@ -383,7 +388,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 		minetest.register_tool(internal_name, tool_def)
 		local tool_def_broken = table.copy(tool_def)
 		tool_def_broken.tool_capabilities = nil
-		tool_def_broken.description = tool_def_broken.description.." (Broken)"
+		tool_def_broken.description = tool_def_broken.description.." (" .. S("Broken") .. ")"
 		tool_def_broken.after_use = nil
 		tool_def_broken._is_broken = true
 		tool_def_broken._unbroken_name = internal_name
@@ -396,7 +401,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	local mat_names = ""
 	local i = 1
 	for name, mat in pairs(materials) do
-		if i == 1 then 
+		if i == 1 then
 			mat_names = name.."="..mat
 		else
 			mat_names = mat_names..","..name.."="..mat
@@ -411,7 +416,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	for cmp, mat in pairs(materials) do
 		local info = tinkering.materials[mat]
 		local comp = tool_data.components[cmp]
-		local desc = tinkering.components[comp].description:format(info.name)
+		local desc = tinkering.components[comp].compose_description(info.name)
 
 		description = description .. "\n" .. minetest.colorize(info.color, desc)
 	end
@@ -459,7 +464,7 @@ function tinkering.register_component(name, data)
 		tinkering.components[name] = data
 	end
 
-	local comp_desc = data.description:sub(4)
+	local comp_desc = data.description
 
 	-- Register cast
 	metal_melter.register_melt_value(name, metal_caster.spec.cast)
@@ -487,12 +492,99 @@ function tinkering.register_component(name, data)
 			component   = name,
 			metal       = m,
 			mod_name    = mod,
-			description = data.description:format(s.name),
+			description = data.compose_description(s.name),
 			image       = tinkering.color_filter(data.image, s.color)
 		})
 
 		-- Make all components meltable
 		fluidity.register_melt(mod..":"..component, m, name)
+	end
+end
+
+-- Register a new material type and register base components and tools for material
+function tinkering.register_material(name, data)
+	local mod = data.mod_name or minetest.get_current_modname()
+
+	assert(data.name ~= nil)
+	assert(data.base ~= nil)
+	assert(data.modifier ~= nil)
+	assert(data.color ~= nil)
+	assert(data.default ~= nil or data.cast == true)
+
+	data.mod = mod
+	tinkering.materials[name] = data
+
+	-- Register all components for material
+	for comp, comp_def in pairs(tinkering.components) do
+		local component = name.."_"..comp
+
+		tinkering.create_material_component({
+			name        = component,
+			component   = comp,
+			metal       = name,
+			mod_name    = mod,
+			description = comp_def.compose_description(name),
+			image       = tinkering.color_filter(comp_def.image, data.color)
+		})
+
+		-- Make all components meltable
+		fluidity.register_melt(mod..":"..component, name, comp)
+	end
+
+	tinkering.register_material_tool(name)
+end
+
+-- Register a modifier we can apply to a tool
+function tinkering.register_modifier(name, data)
+	assert(data.name ~= nil)
+	assert(data.default ~= nil)
+	assert(data.modifier ~= nil)
+
+	tinkering.modifiers[name] = data
+end
+
+-- Register a tool type
+--
+--data = {
+--	description = "Pickaxe",     -- Name (description) of the tool
+--	groups = {"cracky"},  -- Group caps that apply
+--  mod = "tinkering",    -- The mod you're registering this tool from
+--	fleshy_decrement = 1, -- Amount removed from base damage group "fleshy". Negative value adds.
+--	components = {
+--		main    = "pickaxe_head", -- Name of the primary component
+--		binding = "tool_binding", -- Second component
+--		rod     = "tool_rod"      -- Mandatory rod component
+--	},
+--	textures = {
+--		main   = "tinkering_pickaxe_head.png",           -- Head (main) Texture
+--		second = "tinkering_overlay_handle_pickaxe.png", -- Overlay (typically a handle)
+--		offset = "1,-1"                                  -- Head's offset on the texture
+--	}
+--}
+--
+function tinkering.register_tool_type(name, data)
+	assert(data.components ~= nil)
+	assert(data.description ~= nil)
+	assert(data.textures ~= nil)
+
+	if not data.mod then
+		data.mod = minetest.get_current_modname()
+	end
+
+	tinkering.tools[name] = data
+end
+
+-- Register a new tool type and register base tool for all materials
+function tinkering.register_tool(name, data)
+	tinkering.register_tool_type(name, data)
+
+	for material in pairs(tinkering.materials) do
+		local components_table = { main = material }
+		for comp in pairs(data.components) do
+			components_table[comp] = "wood"
+		end
+
+		tinkering.create_tool(name, components_table, false, nil)
 	end
 end
 

@@ -2,6 +2,7 @@
 
 local mer = fluidity.external.ref
 local mei = fluidity.external.items
+local S = core.get_translator("melterns")
 
 metal_caster = {}
 
@@ -12,15 +13,15 @@ metal_caster.max_metal = 16000
 metal_caster.spec = metal_melter.spec
 
 metal_caster.casts = {
-	ingot = {description = "Ingot", result = "ingot",   cost = 1, typenames = {"ingot"}},
-	lump  = {description = "Lump",  result = "lump",    cost = 2, typenames = {"lump"}},
-	gem   = {description = "Gem",   result = "crystal", cost = 1, typenames = {"crystal", "gem"}}
+	ingot = {description = S("Ingot"), result = "ingot",   cost = 1, typenames = {"ingot"}},
+	lump  = {description = S("Lump"),  result = "lump",    cost = 2, typenames = {"lump"}},
+	gem   = {description = S("Gem"),   result = "crystal", cost = 1, typenames = {"crystal", "gem"}}
 }
 
 local metal_cache = {}
 
 function metal_caster.get_metal_caster_formspec(water, metal)
-	local metal_formspec = "tooltip[10.375,0.375;1,2.8;No Molten Metal]"
+	local metal_formspec = "tooltip[10.375,0.375;1,2.8;"..S("No Molten Metal").."]"
 
 	if metal ~= nil then
 		metal_formspec = "tooltip[10.375,0.375;1,2.8;"..fluid_lib.buffer_to_string(metal).."]"
@@ -55,7 +56,7 @@ function metal_caster.get_metal_caster_formspec(water, metal)
 		"image[9.125,0.375;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
 		"image[9.125,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformR90]"..
 
-		"button[10.375,3.425;1,0.75;dump;Dump]"..
+		"button[10.375,3.425;1,0.75;dump;".. S("Dump") .. "]"..
 
 		mer.gui_player_inv()..
 		"listring[context;coolant]"..
@@ -402,13 +403,13 @@ local function caster_node_timer(pos, elapsed)
 	meta:set_string("metal_fluid", metal.fluid)
 	meta:set_string("water_fluid", mei.water)
 
-	local infotext = "Metal Caster\n"
+	local infotext = S("Metal Caster") .. "\n"
 	infotext = infotext .. fluid_lib.buffer_to_string(coolant) .. "\n"
 
 	if metal and metal.fluid ~= "" then
 		infotext = infotext .. fluid_lib.buffer_to_string(metal)
 	else
-		infotext = infotext .. "No Molten Metal"
+		infotext = infotext .. S("No Molten Metal")
 	end
 
 	meta:set_string("infotext", infotext)
@@ -433,7 +434,7 @@ local function on_construct(pos)
 	meta:set_string('water_fluid', mei.water)
 
 	-- Default infotext
-	meta:set_string("infotext", "Metal Caster Inactive")
+	meta:set_string("infotext", S("Metal Caster") .. " " .. S("Inactive"))
 end
 
 -- Register a new cast
@@ -442,7 +443,7 @@ function metal_caster.register_cast(name, data)
 	local castname = mod..":"..name.."_cast"
 
 	minetest.register_craftitem(castname, {
-		description     = data.description.." Cast\n\nMaterial Cost: "..data.cost,
+		description     = data.description.." " .. S("Cast") .. "\n\n" .. S("Material Cost: @1", data.cost),
 		inventory_image = "caster_"..name.."_cast.png",
 		stack_max       = 1,
 		groups          = {tinker_cast=1}
@@ -499,7 +500,7 @@ end
 
 -- Register the caster
 minetest.register_node("metal_melter:metal_caster", {
-	description = "Metal Caster",
+	description = S("Metal Caster") .. "\n" .. S("Will be removed in a future update.\nPlease use the Multifurnace instead."),
 	tiles = {
 		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
 		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,

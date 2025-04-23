@@ -1,5 +1,6 @@
 
 local mer = fluidity.external.ref
+local S = core.get_translator("melterns")
 
 tool_station = {}
 
@@ -9,7 +10,7 @@ function tool_station.get_tool_type_list(ix, iy, mx)
 	local x        = 0
 	local y        = 0
 
-	formspec = formspec..("button[%f,%f;1,1;anvil;Anvil]"):format(x + ix, y + iy)
+	formspec = formspec..("button[%f,%f;1,1;anvil;" .. S("Anvil") .. "]"):format(x + ix, y + iy)
 	x = x + 1.25
 
 	for t, tool in pairs(tinkering.tools) do
@@ -62,7 +63,7 @@ function tool_station.get_formspec(comp_list)
 	end
 
 	return "formspec_version[4]size[18,10.45]"..
-		"label[0.375,0.375;Tool Station]"..
+		"label[0.375,0.375;"..S("Tool Station").."]"..
 		mer.get_itemslot_bg(2.125, 0.75, w, h) ..
 		til..
 		"list[context;input;2.125,0.75;" .. w .. "," .. h .. ";]"..
@@ -532,7 +533,7 @@ local function on_receive_fields(pos, formname, fields, sender)
 end
 
 minetest.register_node("tinkering:tool_station", {
-	description = "Tool Station",
+	description = S("Tool Station"),
 	tiles = {
 		"tinkering_workbench_top.png", "tinkering_bench_bottom.png",
 		"tinkering_bench_side.png",    "tinkering_bench_side.png",

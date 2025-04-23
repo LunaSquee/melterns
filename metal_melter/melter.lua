@@ -1,6 +1,7 @@
 
 local mer = fluidity.external.ref
 local mei = fluidity.external.items
+local S = core.get_translator("melterns")
 
 -- Melts metals using lava as a heat source.
 
@@ -54,7 +55,7 @@ function metal_melter.get_metal_from_stack(stack)
 end
 
 function metal_melter.get_metal_melter_formspec(lava, metal)
-	local metal_formspec = "tooltip[10.375,0.375;1,2.8;No Molten Metal]"
+	local metal_formspec = "tooltip[10.375,0.375;1,2.8;".. S("No Molten Metal") .. "]"
 
 	if metal ~= nil then
 		metal_formspec = "tooltip[10.375,0.375;1,2.8;"..fluid_lib.buffer_to_string(metal).."]"
@@ -86,7 +87,7 @@ function metal_melter.get_metal_melter_formspec(lava, metal)
 		"image[9.125,0.375;1,1;"..mer.gui_furnace_arrow.."^[transformR270]"..
 		"image[9.125,1.625;1,1;"..mer.gui_furnace_arrow.."^[transformR90]"..
 
-		"button[10.375,3.425;1,0.75;dump;Dump]"..
+		"button[10.375,3.425;1,0.75;dump;" .. S("Dump") .. "]"..
 		mer.gui_player_inv()..
 		"listring[context;heat]"..
 		"listring[current_player;main]"..
@@ -304,13 +305,13 @@ local function melter_node_timer(pos, elapsed)
 	meta:set_string("metal_fluid", metal.fluid)
 	meta:set_string("lava_fluid", mei.lava)
 
-	local infotext = "Metal Melter\n"
+	local infotext = S("Metal Melter") .. "\n"
 	infotext = infotext .. fluid_lib.buffer_to_string(lava) .. "\n"
 
 	if metal and metal.fluid ~= "" then
 		infotext = fluid_lib.buffer_to_string(metal)
 	else
-		infotext = infotext .. "No Molten Metal"
+		infotext = infotext .. S("No Molten Metal")
 	end
 
 	if lava.amount > 144 then
@@ -341,7 +342,7 @@ local function on_construct(pos)
 	meta:set_string('lava_fluid', mei.lava)
 
 	-- Default infotext
-	meta:set_string("infotext", "Metal Melter Inactive")
+	meta:set_string("infotext", S("Metal Melter") .. " " .. S("Inactive"))
 end
 
 local function can_dig(pos, player)
@@ -393,7 +394,7 @@ if minetest.get_modpath("pipeworks") ~= nil then
 end
 
 minetest.register_node("metal_melter:metal_melter", {
-	description = "Metal Melter",
+	description = S("Metal Melter") .. "\n" .. S("Will be removed in a future update.\nPlease use the Multifurnace instead."),
 	tiles = {
 		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,
 		"melter_side.png"..tube_entry, "melter_side.png"..tube_entry,

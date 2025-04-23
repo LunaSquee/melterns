@@ -1,5 +1,6 @@
 
 local mer = fluidity.external.ref
+local S = core.get_translator("melterns")
 
 pattern_table = {}
 
@@ -24,7 +25,7 @@ end
 function pattern_table.get_formspec()
 	local pattern_list = pattern_table.get_tool_type_list(11.75, 0.375, 6.25)
 	return "formspec_version[4]size[18,10.45]"..
-		"label[0.375,0.375;Pattern Table]"..
+		"label[0.375,0.375;".. S("Pattern Table") .. "]"..
 		mer.get_itemslot_bg(4.125, 2, 1, 1) ..
 		"list[context;input;4.125,2;1,1;]"..
 		mer.get_itemslot_bg(6.625, 2, 1, 1) ..
@@ -139,7 +140,7 @@ local function on_receive_fields(pos, formname, fields, sender)
 end
 
 minetest.register_node("tinkering:pattern_table", {
-	description = "Pattern Table",
+	description = S("Pattern Table"),
 	tiles = {
 		"tinkering_pattern_bench.png", "tinkering_bench_bottom.png",
 		"tinkering_bench_side.png",    "tinkering_bench_side.png",

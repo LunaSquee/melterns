@@ -1,3 +1,4 @@
+local S = core.get_translator("melterns")
 
 fluidity.florbs = {}
 
@@ -35,7 +36,7 @@ local function update_florb(stack)
 	local meta = stack:get_meta()
 	local contents, fluid_name, capacity = fluidity.florbs.get_florb_contents(stack)
 
-	meta:set_string("description", def_desc.."\nContains "..contents.."/"..capacity.." mB")
+	meta:set_string("description", def_desc.."\n" .. S("Contains") .. " "..contents.."/"..capacity.." " ..fluid_lib.unit)
 
 	return stack
 end
@@ -127,7 +128,9 @@ end
 function fluidity.florbs.register_florb(data)
 	local mod_name   = data.mod_name or minetest.get_current_modname()
 	local florb_name = data.florb_name or 'florb'
-	local florb_desc = data.florb_description or 'Florb'
+	local florb_desc = data.florb_description or S('Florb')
+	local empty_desc = data.florb_description_empty or 
+		florb_desc .. " (" .. S("Empty") .. ")\n" .. S("This item holds millibuckets of fluid.")
 	local textures   = data.textures or {"fluidity_florb.png", "fluidity_florb_mask.png"}
 	local capacity   = data.capacity or 1000
 	local item_name  = mod_name..":"..florb_name
@@ -135,7 +138,7 @@ function fluidity.florbs.register_florb(data)
 	if not minetest.registered_items[item_name] then
 		-- Register base item
 		minetest.register_craftitem(item_name, {
-			description     = florb_desc.." (Empty)\nThis item holds millibuckets of fluid.",
+			description     = empty_desc,
 			inventory_image = textures[1].."^[noalpha^"..textures[2].."^[makealpha:255,0,0,",
 			_florb_capacity = capacity,
 			_florb_source   = nil,

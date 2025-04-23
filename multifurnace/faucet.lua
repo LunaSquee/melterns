@@ -1,5 +1,7 @@
 -- Faucet is a simple liquid transfer node
 
+local S = core.get_translator("melterns")
+
 local FAUCET_PER_SECOND = metal_melter.spec.ingot
 
 local function update_timer (pos)
@@ -104,7 +106,7 @@ local function faucet_timer (pos, elapsed)
 	return refresh
 end
 minetest.register_node("multifurnace:faucet", {
-	description = "Multifurnace Faucet",
+	description = S("Multifurnace Faucet"),
 	tiles = {"metal_melter_heatbrick.png"},
 	groups = {cracky = 3, multifurnace_accessory = 1},
 	drawtype = "nodebox",

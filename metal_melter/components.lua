@@ -1,12 +1,13 @@
 
 local mei = fluidity.external.items
+local S = core.get_translator("melterns")
 
 -- Crafting components
 
 -- Items
 
 minetest.register_craftitem("metal_melter:heated_brick", {
-	description = "Heatbrick",
+	description = S("Heatbrick"),
 	inventory_image = "metal_melter_heated_brick.png",
 	groups = { brick = 1 }
 })
@@ -14,7 +15,7 @@ minetest.register_craftitem("metal_melter:heated_brick", {
 -- Nodes
 
 minetest.register_node("metal_melter:heated_bricks", {
-	description = "Heatbricks",
+	description = S("Heatbricks"),
 	tiles = {"metal_melter_heatbrick.png"},
 	groups = { cracky = 3, pickaxey = 1, multifurnace = 1},
 	paramtype2 = "facedir",
@@ -26,14 +27,14 @@ minetest.register_node("metal_melter:heated_bricks", {
 })
 
 minetest.register_node("metal_melter:heat_gravel", {
-	description = "Heat Gravel",
+	description = S("Heat Gravel"),
 	tiles = {"metal_melter_heat_gravel.png"},
 	groups = {crumbly = 2, shovely = 2, falling_node = 1},
 	sounds = fluidity.external.sounds.node_sound_gravel
 })
 
 minetest.register_node("metal_melter:heat_exchanger", {
-	description = "Heat Exchanger Plate",
+	description = S("Heat Exchanger Plate"),
 	tiles = {"metal_melter_heat_exchanger.png"},
 	groups = { cracky = 3, pickaxey = 1 },
 	place_param2 = 0,
@@ -53,7 +54,7 @@ minetest.register_node("metal_melter:heat_exchanger", {
 })
 
 minetest.register_node('metal_melter:casting_table', {
-	description = "Casting Table",
+	description = S("Casting Table"),
 	paramtype = "light",
 	drawtype = "nodebox",
 	node_box = {
@@ -75,7 +76,7 @@ minetest.register_node('metal_melter:casting_table', {
 })
 
 fluid_tanks.register_tank("metal_melter:heated_tank",{
-	description = "Heated Tank",
+	description = S("Heated Tank"),
 	capacity    = 8000,
 	tiles       = {"melter_heated_tank.png"},
 	accepts     = {mei.lava},

@@ -1,11 +1,12 @@
 
 local mer = fluidity.external.ref
+local S = core.get_translator("melterns")
 
 part_builder = {}
 
 function part_builder.get_formspec()
 	return "formspec_version[4]size[11.75,10.45]"..
-		"label[0.375,0.375;Part Builder]"..
+		"label[0.375,0.375;" .. S("Part Builder") .. "]"..
 
 		mer.get_itemslot_bg(2.125, 2, 1, 1) ..
 		"list[context;pattern;2.125,2;1,1;]"..
@@ -218,7 +219,7 @@ local function on_receive_fields(pos, formname, fields, sender)
 end
 
 minetest.register_node("tinkering:part_builder", {
-	description = "Part Builder",
+	description = S("Part Builder"),
 	tiles = {
 		"tinkering_blank_pattern.png",  "tinkering_bench_bottom.png",
 		"tinkering_bench_side.png",     "tinkering_bench_side.png",

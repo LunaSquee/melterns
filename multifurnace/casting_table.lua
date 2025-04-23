@@ -1,3 +1,5 @@
+local S = core.get_translator("melterns")
+
 local function update_timer(pos)
     local t = core.get_node_timer(pos)
     if not t:is_started() then t:start(1.0) end
@@ -127,7 +129,7 @@ local function on_timer(pos, elapsed)
 end
 
 core.register_node("multifurnace:casting_table", {
-    description = "Casting Table",
+    description = S("Casting Table"),
     drawtype = "nodebox",
     paramtype1 = "light",
     node_box = {

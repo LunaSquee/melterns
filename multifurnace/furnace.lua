@@ -1,5 +1,6 @@
 local mer = fluidity.external.ref
 local mei = fluidity.external.items
+local S = core.get_translator("melterns")
 
 local function update_timer(pos)
     local t = core.get_node_timer(pos)
@@ -394,7 +395,7 @@ end
 -------------------
 
 core.register_node("multifurnace:controller", {
-    description = "Multifurnace Controller",
+    description = S("Multifurnace Controller"),
     tiles = {
         "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
         "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
@@ -477,7 +478,7 @@ core.register_node("multifurnace:controller", {
 })
 
 core.register_node("multifurnace:port", {
-    description = "Multifurnace Port",
+    description = S("Multifurnace Port"),
     tiles = {
         "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
         "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",

@@ -14,13 +14,14 @@ function fluidity.get_metal_for_fluid(fluid)
 	end
 end
 
-function fluidity.register_molten_metal(metal)
-	local description = firstToUpper(metal)
+function fluidity.register_molten_metal(metal, metal_name)
+	local description = metal_name or firstToUpper(metal)
 	local mod_name    = minetest.get_current_modname()
+	local liquid_name = S("Molten @1", metal_name)
 	fluidity.molten_metals[metal] = mod_name..":"..metal.."_source"
 
 	minetest.register_node(mod_name..":"..metal.."_source", {
-		description = "Molten "..description.." Source",
+		description = S("Molten @1 Source", description),
 		drawtype = "liquid",
 		tiles = {
 			{
@@ -59,13 +60,15 @@ function fluidity.register_molten_metal(metal)
 		liquid_alternative_source = mod_name..":"..metal.."_source",
 		liquid_viscosity = 7,
 		liquid_renewable = false,
+		_fluid_name = fluid_name,
+		_doc_items_entry_name = fluid_name,
 		damage_per_second = 4 * 2,
 		post_effect_color = {a = 191, r = 255, g = 64, b = 0},
 		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1},
 	})
 
 	minetest.register_node(mod_name..":"..metal.."_flowing", {
-		description = "Flowing Molten "..description,
+		description = S("Flowing Molten @1", description),
 		drawtype = "flowingliquid",
 		tiles = {"fluidity_"..metal..".png"},
 		special_tiles = {
@@ -105,6 +108,8 @@ function fluidity.register_molten_metal(metal)
 		liquid_alternative_source = mod_name..":"..metal.."_source",
 		liquid_viscosity = 7,
 		liquid_renewable = false,
+		_fluid_name = fluid_name,
+		_doc_items_entry_name = fluid_name,
 		damage_per_second = 4 * 2,
 		post_effect_color = {a = 191, r = 255, g = 64, b = 0},
 		groups = {molten_metal = 1, lava = 1, liquid = 2, igniter = 1,
@@ -116,6 +121,6 @@ function fluidity.register_molten_metal(metal)
 		mod_name..":"..metal.."_flowing",
 		mod_name..":bucket_"..metal,
 		mod_name.."_bucket_"..metal..".png",
-		"Molten "..description.." Bucket"
+		S("Molten @1 Bucket", description)
 	)
 end
