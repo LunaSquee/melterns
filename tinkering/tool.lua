@@ -66,37 +66,37 @@ tinkering.tools = {
 tinkering.components = {
 	pickaxe_head = {
 		description = S("Pickaxe Head"),
-		compose_description = function(u) S("@1 Pickaxe Head", u) end,
+		compose_description = function(u) return S("@1 Pickaxe Head", u) end,
 		material_cost = 2,
 		image = tinkering.tools.pick.textures.main
 	},
 	axe_head = {
 		description = S("Axe Head"),
-		compose_description = function(u) S("@1 Axe Head", u) end,
+		compose_description = function(u) return S("@1 Axe Head", u) end,
 		material_cost = 2,
 		image = tinkering.tools.axe.textures.main
 	},
 	sword_blade = {
 		description = S("Sword Blade"),
-		compose_description = function(u) S("@1 Sword Blade", u) end,
+		compose_description = function(u) return S("@1 Sword Blade", u) end,
 		material_cost = 2,
 		image = tinkering.tools.sword.textures.main
 	},
 	shovel_head = {
 		description = S("Shovel Head"),
-		compose_description = function(u) S("@1 Shovel Head", u) end,
+		compose_description = function(u) return S("@1 Shovel Head", u) end,
 		material_cost = 2,
 		image = tinkering.tools.shovel.textures.main
 	},
 	tool_rod = {
 		description = S("Tool Rod"),
-		compose_description = function(u) S("@1 Tool Rod", u) end,
+		compose_description = function(u) return S("@1 Tool Rod", u) end,
 		material_cost = 1,
 		image = "tinkering_tool_rod.png"
 	},
 	tool_binding = {
 		description = S("Tool Binding"),
-		compose_description = function(u) S("@1 Tool Binding", u) end,
+		compose_description = function(u) return S("@1 Tool Binding", u) end,
 		material_cost = 2,
 		image = "tinkering_tool_binding.png"
 	}

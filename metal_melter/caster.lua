@@ -444,7 +444,7 @@ function metal_caster.register_cast(name, data)
 
 	minetest.register_craftitem(castname, {
 		description     = data.description.." " .. S("Cast") .. "\n\n" .. S("Material Cost: @1", data.cost),
-		inventory_image = "caster_"..name.."_cast.png",
+		inventory_image = mod.."_"..name.."_cast.png",
 		stack_max       = 1,
 		groups          = {tinker_cast=1}
 	})

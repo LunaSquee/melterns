@@ -1,357 +1,360 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Estonian translations for PACKAGE package.
+# Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#  <evert@lunasqu.ee>, 2025.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-23 18:24+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2025-04-23 18:28+0300\n"
+"Last-Translator: <evert@lunasqu.ee>\n"
+"Language-Team: Estonian <linux-ee@lists.eenet.ee>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
 
 #: fluidity/florbs.lua:39
 msgid "Contains"
-msgstr ""
+msgstr "Sisaldab"
 
 #: fluidity/florbs.lua:131 fluidity/register.lua:25
 msgid "Florb"
-msgstr ""
+msgstr "Florb"
 
 #: fluidity/florbs.lua:133
 msgid "Empty"
-msgstr ""
+msgstr "Tühi"
 
 #: fluidity/florbs.lua:133
 msgid "This item holds millibuckets of fluid."
-msgstr ""
+msgstr "See ese hoiab milliämbrites vedelikke."
 
 #: fluidity/molten.lua:22
 msgid "Molten @1"
-msgstr ""
+msgstr "Sula @1"
 
 #: fluidity/molten.lua:26
 msgid "Molten @1 Source"
-msgstr ""
+msgstr "Sula @1 allikas"
 
 #: fluidity/molten.lua:73
 msgid "Flowing Molten @1"
-msgstr ""
+msgstr "Voolav sula @1"
 
 #: fluidity/molten.lua:126
 msgid "Molten @1 Bucket"
-msgstr ""
+msgstr "Ämber - sula @1"
 
 #: fluidity/register.lua:6 tinkering/materials.lua:276
 msgid "Steel"
-msgstr ""
+msgstr "Teras"
 
 #: fluidity/register.lua:7 tinkering/materials.lua:277
 msgid "Copper"
-msgstr ""
+msgstr "Vask"
 
 #: fluidity/register.lua:8 tinkering/materials.lua:278
 msgid "Tin"
-msgstr ""
+msgstr "Tina"
 
 #: fluidity/register.lua:9 tinkering/materials.lua:279
 msgid "Bronze"
-msgstr ""
+msgstr "Pronks"
 
 #: fluidity/register.lua:10 tinkering/materials.lua:280
 msgid "Gold"
-msgstr ""
+msgstr "Kuld"
 
 #: fluidity/register.lua:11 tinkering/materials.lua:281
 msgid "Mese"
-msgstr ""
+msgstr "Mese"
 
 #: fluidity/register.lua:12 tinkering/materials.lua:273
 msgid "Obsidian"
-msgstr ""
+msgstr "Obsidiaan"
 
 #: fluidity/register.lua:13 tinkering/materials.lua:288
 msgid "Lead"
-msgstr ""
+msgstr "Plii"
 
 #: fluidity/register.lua:14 tinkering/materials.lua:289
 msgid "Chromium"
-msgstr ""
+msgstr "Kroom"
 
 #: fluidity/register.lua:15 tinkering/materials.lua:290
 msgid "Zinc"
-msgstr ""
+msgstr "Tsink"
 
 #: fluidity/register.lua:16 tinkering/materials.lua:284
 msgid "Silver"
-msgstr ""
+msgstr "Hõbe"
 
 #: fluidity/register.lua:17 tinkering/materials.lua:285
 msgid "Mithril"
-msgstr ""
+msgstr "Miitril"
 
 #: metal_melter/caster.lua:16
 msgid "Ingot"
-msgstr ""
+msgstr "Kang"
 
 #: metal_melter/caster.lua:17
 msgid "Lump"
-msgstr ""
+msgstr "Töötlemata maak"
 
 #: metal_melter/caster.lua:18
 msgid "Gem"
-msgstr ""
+msgstr "Vääriskivi"
 
 #: metal_melter/caster.lua:24 metal_melter/caster.lua:412
 #: metal_melter/melter.lua:58 metal_melter/melter.lua:314
 msgid "No Molten Metal"
-msgstr ""
+msgstr "Puudub sulametall"
 
 #: metal_melter/caster.lua:59 metal_melter/melter.lua:90
 msgid "Dump"
-msgstr ""
+msgstr "Tühjenda"
 
 #: metal_melter/caster.lua:406 metal_melter/caster.lua:437
 #: metal_melter/caster.lua:503
 msgid "Metal Caster"
-msgstr ""
+msgstr "Metallivalaja"
 
 #: metal_melter/caster.lua:437 metal_melter/melter.lua:345
 msgid "Inactive"
-msgstr ""
+msgstr "Ootel"
 
 #: metal_melter/caster.lua:446
 msgid "Cast"
-msgstr ""
+msgstr "vorm"
 
 #: metal_melter/caster.lua:446 tinkering/pattern.lua:16
 msgid "Material Cost: @1"
-msgstr ""
+msgstr "Materjali kulu: 1"
 
 #: metal_melter/caster.lua:503 metal_melter/melter.lua:397
 msgid ""
 "Will be removed in a future update.\n"
 "Please use the Multifurnace instead."
 msgstr ""
+"Eemaldatakse tulevase uuenduse raames.\n"
+"Palun kasutada multiahju selle asemel."
 
 #: metal_melter/components.lua:10
 msgid "Heatbrick"
-msgstr ""
+msgstr "Soojustellis"
 
 #: metal_melter/components.lua:18
 msgid "Heatbricks"
-msgstr ""
+msgstr "Soojustellised"
 
 #: metal_melter/components.lua:30
 msgid "Heat Gravel"
-msgstr ""
+msgstr "Soojuskruus"
 
 #: metal_melter/components.lua:37
 msgid "Heat Exchanger Plate"
-msgstr ""
+msgstr "Soojusvaheti plaat"
 
 #: metal_melter/components.lua:57 multifurnace/casting_table.lua:132
 msgid "Casting Table"
-msgstr ""
+msgstr "Valulaud"
 
 #: metal_melter/components.lua:79
 msgid "Heated Tank"
-msgstr ""
+msgstr "Kuumutatud paak"
 
 #: metal_melter/melter.lua:308 metal_melter/melter.lua:345
 #: metal_melter/melter.lua:397
 msgid "Metal Melter"
-msgstr ""
+msgstr "Metallisulataja"
 
 #: multifurnace/faucet.lua:109
 msgid "Multifurnace Faucet"
-msgstr ""
+msgstr "Multiahju kraan"
 
 #: multifurnace/furnace.lua:398
 msgid "Multifurnace Controller"
-msgstr ""
+msgstr "Multiahju juhtplokk"
 
 #: multifurnace/furnace.lua:481
 msgid "Multifurnace Port"
-msgstr ""
+msgstr "Multiahju ava"
 
 #: tinkering/materials.lua:20 tinkering/materials.lua:34
 #: tinkering/materials.lua:93
 msgid "Cheap"
-msgstr ""
+msgstr "Odav"
 
 #: tinkering/materials.lua:35
 msgid "Wooden"
-msgstr ""
+msgstr "Puidust"
 
 #: tinkering/materials.lua:49 tinkering/materials.lua:64
 msgid "Economic"
-msgstr ""
+msgstr "Ekonoomne"
 
 #: tinkering/materials.lua:50
 msgid "Stonebound"
-msgstr ""
+msgstr "Kivine"
 
 #: tinkering/materials.lua:65 tinkering/materials.lua:193
 msgid "Metallic"
-msgstr ""
+msgstr "Metalne"
 
 #: tinkering/materials.lua:79
 msgid "Cold"
-msgstr ""
+msgstr "Külm"
 
 #: tinkering/materials.lua:119
 msgid "Precious"
-msgstr ""
+msgstr "Vääris"
 
 #: tinkering/materials.lua:120
 msgid "Expensive"
-msgstr ""
+msgstr "Kallis"
 
 #: tinkering/materials.lua:134 tinkering/materials.lua:178
 #: tinkering/materials.lua:208
 msgid "Shiny"
-msgstr ""
+msgstr "Läikiv"
 
 #: tinkering/materials.lua:135
 msgid "Soft"
-msgstr ""
+msgstr "Pehme"
 
 #: tinkering/materials.lua:149
 msgid "Reinforced"
-msgstr ""
+msgstr "Tugevdatud"
 
 #: tinkering/materials.lua:163
 msgid "Toxic"
-msgstr ""
+msgstr "Toksiline"
 
 #: tinkering/materials.lua:207 tinkering/materials.lua:222
 msgid "Durable"
-msgstr ""
+msgstr "Vastupidav"
 
 #: tinkering/materials.lua:223
 msgid "Lethal"
-msgstr ""
+msgstr "Surmav"
 
 #: tinkering/materials.lua:233 tinkering/materials.lua:294
 msgid "Diamond"
-msgstr ""
+msgstr "Teemant"
 
 #: tinkering/materials.lua:270
 msgid "Flint"
-msgstr ""
+msgstr "Tulekivi"
 
 #: tinkering/materials.lua:271
 msgid "Wood"
-msgstr ""
+msgstr "Puit"
 
 #: tinkering/materials.lua:272
 msgid "Stone"
-msgstr ""
+msgstr "Kivi"
 
 #: tinkering/materials.lua:298
 msgid "Redstone"
-msgstr ""
+msgstr "Redstone"
 
 #: tinkering/materials.lua:307
 msgid "Netherite"
-msgstr ""
+msgstr "Netherite"
 
 #: tinkering/nodes/part_builder.lua:9 tinkering/nodes/part_builder.lua:222
 msgid "Part Builder"
-msgstr ""
+msgstr "Tööriista osa valmistaja"
 
 #: tinkering/nodes/pattern_table.lua:28 tinkering/nodes/pattern_table.lua:143
 msgid "Pattern Table"
-msgstr ""
+msgstr "Šablooni laud"
 
 #: tinkering/nodes/tool_station.lua:13
 msgid "Anvil"
-msgstr ""
+msgstr "Alasi"
 
 #: tinkering/nodes/tool_station.lua:66 tinkering/nodes/tool_station.lua:536
 msgid "Tool Station"
-msgstr ""
+msgstr "Tööriistajaam"
 
 #: tinkering/pattern.lua:15
 msgid "Pattern"
-msgstr ""
+msgstr "šabloon"
 
 #: tinkering/pattern.lua:25
 msgid "Blank Pattern"
-msgstr ""
+msgstr "Šablooni toorik"
 
 #: tinkering/tool.lua:5
 msgid "Pickaxe"
-msgstr ""
+msgstr "Kirka"
 
 #: tinkering/tool.lua:20
 msgid "Axe"
-msgstr ""
+msgstr "Kirves"
 
 #: tinkering/tool.lua:35
 msgid "Sword"
-msgstr ""
+msgstr "Mõõk"
 
 #: tinkering/tool.lua:50
 msgid "Shovel"
-msgstr ""
+msgstr "Labidas"
 
 #: tinkering/tool.lua:68
 msgid "Pickaxe Head"
-msgstr ""
+msgstr "Kirka pea"
 
 #: tinkering/tool.lua:69
 msgid "@1 Pickaxe Head"
-msgstr ""
+msgstr "@1 kirka pea"
 
 #: tinkering/tool.lua:74
 msgid "Axe Head"
-msgstr ""
+msgstr "Kirve pea"
 
 #: tinkering/tool.lua:75
 msgid "@1 Axe Head"
-msgstr ""
+msgstr "@1 kirve pea"
 
 #: tinkering/tool.lua:80
 msgid "Sword Blade"
-msgstr ""
+msgstr "Mõõga tera"
 
 #: tinkering/tool.lua:81
 msgid "@1 Sword Blade"
-msgstr ""
+msgstr "@1 mõõga tera"
 
 #: tinkering/tool.lua:86
 msgid "Shovel Head"
-msgstr ""
+msgstr "Labida pea"
 
 #: tinkering/tool.lua:87
 msgid "@1 Shovel Head"
-msgstr ""
+msgstr "@1 labida pea"
 
 #: tinkering/tool.lua:92
 msgid "Tool Rod"
-msgstr ""
+msgstr "Tööriistavarras"
 
 #: tinkering/tool.lua:93
 msgid "@1 Tool Rod"
-msgstr ""
+msgstr "@1 tööriistavarras"
 
 #: tinkering/tool.lua:98
 msgid "Tool Binding"
-msgstr ""
+msgstr "Tööriista köide"
 
 #: tinkering/tool.lua:99
 msgid "@1 Tool Binding"
-msgstr ""
+msgstr "@1 tööriista köide"
 
 #: tinkering/tool.lua:307 tinkering/tool.lua:391
 msgid "Broken"
-msgstr ""
+msgstr "Katkine"

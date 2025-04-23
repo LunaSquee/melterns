@@ -309,7 +309,7 @@ local function melter_node_timer(pos, elapsed)
 	infotext = infotext .. fluid_lib.buffer_to_string(lava) .. "\n"
 
 	if metal and metal.fluid ~= "" then
-		infotext = fluid_lib.buffer_to_string(metal)
+		infotext = infotext .. fluid_lib.buffer_to_string(metal)
 	else
 		infotext = infotext .. S("No Molten Metal")
 	end

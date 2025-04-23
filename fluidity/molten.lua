@@ -1,3 +1,5 @@
+local S = core.get_translator("melterns")
+
 -- Register molten metals
 
 fluidity.molten_metals = {}
@@ -17,7 +19,7 @@ end
 function fluidity.register_molten_metal(metal, metal_name)
 	local description = metal_name or firstToUpper(metal)
 	local mod_name    = minetest.get_current_modname()
-	local liquid_name = S("Molten @1", metal_name)
+	local fluid_name  = S("Molten @1", metal_name)
 	fluidity.molten_metals[metal] = mod_name..":"..metal.."_source"
 
 	minetest.register_node(mod_name..":"..metal.."_source", {

@@ -14,7 +14,7 @@ function tinkering.register_pattern(name, data)
     minetest.register_craftitem(itemname, {
         description = desc .. " " .. S("Pattern") .. "\n\n" ..
             S("Material Cost: @1", data.cost),
-        inventory_image = "tinkering_" .. name .. "_pattern.png",
+        inventory_image = mod.."_" .. name .. "_pattern.png",
         _tinker_pattern = name,
         groups = {tinker_pattern = 1, ["tc_" .. name] = 1}
     })
