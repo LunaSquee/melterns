@@ -268,10 +268,13 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 			if fg[grp] then
 				local temp = {}
 				for i = #fg[grp].times, 1, -1 do
-					table.insert(temp, fg[grp].times[i] + 0.50)
+					table.insert(temp, fg[grp].times[i])
 				end
 				fg[val] = fg[grp]
+				fg[val].uses = fg[grp].uses * 10
 				fg[val].times = temp
+				fg[val].maxlevel = 0
+				fg[grp] = nil
 			end
 		end
 	end
@@ -282,6 +285,8 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 		groupcaps = fg,
 		damage_groups = fd,
 	}
+
+	core.debug(dump(tool_caps))
 
 	-- Construct the name
 	name = main.name.." "..name

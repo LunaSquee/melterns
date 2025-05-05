@@ -43,8 +43,8 @@ local modifiers = {
 		damagegroups = {fleshy = 4},
 		explody = nil,
 
-		binding = {increase = 0.05, uses = -1},
-		rod = {increase = 0.05, uses = -1},
+		binding = {increase = 0.02, uses = -1},
+		rod = {increase = 0.02, uses = -1},
 		tags = {
 			{name = "economic", description = S("Economic")},
 			{name = "stonebound", description = S("Stonebound")}
@@ -58,8 +58,8 @@ local modifiers = {
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
-		binding = {increase = 0.05, uses = 3},
-		rod = {increase = 0.10, uses = 5},
+		binding = {increase = -0.02, uses = 3},
+		rod = {increase = -0.02, uses = 5},
 		tags = {
 			{name = "economic", description = S("Economic")},
 			{name = "metal", description = S("Metallic")}
@@ -73,8 +73,8 @@ local modifiers = {
 		damagegroups = {fleshy = 5},
 		explody = nil,
 
-		binding = {increase = 0.05, uses = 3},
-		rod = {increase = 0.06, uses = 5},
+		binding = {increase = 0.02, uses = 3},
+		rod = {increase = 0.03, uses = 5},
 		tags = {
 			{name = "cold", description = S("Cold")}
 		}
@@ -87,8 +87,8 @@ local modifiers = {
 		damagegroups = {fleshy = 5},
 		explody = nil,
 
-		binding = {increase = 0.02, uses = -2},
-		rod = {increase = 0.06, uses = -3},
+		binding = {increase = 0.05, uses = -2},
+		rod = {increase = 0.05, uses = -3},
 		tags = {
 			{name = "cheap", description = S("Cheap")}
 		}
@@ -101,8 +101,8 @@ local modifiers = {
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
-		binding = {increase = 0.09, uses = 2},
-		rod = {increase = 0.01, uses = 10},
+		binding = {increase = -0.01, uses = 2},
+		rod = {increase = -0.01, uses = 10},
 		tags = {}
 	},
 	mese = {
@@ -113,8 +113,8 @@ local modifiers = {
 		damagegroups = {fleshy = 7},
 		explody = nil,
 
-		binding = {increase = 0.10, uses = 10},
-		rod = {increase = 0.15, uses = 10},
+		binding = {increase = -0.05, uses = 10},
+		rod = {increase = 0.00, uses = 10},
 		tags = {
 			{name = "gem", description = S("Precious")},
 			{name = "expensive", description = S("Expensive")}
@@ -143,8 +143,8 @@ local modifiers = {
 		damagegroups = {fleshy = 6},
 		explody = nil,
 
-		binding = {increase = 0.10, uses = 15},
-		rod = {increase = 0.05, uses = 5},
+		binding = {increase = 0.02, uses = 15},
+		rod = {increase = -0.02, uses = 5},
 		tags = {
 			{name = "reinforced", description = S("Reinforced")}
 		}
@@ -157,7 +157,7 @@ local modifiers = {
 		damagegroups = {fleshy = 7},
 		explody = nil,
 
-		binding = {increase = 0.15, uses = 1},
+		binding = {increase = 0.10, uses = 1},
 		rod = {increase = 0.05, uses = -5},
 		tags = {
 			{name = "toxic", description = S("Toxic")}
@@ -217,7 +217,7 @@ local modifiers = {
 		explody = nil,
 
 		binding = {increase = 0.05, uses = 15},
-		rod = {increase = -0.10, uses = 15, damage = {fleshy = 8}},
+		rod = {increase = -0.05, uses = 15, damage = {fleshy = 8}},
 		tags = {
 			{name = "durable", description = S("Durable")},
 			{name = "lethal", description = S("Lethal")}
@@ -226,7 +226,7 @@ local modifiers = {
 	-- Modifier items
 	diamond = {
 		uses = 20,
-		increase = 0.25,
+		increase = -0.20,
 		count = 1,
 		maxlevel = 5,
 		tags = {
@@ -300,7 +300,7 @@ if core.get_modpath("mcl_core") then
 		name = "netherite", default = "mcl_nether:netherite_ingot",
 		modifier = {
 			uses = 30,
-			increase = 0.35,
+			increase = -0.25,
 			count = 1,
 			maxlevel = 5,
 			tags = {
