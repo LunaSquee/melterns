@@ -1,4 +1,5 @@
 local S = core.get_translator("melterns")
+local has_mcl = core.get_modpath("mcl_core") ~= nil
 
 tinkering.max_tool_modifiers = 3
 tinkering.tools = {
@@ -114,13 +115,13 @@ local mcl_group_translations = {
 function tinkering.create_material_component(data)
 	local desc = data.description
 	local name = data.name
-	local mod  = data.mod_name or minetest.get_current_modname()
+	local mod  = data.mod_name or core.get_current_modname()
 
 	local groups = {tinker_component = 1}
 	groups["tc_"..data.component] = 1
 	groups["material_"..data.metal] = 1
 
-	minetest.register_craftitem(mod..":"..name, {
+	core.register_craftitem(mod..":"..name, {
 		description       = desc,
 		groups            = groups,
 		_tinker_component = data.component,
@@ -139,7 +140,8 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 	local incr = 0.00
 	local uses = 0
 	local maxlevel = 0
-	local dmg = {}
+	local maxtimes = 0
+	local dmg = table.copy(dgroup)
 
 	-- Apply material modifiers
 	for m, v in pairs(materials) do
@@ -161,10 +163,10 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 					maxlevel = mp.maxlevel
 				end
 
-				if mp.damage then
-					for g,mod in pairs(mp.damage) do
-						if dmg[g] == nil or dmg[g] < mod then
-							dmg[g] = mod
+				if mp.damagegroups then
+					for g,gamount in pairs(mp.damagegroups) do
+						if dmg[g] == nil or dmg[g] < gamount then
+							dmg[g] = gamount
 						end
 					end
 				end
@@ -202,9 +204,13 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 				maxlevel = modifier_data.maxlevel
 			end
 
+			if modifier_data.maxtimes and maxtimes < modifier_data.maxtimes then
+				maxtimes = modifier_data.maxtimes
+			end
+
 			-- Apply damage group values
-			if modifier_data.damage then
-				for g,mod in pairs(modifier_data.damage) do
+			if modifier_data.damagegroups then
+				for g,mod in pairs(modifier_data.damagegroups) do
 					local use_value = mod
 
 					-- Min-max linear interpolate
@@ -213,6 +219,13 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 					end
 
 					if dmg[g] == nil or dmg[g] < use_value then
+						local current_value = dmg[g]
+
+						-- If the increase is unrealistically big, make it smaller
+						if use_value - current_value > 2 then
+							use_value = math.ceil(lerp(current_value, use_value, 0.5))
+						end
+
 						dmg[g] = use_value
 					end
 				end
@@ -229,25 +242,37 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 		end
 	end
 
+	-- If we add more groups, we need to make other groups a bit slower in MCL
+	if has_mcl and maxtimes > 0 then
+		incr = incr + 0.15 * maxtimes
+	end
+
 	-- Apply modified to base groups
 	for grp, d in pairs(basegroup) do
 		groups[grp] = d
 
 		for id,val in pairs(d.times) do
-			groups[grp].times[id] = math.max(val + (incr / id), 0.01)
+			local increase_amount = incr / id
+			if has_mcl then
+				increase_amount = (incr / (#d.times - (id - 1)))
+			end
+
+			groups[grp].times[id] = math.max(val + increase_amount, 0.01)
+		end
+
+		if maxtimes > 2 and maxtimes > #d.times then
+			for nextval = #d.times, maxtimes, 1 do
+				local prev2_p = d.times[nextval - 2] or 1
+				local prev1_p = d.times[nextval - 1] or 1
+				local reduce_amount = prev1_p / prev2_p
+				d.times[nextval] = prev1_p * reduce_amount
+			end
 		end
 
 		groups[grp].uses = d.uses + uses
 
 		if groups[grp].maxlevel and maxlevel < groups[grp].maxlevel then
 			maxlevel = groups[grp].maxlevel
-		end
-	end
-
-	-- Apply damage group modifications
-	for g,l in pairs(dgroup) do
-		if dmg[g] == nil or dmg[g] < l then
-			dmg[g] = l
 		end
 	end
 
@@ -313,8 +338,8 @@ function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 	-- Apply all modifiers
 	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups, modifiers)
 
-	-- Use MCL tool capabilities
-	if core.get_modpath("mcl_core") ~= nil then
+	-- Use MCL tool capabilities, the times table is reversed and names are different
+	if has_mcl then
 		for grp, val in pairs(mcl_group_translations) do
 			if fg[grp] then
 				local temp = {}
@@ -358,8 +383,8 @@ local function after_use_handler(itemstack, user, node, digparams)
 	tool_broken_meta:from_table(meta:to_table())
 	local description = meta:get_string("description")
 	tool_broken_meta:set_string("description_non_broken", description)
-	tool_broken_meta:set_string("description", description .. "\n" .. minetest.colorize("#BB1111", S("Broken")))
-	tool_broken_meta:set_string("capabilities_non_broken", minetest.serialize(itemstack:get_tool_capabilities()))
+	tool_broken_meta:set_string("description", description .. "\n" .. core.colorize("#BB1111", S("Broken")))
+	tool_broken_meta:set_string("capabilities_non_broken", core.serialize(itemstack:get_tool_capabilities()))
 	itemstack:replace(tool_broken)
 	meta:set_tool_capabilities({})
 	return itemstack
@@ -408,7 +433,9 @@ end
 function tinkering.read_tool_modifiers(tool)
 	local meta = tool:get_meta()
 	local deserialized = meta:contains("modifiers") and core.deserialize(meta:get_string("modifiers")) or {}
-	local total_modifiers = meta:get_int("modifiers_total") or tinkering.max_tool_modifiers
+	local total_modifiers = meta:contains("modifiers_total")
+		and meta:get_int("modifiers_total")
+		or tinkering.max_tool_modifiers
 	return deserialized, total_modifiers
 end
 
@@ -445,15 +472,15 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	local internal_name = mod_name..":"..materials.main.."_"..tool_type
 
 	-- Register base tool if it doesnt exist already
-	if not minetest.registered_items[internal_name] and minetest.get_current_modname() then
-		minetest.register_tool(internal_name, tool_def)
+	if not core.registered_items[internal_name] and core.get_current_modname() then
+		core.register_tool(internal_name, tool_def)
 		local tool_def_broken = table.copy(tool_def)
 		tool_def_broken.tool_capabilities = nil
 		tool_def_broken.description = tool_def_broken.description.." (" .. S("Broken") .. ")"
 		tool_def_broken.after_use = nil
 		tool_def_broken._is_broken = true
 		tool_def_broken._unbroken_name = internal_name
-		minetest.register_tool(internal_name.."_broken", tool_def_broken)
+		core.register_tool(internal_name.."_broken", tool_def_broken)
 	end
 
 	if not want_tool then return nil end
@@ -479,7 +506,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 		local comp = tool_data.components[cmp]
 		local desc = tinkering.components[comp].compose_description(info.name)
 
-		description = description .. "\n" .. minetest.colorize(info.color, desc)
+		description = description .. "\n" .. core.colorize(info.color, desc)
 	end
 
 	-- Add tags to description
@@ -520,7 +547,7 @@ end
 
 -- Register a new tool component
 function tinkering.register_component(name, data)
-	local mod = data.mod_name or minetest.get_current_modname()
+	local mod = data.mod_name or core.get_current_modname()
 
 	if not tinkering.components[name] then
 		tinkering.components[name] = data
@@ -565,7 +592,7 @@ end
 
 -- Register a new material type and register base components and tools for material
 function tinkering.register_material(name, data)
-	local mod = data.mod_name or minetest.get_current_modname()
+	local mod = data.mod_name or core.get_current_modname()
 
 	assert(data.name ~= nil)
 	assert(data.base ~= nil)
@@ -630,7 +657,7 @@ function tinkering.register_tool_type(name, data)
 	assert(data.textures ~= nil)
 
 	if not data.mod then
-		data.mod = minetest.get_current_modname()
+		data.mod = core.get_current_modname()
 	end
 
 	tinkering.tools[name] = data

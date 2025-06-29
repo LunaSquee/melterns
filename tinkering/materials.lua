@@ -217,7 +217,7 @@ local modifiers = {
 		explody = nil,
 
 		binding = {increase = 0.05, uses = 15},
-		rod = {increase = -0.05, uses = 15, damage = {fleshy = 8}},
+		rod = {increase = -0.05, uses = 15, damagegroups = {fleshy = 8}},
 		tags = {
 			{name = "durable", description = S("Durable")},
 			{name = "lethal", description = S("Lethal")}
@@ -226,9 +226,10 @@ local modifiers = {
 	-- Modifier items
 	diamond = {
 		uses = 20,
-		increase = -0.20,
+		increase = -0.15,
 		count = 1,
 		maxlevel = 3,
+		maxtimes = 5,
 		damagegroups = {fleshy = 8},
 		tags = {
 			{name = "diamond", description = S("Diamond")}
@@ -247,9 +248,9 @@ local modifiers = {
 		binding = {
 			increase = 0.00, -- Increase in `times`. Divided by group number.
 			uses = 0, -- Base uses increase
-			damage = {fleshy = 8} -- Sets the damagegroups to this value.
+			damagegroups = {fleshy = 8} -- Sets the damagegroups to this value.
 		},
-		
+
 		-- Rod specifications, same format as binding
 		rod = {},
 
@@ -260,8 +261,11 @@ local modifiers = {
 		uses = 0, -- Base uses increase
 		increase = 0.00, -- Times increase. Divided by group number.
 		count = 1, -- How many times this modifier can be applied
-		damage = {fleshy = 8}, -- Sets the damagegroups to this value.
-		
+		damagegroups = {fleshy = 8}, -- Sets the damagegroups to this value.
+
+		maxlevel = 3, -- Assign new minimum max level to each group
+		maxtimes = 3, -- Set the minimum number of dig times, may calculate new values
+
 		-- Tags added to this tool
 		tags = {}
 	}
@@ -302,9 +306,10 @@ if core.get_modpath("mcl_core") then
 		name = "netherite", default = "mcl_nether:netherite_ingot",
 		modifier = {
 			uses = 30,
-			increase = -0.25,
+			increase = 0,
 			count = 1,
 			maxlevel = 3,
+			maxtimes = 6,
 			damagegroups = {fleshy = 9},
 			tags = {
 				{name = "netherite", description = S("Netherite")}
