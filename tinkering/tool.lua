@@ -1,5 +1,6 @@
 local S = core.get_translator("melterns")
 
+tinkering.max_tool_modifiers = 3
 tinkering.tools = {
 	pick = {
 		description = S("Pickaxe"),
@@ -128,8 +129,10 @@ function tinkering.create_material_component(data)
 	})
 end
 
+local function lerp(a,b,t) return a * (1-t) + b * t end
+
 -- Create groups based on materials
-local function apply_modifiers(materials, basegroup, dgroup)
+local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 	local tags = {}
 	local groups = {}
 
@@ -178,12 +181,60 @@ local function apply_modifiers(materials, basegroup, dgroup)
 		end
 	end
 
+	-- Apply extra modifiers
+	for _,modinfo in pairs(modifiers) do
+		local modifier_def = tinkering.modifiers[modinfo.name]
+		if modifier_def ~= nil then
+			local modifier_data = modifier_def.modifier
+			local modifier_amount = modinfo.count or 1
+			local modifier_total = modifier_data.count or 1
+			local lerp_amount = modifier_amount / modifier_total
+
+			if modifier_data.increase then
+				incr = incr + (modifier_data.increase * modifier_amount)
+			end
+
+			if modifier_data.uses then
+				uses = uses + (modifier_data.uses * modifier_amount)
+			end
+
+			if modifier_data.maxlevel and maxlevel < modifier_data.maxlevel then
+				maxlevel = modifier_data.maxlevel
+			end
+
+			-- Apply damage group values
+			if modifier_data.damage then
+				for g,mod in pairs(modifier_data.damage) do
+					local use_value = mod
+
+					-- Min-max linear interpolate
+					if type(mod) == "table" then
+						use_value = lerp(mod.min, mod.max, lerp_amount)
+					end
+
+					if dmg[g] == nil or dmg[g] < use_value then
+						dmg[g] = use_value
+					end
+				end
+			end
+
+			-- Apply tags
+			if modifier_data.tags then
+				for _,t in pairs(modifier_data.tags) do
+					if tags[t.name] == nil then
+						tags[t.name] = t.description
+					end
+				end
+			end
+		end
+	end
+
 	-- Apply modified to base groups
 	for grp, d in pairs(basegroup) do
 		groups[grp] = d
 
 		for id,val in pairs(d.times) do
-			groups[grp].times[id] = val + (incr / id)
+			groups[grp].times[id] = math.max(val + (incr / id), 0.01)
 		end
 
 		groups[grp].uses = d.uses + uses
@@ -221,7 +272,7 @@ local function quickcopy(t)
 end
 
 -- Generate tool capabilities based on tool type and materials
-function tinkering.get_tool_capabilities(tool_type, materials)
+function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 	if not materials["main"] or not materials["rod"] then
 		return nil
 	end
@@ -260,7 +311,7 @@ function tinkering.get_tool_capabilities(tool_type, materials)
 	end
 
 	-- Apply all modifiers
-	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups)
+	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups, modifiers)
 
 	-- Use MCL tool capabilities
 	if core.get_modpath("mcl_core") ~= nil then
@@ -315,12 +366,12 @@ local function after_use_handler(itemstack, user, node, digparams)
 end
 
 -- Return tool definition
-function tinkering.tool_definition(tool_type, materials)
+function tinkering.tool_definition(tool_type, materials, modifiers)
 	if not materials["main"] or not materials["rod"] then
 		return nil
 	end
 
-	local capabilities, name, tags = tinkering.get_tool_capabilities(tool_type, materials)
+	local capabilities, name, tags = tinkering.get_tool_capabilities(tool_type, materials, modifiers or {})
 	if not capabilities then return nil end
 
 	local tool_tree = {
@@ -354,8 +405,15 @@ local function compare_components_required(tool_spec, materials)
 	return all_match
 end
 
+function tinkering.read_tool_modifiers(tool)
+	local meta = tool:get_meta()
+	local deserialized = meta:contains("modifiers") and core.deserialize(meta:get_string("modifiers")) or {}
+	local total_modifiers = meta:get_int("modifiers_total") or tinkering.max_tool_modifiers
+	return deserialized, total_modifiers
+end
+
 -- Create a new tool based on parameters specified.
-function tinkering.create_tool(tool_type, materials, want_tool, custom_name, overrides)
+function tinkering.create_tool(tool_type, materials, want_tool, custom_name, overrides, modifiers)
 	-- Not a valid tool type
 	if not tinkering.tools[tool_type] then return nil end
 	local tool_data = tinkering.tools[tool_type]
@@ -364,7 +422,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	if not compare_components_required(tool_data.components, materials) then return nil end
 
 	-- Get tool definition and other metadata
-	local tool_def, tags = tinkering.tool_definition(tool_type, materials)
+	local tool_def, tags = tinkering.tool_definition(tool_type, materials, modifiers)
 	if not tool_def then return nil end
 
 	local mod_name = tool_data.mod or "tinkering"
@@ -444,6 +502,7 @@ function tinkering.create_tool(tool_type, materials, want_tool, custom_name, ove
 	meta:set_string("inventory_image", tool_def.inventory_image)
 	meta:set_tool_capabilities(tool_def.tool_capabilities)
 	meta:set_string("materials", mat_names)
+	meta:set_string("modifiers", modifiers and core.serialize(modifiers) or "")
 
 	if tool_def["wear"] then
 		tool:set_wear(tool_def.wear)

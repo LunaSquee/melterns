@@ -229,6 +229,7 @@ local modifiers = {
 		increase = -0.20,
 		count = 1,
 		maxlevel = 3,
+		damagegroups = {fleshy = 8},
 		tags = {
 			{name = "diamond", description = S("Diamond")}
 		}
@@ -259,6 +260,7 @@ local modifiers = {
 		uses = 0, -- Base uses increase
 		increase = 0.00, -- Times increase. Divided by group number.
 		count = 1, -- How many times this modifier can be applied
+		damage = {fleshy = 8}, -- Sets the damagegroups to this value.
 		
 		-- Tags added to this tool
 		tags = {}
@@ -303,6 +305,7 @@ if core.get_modpath("mcl_core") then
 			increase = -0.25,
 			count = 1,
 			maxlevel = 3,
+			damagegroups = {fleshy = 9},
 			tags = {
 				{name = "netherite", description = S("Netherite")}
 			}

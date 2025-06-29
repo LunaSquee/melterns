@@ -255,6 +255,86 @@ local function take_from_list(list, item, list2)
 	return list
 end
 
+local function can_apply_modifier(mod_list, mod_name, max_mods)
+	if max_mods == 0 then
+		return 0
+	end
+
+	local can_apply_count = 0
+	local definition = tinkering.modifiers[mod_name].modifier
+
+	local has_mod = false
+	for _,minfo in pairs(mod_list) do
+		if minfo.name == mod_name then
+			has_mod = true
+			if minfo.count < definition.count then
+				can_apply_count = definition.count - minfo.count
+				break
+			end
+		end
+	end
+
+	-- If the modifier can only be added once, prevent it from being added to additional slots
+	if has_mod and definition.count == 1 then
+		return 0
+	end
+
+	-- If the mod list is empty, or there are still modifier slots available,
+	-- return the full count.
+	if #mod_list == 0 or (can_apply_count == 0 and #mod_list < max_mods) then
+		return definition.count
+	end
+
+	return can_apply_count
+end
+
+local function apply_modifier(mod_list, mod_name, count)
+	local leftover = count
+	local definition = tinkering.modifiers[mod_name].modifier
+	for _,minfo in pairs(mod_list) do
+		if minfo.name == mod_name then
+			local new_count = minfo.count + count
+			if new_count > definition.count then
+				leftover = new_count - definition.count
+				new_count = definition.count
+			end
+
+			minfo.count = new_count
+		end
+	end
+
+	if leftover > 0 then
+		table.insert(mod_list, {
+			name = mod_name,
+			count = leftover
+		})
+	end
+
+	return mod_list
+end
+
+local function material_list_to_modifiers(list, mod_list, max_mods)
+	local modified = false
+	local complete_list = table.copy(mod_list)
+	local materials_to_take = {}
+
+	for mat, stat in pairs(list) do
+		for name, modinfo in pairs(tinkering.modifiers) do
+			if stat.stack == modinfo.default then
+				local can_apply_count = can_apply_modifier(complete_list, name, max_mods)
+				if can_apply_count > 0 then
+					local m_count = math.min(stat.count, can_apply_count)
+					complete_list = apply_modifier(complete_list, name, m_count)
+					materials_to_take[stat.stack] = m_count
+					modified = true
+				end
+			end
+		end
+	end
+
+	return modified, complete_list, materials_to_take
+end
+
 local function handle_take_output(pos, listname)
 	local meta = minetest.get_meta(pos)
 	local inv  = meta:get_inventory()
@@ -293,8 +373,10 @@ local function handle_take_output(pos, listname)
 			local comp_mats = tool:get_meta():get_string("materials")
 			if comp_mats and comp_mats ~= "" then
 				local materials = decode_meta(comp_mats)
-				-- Material list found, now we can start doing repair work or replacing a component
+				-- Material list found, now we can start doing repair work, replacing a component or applying modifiers
 				local mat_grid = get_materials_in_list(list, tool:get_name())
+				local modifiers, max_modifiers = tinkering.read_tool_modifiers(tool)
+				local modified, _, to_take = material_list_to_modifiers(mat_grid, modifiers, max_modifiers)
 
 				-- Find components to remove
 				local for_removal = {}
@@ -311,11 +393,16 @@ local function handle_take_output(pos, listname)
 					end
 				end
 
-				if not repair then
+				if modified then
+					inv:set_list(listname, take_from_list(list, tool:get_name(), to_take))
+					repair = true
+				end
+
+				if not modified and not repair then
 					inv:set_list(listname, take_from_list(list, tool:get_name(), for_removal))
 				end
 
-				if tool:get_wear() ~= 0 and repair then
+				if not modified and tool:get_wear() ~= 0 and repair then
 					local matches = match_materials(mat_grid, materials)
 					local repair_cap = 0
 					for mat, stat in pairs(matches) do
@@ -382,8 +469,10 @@ local function on_timer(pos, elapsed)
 			local comp_mats = tool:get_meta():get_string("materials")
 			if comp_mats and comp_mats ~= "" then
 				local materials = decode_meta(comp_mats)
-				-- Material list found, now we can start doing repair work or replacing a component
+				-- Material list found, now we can start doing repair work, replacing a component or applying modifiers
 				local mat_grid = get_materials_in_list(list, tool:get_name())
+				local modifiers, max_modifiers = tinkering.read_tool_modifiers(tool)
+				local modified, new_modifiers, to_take = material_list_to_modifiers(mat_grid, modifiers, max_modifiers)
 
 				-- Find components to replace
 				local comp_repl = {}
@@ -405,7 +494,24 @@ local function on_timer(pos, elapsed)
 					end
 				end
 
-				if not repair and comp_repl then
+				if modified then
+					local tool_res = tinkering.create_tool(
+						tool_type_,
+						materials,
+						true,
+						nil,
+						{
+							wear = tool:get_wear(),
+							initial_metadata = tool:get_meta():to_table()
+						},
+						new_modifiers
+					)
+					if tool_res then
+						output = tool_res
+					end
+				end
+
+				if not modified and not repair and comp_repl then
 					-- Add non-replacement materials back
 					for i,v in pairs(materials) do
 						if not comp_repl[i] then
@@ -413,14 +519,24 @@ local function on_timer(pos, elapsed)
 						end
 					end
 
-					local tool_res = tinkering.create_tool(tool_type_, comp_repl, true, nil, {wear = tool:get_wear(), initial_metadata = tool:get_meta():to_table()})
+					local tool_res = tinkering.create_tool(
+						tool_type_,
+						comp_repl,
+						true,
+						nil,
+						{
+							wear = tool:get_wear(),
+							initial_metadata = tool:get_meta():to_table()
+						},
+						modifiers
+					)
 					if tool_res then
 						output = tool_res
 					end
 				end
 
 				-- Attempt to repair tool with provided items
-				if tool:get_wear() ~= 0 and repair then
+				if not modified and tool:get_wear() ~= 0 and repair then
 					local matches = match_materials(mat_grid, materials)
 					local repair_cap = 0
 					for mat, stat in pairs(matches) do
@@ -436,7 +552,18 @@ local function on_timer(pos, elapsed)
 							new_wear = 0
 						end
 
-						local tool_res = tinkering.create_tool(tool_type_, materials, true, nil, {wear = new_wear, initial_metadata = tool:get_meta():to_table()})
+						local modifiers = tinkering.read_tool_modifiers(tool)
+						local tool_res = tinkering.create_tool(
+							tool_type_,
+							materials,
+							true,
+							nil,
+							{
+								wear = new_wear,
+								initial_metadata = tool:get_meta():to_table()
+							},
+							modifiers
+						)
 						if tool_res then
 							output = tool_res
 						end
