@@ -360,8 +360,6 @@ function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 		damage_groups = fd,
 	}
 
-	core.debug(dump(tool_caps))
-
 	-- Construct the name
 	name = main.name.." "..name
 
