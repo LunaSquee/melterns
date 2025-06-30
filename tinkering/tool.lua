@@ -246,25 +246,14 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 	for grp, d in pairs(basegroup) do
 		groups[grp] = d
 
-		for id,val in pairs(d.times) do
-			local increase_amount = incr / id
-
-			-- Group times order is reversed in MCL
-			if is_mcl then
-				increase_amount = (incr / (#d.times - (id - 1)))
-			end
-
-			groups[grp].times[id] = math.max(val + increase_amount, 0.01)
-		end
-
 		if maxtimes > 2 and maxtimes > #d.times then
 			-- Group times order is reversed in MCL
 			if is_mcl then
-				for nextval = 1, (#d.times - maxtimes), 1 do
+				for _ = 1, (maxtimes - #d.times), 1 do
 					local next1_p = d.times[1] or 1
 					local next2_p = d.times[2] or 1
 					local increase_amount = next2_p / next1_p
-					table.insert(d.times, 1, next1_p / increase_amount)
+					table.insert(d.times, 1, next1_p + (next1_p * increase_amount))
 				end
 			else
 				for nextval = #d.times, maxtimes, 1 do
@@ -274,6 +263,11 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 					d.times[nextval] = prev1_p * reduce_amount
 				end
 			end
+		end
+
+		for id, val in pairs(d.times) do
+			local increase_amount = incr / id
+			groups[grp].times[id] = math.max(val + increase_amount, 0.01)
 		end
 
 		groups[grp].uses = d.uses + uses
@@ -365,6 +359,8 @@ function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 		groupcaps = fg,
 		damage_groups = fd,
 	}
+
+	core.debug(dump(tool_caps))
 
 	-- Construct the name
 	name = main.name.." "..name
