@@ -1,11 +1,11 @@
 local S = core.get_translator("melterns")
-local has_mcl = core.get_modpath("mcl_core") ~= nil
+local is_mcl = core.get_modpath("mcl_core") ~= nil
 
 tinkering.max_tool_modifiers = 3
 tinkering.tools = {
 	pick = {
 		description = S("Pickaxe"),
-		groups = {"cracky"},
+		groups = {"cracky", "pickaxey"},
 		fleshy_decrement = 1,
 		components = {
 			main    = "pickaxe_head",
@@ -20,7 +20,7 @@ tinkering.tools = {
 	},
 	axe = {
 		description = S("Axe"),
-		groups = {"choppy"},
+		groups = {"choppy", "axey"},
 		fleshy_increment = 1,
 		components = {
 			main    = "axe_head",
@@ -35,7 +35,7 @@ tinkering.tools = {
 	},
 	sword = {
 		description = S("Sword"),
-		groups = {"snappy"},
+		groups = {"snappy", "swordy"},
 		fleshy_decrement = 0,
 		components = {
 			main    = "sword_blade",
@@ -50,7 +50,7 @@ tinkering.tools = {
 	},
 	shovel = {
 		description = S("Shovel"),
-		groups = {"crumbly"},
+		groups = {"crumbly", "shovely"},
 		fleshy_decrement = 1,
 		components = {
 			main    = "shovel_head",
@@ -242,18 +242,15 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 		end
 	end
 
-	-- If we add more groups, we need to make other groups a bit slower in MCL
-	if has_mcl and maxtimes > 0 then
-		incr = incr + 0.15 * maxtimes
-	end
-
 	-- Apply modified to base groups
 	for grp, d in pairs(basegroup) do
 		groups[grp] = d
 
 		for id,val in pairs(d.times) do
 			local increase_amount = incr / id
-			if has_mcl then
+
+			-- Group times order is reversed in MCL
+			if is_mcl then
 				increase_amount = (incr / (#d.times - (id - 1)))
 			end
 
@@ -261,11 +258,21 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 		end
 
 		if maxtimes > 2 and maxtimes > #d.times then
-			for nextval = #d.times, maxtimes, 1 do
-				local prev2_p = d.times[nextval - 2] or 1
-				local prev1_p = d.times[nextval - 1] or 1
-				local reduce_amount = prev1_p / prev2_p
-				d.times[nextval] = prev1_p * reduce_amount
+			-- Group times order is reversed in MCL
+			if is_mcl then
+				for nextval = 1, (#d.times - maxtimes), 1 do
+					local next1_p = d.times[1] or 1
+					local next2_p = d.times[2] or 1
+					local increase_amount = next2_p / next1_p
+					table.insert(d.times, 1, next1_p / increase_amount)
+				end
+			else
+				for nextval = #d.times, maxtimes, 1 do
+					local prev2_p = d.times[nextval - 2] or 1
+					local prev1_p = d.times[nextval - 1] or 1
+					local reduce_amount = prev1_p / prev2_p
+					d.times[nextval] = prev1_p * reduce_amount
+				end
 			end
 		end
 
@@ -286,14 +293,6 @@ function tinkering.compose_tool_texture(tooltype, main, rod)
 	local tool_data = tinkering.tools[tooltype].textures
 
 	return tinkering.combine_textures(tool_data.main, tool_data.second, mat_main.color, mat_rod.color, tool_data.offset)
-end
-
-local function quickcopy(t)
-	local res = {}
-	for i, v in pairs(t) do
-		res[i] = v
-	end
-	return res
 end
 
 -- Generate tool capabilities based on tool type and materials
@@ -331,7 +330,7 @@ function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 	-- Type specific groups and modifiers
 	for _,v in pairs(tool_data.groups) do
 		if main.modifier[v] then
-			groups[v] = quickcopy(main.modifier[v])
+			groups[v] = table.copy(main.modifier[v])
 		end
 	end
 
@@ -339,9 +338,9 @@ function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 	local fg, fd, tags, maxlevel = apply_modifiers(materials, groups, dgroups, modifiers)
 
 	-- Use MCL tool capabilities, the times table is reversed and names are different
-	if has_mcl then
+	if is_mcl then
 		for grp, val in pairs(mcl_group_translations) do
-			if fg[grp] then
+			if fg[grp] and not fg[val] then
 				local temp = {}
 				for i = #fg[grp].times, 1, -1 do
 					table.insert(temp, fg[grp].times[i])
@@ -350,6 +349,11 @@ function tinkering.get_tool_capabilities(tool_type, materials, modifiers)
 				fg[val].uses = fg[grp].uses * 10
 				fg[val].times = temp
 				fg[val].maxlevel = 0
+				fg[grp] = nil
+			end
+
+			-- If MCL groups are explicitly defined for a material, drop the MTG groups
+			if fg[grp] and fg[val] then
 				fg[grp] = nil
 			end
 		end

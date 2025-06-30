@@ -4,7 +4,7 @@ local S = core.get_translator("melterns")
 
 -- Set the tool times keeping in mind that in Minetest Game-style groups, the lower level breaks slower.
 -- AKA weaker blocks are a higher level (cracky = 3 is just like basic stone)
--- BUT in MCL, cracky = 3 would be pickaxey = 1 - the "times" array will be reversed!!
+-- BUT in MCL, cracky = 3 would be pickaxey = 1 - the "times" table will be reversed!!
 local modifiers = {
 	flint = {
 		cracky = {times={[1]=3.60, [2]=2.50, [3]=1.00}, uses=5, maxlevel=1},
@@ -306,7 +306,7 @@ if core.get_modpath("mcl_core") then
 		name = "netherite", default = "mcl_nether:netherite_ingot",
 		modifier = {
 			uses = 30,
-			increase = 0,
+			increase = -0.15,
 			count = 1,
 			maxlevel = 3,
 			maxtimes = 6,
