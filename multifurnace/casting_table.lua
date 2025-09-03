@@ -281,7 +281,28 @@ core.register_node("multifurnace:casting_table", {
                    inv:get_stack("cast", 1):is_empty()
     end,
     on_timer = on_timer,
-    node_io_can_put_liquid = function(pos, node, side) return true end,
+    node_io_can_put_liquid = function(pos, node, side, liquid, millibuckets)
+        if liquid == nil and not millibuckets then
+            return true
+        end
+
+        local meta = core.get_meta(pos)
+        local inv = meta:get_inventory()
+        local liq = meta:get_string("liquid")
+        local liqc = meta:get_int("liquid_amount")
+        local liqt = meta:get_int("liquid_total")
+        local add = millibuckets
+
+        -- Don't allow adding fluid when there's an item or there's something solidifying
+        if not inv:get_stack("item", 1):is_empty() or meta:get_int("solidify") >
+            0 then return 0 end
+
+        if (liq ~= liquid and liq ~= "") or liqt == 0 then return 0 end
+        if liqc == liqt then return 0 end
+        if liqc + millibuckets > liqt then add = liqt - liqc end
+
+        return add
+    end,
     node_io_can_take_liquid = function(pos, node, side) return false end,
     node_io_accepts_millibuckets = function(pos, node, side) return true end,
     node_io_put_liquid = function(pos, node, side, putter, liquid, millibuckets)
@@ -308,6 +329,7 @@ core.register_node("multifurnace:casting_table", {
 
         return leftovers
     end,
+	-- TODO: remove this after updates have propagated
     node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()

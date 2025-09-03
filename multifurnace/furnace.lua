@@ -487,7 +487,21 @@ core.register_node("multifurnace:port", {
     },
     groups = {cracky = 3, pickaxey = 1, multifurnace = 2, fluid_container = 1},
     fluid_buffers = {},
-    node_io_can_put_liquid = function(pos, node, side) return true end,
+    node_io_can_put_liquid = function(pos, node, side, liquid, millibuckets)
+        if liquid == nil and not millibuckets then
+            return true
+        end
+
+        if not fluidity.get_metal_for_fluid(liquid) then return 0 end
+        local ctrl = get_port_controller(pos)
+        if not ctrl then return 0 end
+
+        if can_put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
+            return millibuckets
+        end
+
+        return 0
+    end,
     node_io_can_take_liquid = function(pos, node, side) return true end,
     node_io_accepts_millibuckets = function(pos, node, side) return true end,
     node_io_take_liquid = function(pos, node, side, taker, want_liquid,
@@ -523,6 +537,7 @@ core.register_node("multifurnace:port", {
 
         return millibuckets
     end,
+	-- TODO: remove this after updates have propagated
     node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
         if not fluidity.get_metal_for_fluid(liquid) then return 0 end
         local ctrl, ctrl_meta = get_port_controller(pos)
