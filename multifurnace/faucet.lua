@@ -1,4 +1,5 @@
 -- Faucet is a simple liquid transfer node
+-- TODO: Use actual directions in node_io operations
 
 local S = core.get_translator("melterns")
 
@@ -69,7 +70,7 @@ local function faucet_timer (pos, elapsed)
 		local target = vector.subtract(pos, {x=0,y=1,z=0})
 		local tnode = minetest.get_node(target)
 		local treg = minetest.registered_nodes[tnode.name]
-		if not treg.node_io_can_put_liquid or not treg.node_io_can_put_liquid(target, tnode, "top") then
+		if not treg.node_io_can_put_liquid or not treg.node_io_can_put_liquid(target, tnode, "U") then
 			liquid = ""
 			break
 		end
@@ -79,9 +80,9 @@ local function faucet_timer (pos, elapsed)
 			flowcap = FAUCET_PER_SECOND
 		end
 
-		local room = treg.node_io_can_put_liquid(target, tnode, "top", liquid, flowcap)
+		local room = treg.node_io_can_put_liquid(target, tnode, "U", liquid, flowcap)
 		if room > 0 and treg.node_io_put_liquid then
-			treg.node_io_put_liquid(target, tnode, "top", nil, liquid, room)
+			treg.node_io_put_liquid(target, tnode, "U", nil, liquid, room)
 
 			if treg.on_timer then
 				update_timer(target)
@@ -91,7 +92,7 @@ local function faucet_timer (pos, elapsed)
 			break
 		end
 
-		bhindreg.node_io_take_liquid(bhind, bhindnode, "front", nil, source, room)
+		bhindreg.node_io_take_liquid(bhind, bhindnode, "N", nil, source, room)
 		if bhindreg.on_timer then
 			update_timer(bhind)
 		end
