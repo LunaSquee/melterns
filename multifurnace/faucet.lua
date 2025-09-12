@@ -18,14 +18,14 @@ local function faucet_flow (pos, meta)
 	local backnode = minetest.get_node(back)
 	local backreg = minetest.registered_nodes[backnode.name]
 
-	if not backreg.node_io_can_take_liquid or not backreg.node_io_can_take_liquid(back, backnode, "front")
+	if not backreg.node_io_can_take_liquid or not backreg.node_io_can_take_liquid(back, backnode, "N")
 		or not backreg.node_io_take_liquid then
 		return false
 	end
 
 	local stack
 	if backreg.node_io_get_liquid_stack then
-		stack = backreg.node_io_get_liquid_stack(back, backnode, "front", 1)
+		stack = backreg.node_io_get_liquid_stack(back, backnode, "N", 1)
 	end
 
 	if not stack or stack:is_empty() then
@@ -82,19 +82,24 @@ local function faucet_timer (pos, elapsed)
 
 		local room = treg.node_io_can_put_liquid(target, tnode, "U", liquid, flowcap)
 		if room > 0 and treg.node_io_put_liquid then
-			treg.node_io_put_liquid(target, tnode, "U", nil, liquid, room)
+			local take = bhindreg.node_io_take_liquid(bhind, bhindnode, "N", nil, source, room)
 
-			if treg.on_timer then
-				update_timer(target)
+			if take.millibuckets > 0 then
+				if bhindreg.on_timer then
+					update_timer(bhind)
+				end
+				treg.node_io_put_liquid(target, tnode, "U", nil, liquid, take.millibuckets)
+
+				if treg.on_timer then
+					update_timer(target)
+				end
+			else
+				liquid = ""
+				break
 			end
 		else
 			liquid = ""
 			break
-		end
-
-		bhindreg.node_io_take_liquid(bhind, bhindnode, "N", nil, source, room)
-		if bhindreg.on_timer then
-			update_timer(bhind)
 		end
 
 		refresh = true

@@ -537,18 +537,6 @@ core.register_node("multifurnace:port", {
 
         return millibuckets
     end,
-	-- TODO: remove this after updates have propagated
-    node_io_room_for_liquid = function(pos, node, side, liquid, millibuckets)
-        if not fluidity.get_metal_for_fluid(liquid) then return 0 end
-        local ctrl, ctrl_meta = get_port_controller(pos)
-        if not ctrl then return 0 end
-
-        if can_put_liquid(ctrl, ItemStack(liquid .. " " .. millibuckets)) then
-            return millibuckets
-        end
-
-        return 0
-    end,
     paramtype2 = "facedir",
     is_ground_content = false,
     on_destruct = function(pos) multifurnace.api.remove_port(pos) end,
