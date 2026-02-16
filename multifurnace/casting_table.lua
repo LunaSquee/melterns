@@ -72,6 +72,25 @@ local function set_item_entities(inv, pos)
     end
 end
 
+local function create_fluid_entities(pos, liquid, cooldown)
+    local f_ent = nil
+    local ents = core.get_objects_inside_radius(pos, 1)
+    for _, obj in pairs(ents) do
+        if obj:get_luaentity() and obj:get_luaentity().name == "multifurnace:table_fluid" then
+            f_ent = obj
+            break
+        end
+    end
+
+    if f_ent then
+        return
+    end
+
+    local vpos = vector.add(pos, {x = 0, y = 0.45, z = 0})
+    local e = core.add_entity(vpos, "multifurnace:table_fluid")
+    e:get_luaentity():init_setup(pos, liquid, cooldown)
+end
+
 local function on_timer(pos, elapsed)
     local refresh = false
     local meta = core.get_meta(pos)
@@ -93,6 +112,10 @@ local function on_timer(pos, elapsed)
     local result, required, output_cast =
         multifurnace.api.get_recipe(name, liquid, liqt)
     meta:set_int("liquid_total", required)
+
+    if liqc > 0 then
+        create_fluid_entities(pos, liquid, cooldown)
+    end
 
     if not result then return false end
 
@@ -375,6 +398,72 @@ core.register_lbm({
         local inv = meta:get_inventory()
         set_item_entities(inv, pos)
     end
+})
+
+core.register_entity("multifurnace:table_fluid", {
+    initial_properties = {
+        physical = false,
+        collide_with_objects = false,
+        visual = "cube",
+        visual_size = {x = 0.9, y = 0.05, z = 0.9},
+        textures = {},
+        pointable = false,
+        static_save = false,
+    },
+    item = "air",
+    table_pos = nil,
+    liquid = nil,
+    liquid_texture = nil,
+    cooldown = 0,
+    timer = 0,
+    init_setup = function(self, table_pos, liquid, cooldown)
+        self.table_pos = table_pos
+        self.liquid = liquid
+        self.cooldown = cooldown
+
+    		-- Set appropriate fluid texture
+    		local tiles = core.registered_nodes[liquid]
+    		if not tiles.liquid_alternative_flowing then return end
+    		local flowing = core.registered_nodes[tiles.liquid_alternative_flowing]
+    		if not flowing.tiles or type(flowing.tiles[1]) ~= "string" then return end
+    		self.liquid_texture = flowing.tiles[1]
+
+    		self.object:set_properties({textures = {
+    			flowing.tiles[1], flowing.tiles[1], flowing.tiles[1],
+    			flowing.tiles[1], flowing.tiles[1], flowing.tiles[1],
+    		}})
+    end,
+    on_step = function(self, dt)
+        if not self.table_pos then
+            self.object:remove()
+            return
+        end
+
+        local meta = core.get_meta(self.table_pos)
+        local liqc = meta:get_int("liquid_amount")
+        local liqt = meta:get_int("liquid_total")
+        if not liqc or liqc == 0 then
+            self.object:remove()
+            return
+        end
+
+        self.object:set_properties({
+            visual_size = {x = 0.9, z = 0.9, y = 0.01 + 0.09 * (liqc / liqt)}
+        })
+
+        if liqc == liqt then
+            self.timer = self.timer + dt
+            local hue = math.round(140 * (self.timer / self.cooldown))
+            self.object:set_properties({textures = {
+                self.liquid_texture .. "^[colorize:#000000:" .. hue,
+                self.liquid_texture .. "^[colorize:#000000:" .. hue,
+                self.liquid_texture .. "^[colorize:#000000:" .. hue,
+                self.liquid_texture .. "^[colorize:#000000:" .. hue,
+                self.liquid_texture .. "^[colorize:#000000:" .. hue,
+                self.liquid_texture .. "^[colorize:#000000:" .. hue,
+            }})
+        end
+    end,
 })
 
 if core.get_modpath("tubelib") then
