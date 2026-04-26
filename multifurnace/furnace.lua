@@ -422,6 +422,7 @@ core.register_node("multifurnace:controller", {
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
         inv:set_size("melt", 1)
+        meta:set_string("formspec", "")
         multifurnace.api.component_changed_nearby(pos)
     end,
     on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,

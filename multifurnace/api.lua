@@ -266,6 +266,7 @@ function multifurnace.api.check_controller(pos)
 
     if not dimensions then
         ctrl_meta:set_string("serial", "")
+        ctrl_meta:set_string("formspec", "")
         multifurnace.fluid_entity.remove(pos)
         notify_ports_removal(pos)
         update_timer(pos)
