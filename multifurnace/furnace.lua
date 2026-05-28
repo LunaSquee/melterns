@@ -41,6 +41,7 @@ local function set_hot(pos, buf, empty)
     meta:set_string("buffer1", new_one:to_string())
     meta:set_string("buffer" .. buf, empty and "" or current_one:to_string())
     if empty then meta:set_int("buffers", #stacks - 1) end
+    multifurnace.api.update_fluid_entity(pos)
 
     return true
 end
@@ -68,6 +69,7 @@ local function can_take_liquid(pos, want_mb)
 
     if found and found:is_empty() then
         clean_buffer_list(pos)
+        multifurnace.api.update_fluid_entity(pos)
         return "", 0
     end
 
@@ -100,6 +102,7 @@ local function take_liquid(pos, want_mb)
     meta:set_string("buffer1", new_stack:to_string())
 
     if new_count == 0 then clean_buffer_list(pos) end
+    multifurnace.api.update_fluid_entity(pos)
 
     return fluid, count
 end
@@ -152,6 +155,8 @@ local function put_liquid(pos, liquid)
         meta:set_string("buffer" .. buf, liquid:to_string())
         meta:set_int("buffers", buf)
     end
+
+    multifurnace.api.update_fluid_entity(pos)
 
     return true
 end

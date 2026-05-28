@@ -5,6 +5,41 @@ local function update_timer(pos)
     if not t:is_started() then t:start(1.0) end
 end
 
+local function update_fluid_entity(pos)
+    local meta = core.get_meta(pos)
+    local liquid = meta:get_string("liquid")
+    local amount = meta:get_int("liquid_amount")
+    local total = meta:get_int("liquid_total")
+    local texture_modifier = nil
+
+    if liquid == "" or amount <= 0 or total <= 0 then
+        multifurnace.fluid_entity.remove(pos)
+        return
+    end
+
+    local solidify = meta:get_int("solidify")
+    if solidify > 0 then
+        local def = core.registered_items[core.get_node(pos).name]
+        local cooldown = def._multifurnace_casting_cooldown
+        local colorize = math.floor(140 * solidify / cooldown + 0.5)
+        texture_modifier = "^[colorize:#000000:" .. colorize
+    end
+
+    multifurnace.fluid_entity.create_box(pos, {
+        x = pos.x - 0.375,
+        y = pos.y + 0.44,
+        z = pos.z - 0.375
+    }, {
+        x = 0.75,
+        y = 0.06,
+        z = 0.75
+    }, {{
+        fluid = liquid,
+        fill_ratio = amount / total,
+        texture_modifier = texture_modifier
+    }})
+end
+
 local function create_item_entity(istack, cast, tpos)
     local vpos = vector.add(tpos, {x = 0, y = 0.5, z = 0})
     local e = core.add_entity(vpos, "multifurnace:table_item")
@@ -102,6 +137,7 @@ local function on_timer(pos, elapsed)
         if solidify < cooldown then
             refresh = true
             meta:set_int("solidify", solidify + 1)
+            update_fluid_entity(pos)
         else
             liquid = ""
             liqc = 0
@@ -113,6 +149,7 @@ local function on_timer(pos, elapsed)
             meta:set_string("liquid", liquid)
             meta:set_int("liquid_amount", liqc)
             meta:set_int("solidify", 0)
+            update_fluid_entity(pos)
 
             if output_cast then
                 inv:set_stack("item", 1, "")
@@ -190,6 +227,7 @@ core.register_node("multifurnace:casting_table", {
                         meta:set_int("liquid_amount", 0)
                         meta:set_string("liquid", "")
                         meta:set_int("solidify", 0)
+                        update_fluid_entity(pos)
                     end
 
                     set_item_entities(inv, pos)
@@ -223,6 +261,9 @@ core.register_node("multifurnace:casting_table", {
         inv:set_size("cast", 1)
         inv:set_size("item", 1)
     end,
+    on_destruct = function(pos)
+        multifurnace.fluid_entity.remove(pos)
+    end,
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         local i = itemstack:get_name()
         local meta = core.get_meta(pos)
@@ -253,6 +294,7 @@ core.register_node("multifurnace:casting_table", {
                     meta:set_int("liquid_amount", 0)
                     meta:set_string("liquid", "")
                     meta:set_int("solidify", 0)
+                    update_fluid_entity(pos)
                 end
 
                 to_give = inv:get_stack("cast", 1)
@@ -325,6 +367,7 @@ core.register_node("multifurnace:casting_table", {
 
         meta:set_string("liquid", liquid)
         meta:set_int("liquid_amount", liqc + add)
+        update_fluid_entity(pos)
         update_timer(pos)
 
         return leftovers
@@ -374,6 +417,7 @@ core.register_lbm({
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
         set_item_entities(inv, pos)
+        update_fluid_entity(pos)
     end
 })
 
@@ -420,6 +464,7 @@ if core.get_modpath("tubelib") then
                         meta:set_int("liquid_amount", 0)
                         meta:set_string("liquid", "")
                         meta:set_int("solidify", 0)
+                        update_fluid_entity(pos)
                     end
 
                     local removing = inv:get_stack("cast", 1)

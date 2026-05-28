@@ -172,6 +172,45 @@ local function notify_ports_removal(pos)
     end
 end
 
+local function get_buffer_layers(pos)
+    local meta = core.get_meta(pos)
+    local count = meta:get_int("buffers")
+    local layers = {}
+
+    for i = 1, count do
+        local stack = ItemStack(meta:get_string("buffer" .. i))
+        if not stack:is_empty() then
+            table.insert(layers, {
+                fluid = stack:get_name(),
+                amount = stack:get_count()
+            })
+        end
+    end
+
+    return layers
+end
+
+function multifurnace.api.update_fluid_entity(pos)
+    local info = multifurnace.api.get_controller_info(pos)
+    if not info then
+        multifurnace.fluid_entity.remove(pos)
+        return
+    end
+
+    local layers = get_buffer_layers(pos)
+    local dimensions = vector.subtract(info.box_max, info.box_min)
+    local capacity = info.volume * 1000
+
+    for _, layer in ipairs(layers) do
+        layer.fill_ratio = layer.amount / capacity
+    end
+
+    multifurnace.fluid_entity.create_box(pos, vector.subtract(info.box_min, 0.5),
+                                         vector.add(dimensions,
+                                                    {x = 1, y = 0, z = 1}),
+                                         layers)
+end
+
 function multifurnace.api.structure_detect(node, pos, max_dim)
     local back = vector.add(pos, minetest.facedir_to_dir(node.param2))
     local center, min, max = detect_center(back, max_dim - 1)
@@ -211,7 +250,7 @@ function multifurnace.api.check_controller(pos)
     end
 
     local def = core.registered_nodes[node.name]
-    local dimensions, ports, tanks, min =
+    local dimensions, ports, tanks, center, min =
         multifurnace.api.structure_detect(node, pos,
                                           def._multifurnace_max_dimensions or 8)
     local key = core.pos_to_string(pos)
@@ -219,6 +258,7 @@ function multifurnace.api.check_controller(pos)
 
     if not dimensions then
         ctrl_meta:set_string("serial", "")
+        multifurnace.fluid_entity.remove(pos)
         notify_ports_removal(pos)
         update_timer(pos)
         return
@@ -229,6 +269,7 @@ function multifurnace.api.check_controller(pos)
     for other_key, other_ctrl in pairs(multifurnace.loaded_controllers) do
         if key ~= other_key and vector.equals(other_ctrl.box_min, min) and
             vector.equals(other_ctrl.box_max, bounds_end) then
+            multifurnace.fluid_entity.remove(pos)
             update_timer(pos)
             return
         end
@@ -248,11 +289,13 @@ function multifurnace.api.check_controller(pos)
         volume = volume,
         box_min = min,
         box_max = bounds_end,
+        center = center,
         max_dim = def._multifurnace_max_dimensions,
         fuel_consumption = def._multifurnace_fuel_consumption,
         ports = ports,
         tanks = tanks
     }
+    multifurnace.api.update_fluid_entity(pos)
     update_timer(pos)
 end
 
@@ -264,6 +307,7 @@ function multifurnace.api.remove_controller(pos)
     end
 
     local key = core.pos_to_string(pos)
+    multifurnace.fluid_entity.remove(pos)
     notify_ports_removal(pos)
     multifurnace.loaded_controllers[key] = nil
     multifurnace.api.component_changed_nearby(pos)
