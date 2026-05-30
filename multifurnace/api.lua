@@ -394,3 +394,23 @@ function multifurnace.api.get_recipe(cast_item, liquid, current_total)
 
     return result, required, output_cast
 end
+
+function multifurnace.api.get_basin_recipe(liquid, current_total)
+    local required = current_total
+    local amount = metal_melter.spec.block
+
+    if current_total ~= amount then required = amount end
+    if liquid == "" then return nil, required end
+
+    local metal = fluidity.get_metal_for_fluid(liquid)
+    local types = metal and fluidity.melts[metal]
+    local blocks = types and types.block
+
+    if not blocks then return nil, required end
+
+    for _, item in pairs(blocks) do
+        if core.registered_items[item] then return item, required end
+    end
+
+    return nil, required
+end
