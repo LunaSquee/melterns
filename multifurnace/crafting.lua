@@ -40,3 +40,12 @@ core.register_craft({
         {'metal_melter:heated_brick', '', 'metal_melter:heated_brick'}
     }
 })
+
+core.register_craft({
+    output = 'multifurnace:casting_basin',
+    recipe = {
+        {'metal_melter:heated_brick', '', 'metal_melter:heated_brick'},
+        {'metal_melter:heated_brick', '', 'metal_melter:heated_brick'},
+        {'metal_melter:heated_brick', 'metal_melter:heated_brick', 'metal_melter:heated_brick'}
+    }
+})
