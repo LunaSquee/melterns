@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-23 18:24+0300\n"
-"PO-Revision-Date: 2025-04-23 18:28+0300\n"
+"POT-Creation-Date: 2026-06-08 21:31+0300\n"
+"PO-Revision-Date: 2026-06-08 22:00+0300\n"
 "Last-Translator: <evert@lunasqu.ee>\n"
 "Language-Team: Estonian <linux-ee@lists.eenet.ee>\n"
 "Language: et\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.9\n"
 
 #: fluidity/florbs.lua:39
 msgid "Contains"
@@ -50,51 +50,51 @@ msgstr "Voolav sula @1"
 msgid "Molten @1 Bucket"
 msgstr "Ämber - sula @1"
 
-#: fluidity/register.lua:6 tinkering/materials.lua:276
+#: fluidity/register.lua:6 tinkering/materials.lua:282
 msgid "Steel"
 msgstr "Teras"
 
-#: fluidity/register.lua:7 tinkering/materials.lua:277
+#: fluidity/register.lua:7 tinkering/materials.lua:283
 msgid "Copper"
 msgstr "Vask"
 
-#: fluidity/register.lua:8 tinkering/materials.lua:278
+#: fluidity/register.lua:8 tinkering/materials.lua:284
 msgid "Tin"
 msgstr "Tina"
 
-#: fluidity/register.lua:9 tinkering/materials.lua:279
+#: fluidity/register.lua:9 tinkering/materials.lua:285
 msgid "Bronze"
 msgstr "Pronks"
 
-#: fluidity/register.lua:10 tinkering/materials.lua:280
+#: fluidity/register.lua:10 tinkering/materials.lua:286
 msgid "Gold"
 msgstr "Kuld"
 
-#: fluidity/register.lua:11 tinkering/materials.lua:281
+#: fluidity/register.lua:11 tinkering/materials.lua:287
 msgid "Mese"
 msgstr "Mese"
 
-#: fluidity/register.lua:12 tinkering/materials.lua:273
+#: fluidity/register.lua:12 tinkering/materials.lua:279
 msgid "Obsidian"
 msgstr "Obsidiaan"
 
-#: fluidity/register.lua:13 tinkering/materials.lua:288
+#: fluidity/register.lua:13 tinkering/materials.lua:294
 msgid "Lead"
 msgstr "Plii"
 
-#: fluidity/register.lua:14 tinkering/materials.lua:289
+#: fluidity/register.lua:14 tinkering/materials.lua:295
 msgid "Chromium"
 msgstr "Kroom"
 
-#: fluidity/register.lua:15 tinkering/materials.lua:290
+#: fluidity/register.lua:15 tinkering/materials.lua:296
 msgid "Zinc"
 msgstr "Tsink"
 
-#: fluidity/register.lua:16 tinkering/materials.lua:284
+#: fluidity/register.lua:16 tinkering/materials.lua:290
 msgid "Silver"
 msgstr "Hõbe"
 
-#: fluidity/register.lua:17 tinkering/materials.lua:285
+#: fluidity/register.lua:17 tinkering/materials.lua:291
 msgid "Mithril"
 msgstr "Miitril"
 
@@ -160,9 +160,9 @@ msgstr "Soojuskruus"
 msgid "Heat Exchanger Plate"
 msgstr "Soojusvaheti plaat"
 
-#: metal_melter/components.lua:57 multifurnace/casting_table.lua:132
+#: metal_melter/components.lua:57 multifurnace/casting_table.lua:169
 msgid "Casting Table"
-msgstr "Valulaud"
+msgstr "Valamislaud"
 
 #: metal_melter/components.lua:79
 msgid "Heated Tank"
@@ -173,15 +173,19 @@ msgstr "Kuumutatud paak"
 msgid "Metal Melter"
 msgstr "Metallisulataja"
 
-#: multifurnace/faucet.lua:109
+#: multifurnace/casting_basin.lua:119
+msgid "Casting Basin"
+msgstr "Valamisbassein"
+
+#: multifurnace/faucet.lua:114
 msgid "Multifurnace Faucet"
 msgstr "Multiahju kraan"
 
-#: multifurnace/furnace.lua:398
+#: multifurnace/furnace.lua:403
 msgid "Multifurnace Controller"
 msgstr "Multiahju juhtplokk"
 
-#: multifurnace/furnace.lua:481
+#: multifurnace/furnace.lua:486
 msgid "Multifurnace Port"
 msgstr "Multiahju ava"
 
@@ -243,27 +247,27 @@ msgstr "Vastupidav"
 msgid "Lethal"
 msgstr "Surmav"
 
-#: tinkering/materials.lua:233 tinkering/materials.lua:294
+#: tinkering/materials.lua:235 tinkering/materials.lua:300
 msgid "Diamond"
 msgstr "Teemant"
 
-#: tinkering/materials.lua:270
+#: tinkering/materials.lua:276
 msgid "Flint"
 msgstr "Tulekivi"
 
-#: tinkering/materials.lua:271
+#: tinkering/materials.lua:277
 msgid "Wood"
 msgstr "Puit"
 
-#: tinkering/materials.lua:272
+#: tinkering/materials.lua:278
 msgid "Stone"
 msgstr "Kivi"
 
-#: tinkering/materials.lua:298
+#: tinkering/materials.lua:304
 msgid "Redstone"
 msgstr "Redstone"
 
-#: tinkering/materials.lua:307
+#: tinkering/materials.lua:315
 msgid "Netherite"
 msgstr "Netherite"
 
@@ -279,7 +283,7 @@ msgstr "Šablooni laud"
 msgid "Anvil"
 msgstr "Alasi"
 
-#: tinkering/nodes/tool_station.lua:66 tinkering/nodes/tool_station.lua:536
+#: tinkering/nodes/tool_station.lua:66 tinkering/nodes/tool_station.lua:672
 msgid "Tool Station"
 msgstr "Tööriistajaam"
 
@@ -291,70 +295,70 @@ msgstr "šabloon"
 msgid "Blank Pattern"
 msgstr "Šablooni toorik"
 
-#: tinkering/tool.lua:5
+#: tinkering/tool.lua:7
 msgid "Pickaxe"
 msgstr "Kirka"
 
-#: tinkering/tool.lua:20
+#: tinkering/tool.lua:22
 msgid "Axe"
 msgstr "Kirves"
 
-#: tinkering/tool.lua:35
+#: tinkering/tool.lua:37
 msgid "Sword"
 msgstr "Mõõk"
 
-#: tinkering/tool.lua:50
+#: tinkering/tool.lua:52
 msgid "Shovel"
 msgstr "Labidas"
 
-#: tinkering/tool.lua:68
+#: tinkering/tool.lua:70
 msgid "Pickaxe Head"
 msgstr "Kirka pea"
 
-#: tinkering/tool.lua:69
+#: tinkering/tool.lua:71
 msgid "@1 Pickaxe Head"
 msgstr "@1 kirka pea"
 
-#: tinkering/tool.lua:74
+#: tinkering/tool.lua:76
 msgid "Axe Head"
 msgstr "Kirve pea"
 
-#: tinkering/tool.lua:75
+#: tinkering/tool.lua:77
 msgid "@1 Axe Head"
 msgstr "@1 kirve pea"
 
-#: tinkering/tool.lua:80
+#: tinkering/tool.lua:82
 msgid "Sword Blade"
 msgstr "Mõõga tera"
 
-#: tinkering/tool.lua:81
+#: tinkering/tool.lua:83
 msgid "@1 Sword Blade"
 msgstr "@1 mõõga tera"
 
-#: tinkering/tool.lua:86
+#: tinkering/tool.lua:88
 msgid "Shovel Head"
 msgstr "Labida pea"
 
-#: tinkering/tool.lua:87
+#: tinkering/tool.lua:89
 msgid "@1 Shovel Head"
 msgstr "@1 labida pea"
 
-#: tinkering/tool.lua:92
+#: tinkering/tool.lua:94
 msgid "Tool Rod"
 msgstr "Tööriistavarras"
 
-#: tinkering/tool.lua:93
+#: tinkering/tool.lua:95
 msgid "@1 Tool Rod"
 msgstr "@1 tööriistavarras"
 
-#: tinkering/tool.lua:98
+#: tinkering/tool.lua:100
 msgid "Tool Binding"
 msgstr "Tööriista köide"
 
-#: tinkering/tool.lua:99
+#: tinkering/tool.lua:101
 msgid "@1 Tool Binding"
 msgstr "@1 tööriista köide"
 
-#: tinkering/tool.lua:307 tinkering/tool.lua:391
+#: tinkering/tool.lua:384 tinkering/tool.lua:477
 msgid "Broken"
 msgstr "Katkine"
