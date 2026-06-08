@@ -7,6 +7,7 @@ local modpath = minetest.get_modpath(minetest.get_current_modname())
 multifurnace.modpath = modpath
 
 dofile(modpath .. "/api.lua")
+dofile(modpath .. "/fluid_entity.lua")
 
 dofile(modpath .. "/faucet.lua")
 dofile(modpath .. "/casting_table.lua")
