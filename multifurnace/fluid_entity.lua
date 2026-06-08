@@ -23,12 +23,6 @@ local function get_entity_textures(fluid, modifier)
     return {texture, texture, texture, texture, texture, texture}
 end
 
-local function debug_log(label, message)
-    if label then
-        core.log("action", "[multifurnace:" .. label .. "] " .. message)
-    end
-end
-
 local function get_glow(fluid)
     local def = fluid and core.registered_nodes[fluid]
     return def and def.light_source or 0
@@ -57,8 +51,6 @@ function multifurnace.fluid_entity.create_box(owner_pos, box_min, box_size, laye
     for _, layer in ipairs(layers) do
         local height = box_size.y * layer.fill_ratio
         if height > 0 then
-            local base_texture = get_texture(layer.fluid) or
-                                     get_texture(fluidity.external.items.lava)
             local textures = get_entity_textures(layer.fluid,
                                                  layer.texture_modifier)
             local glow = get_glow(layer.fluid)
@@ -67,14 +59,6 @@ function multifurnace.fluid_entity.create_box(owner_pos, box_min, box_size, laye
                 y = box_min.y + y_offset + height / 2,
                 z = box_min.z + box_size.z / 2
             }
-            debug_log(layer.debug_label, "calculated fluid=" ..
-                          tostring(layer.fluid) .. " fill_ratio=" ..
-                          tostring(layer.fill_ratio) .. " height=" ..
-                          tostring(height) .. " center=" ..
-                          core.pos_to_string(center) .. " base_texture=" ..
-                          tostring(base_texture) .. " modifier=" ..
-                          tostring(layer.texture_modifier) .. " final_texture=" ..
-                          tostring(textures[1]) .. " glow=" .. tostring(glow))
             local object = core.add_entity(center, ENTITY_NAME)
 
             if object then
@@ -84,17 +68,7 @@ function multifurnace.fluid_entity.create_box(owner_pos, box_min, box_size, laye
                     textures = textures,
                     glow = glow
                 })
-                local properties = object:get_properties()
-                debug_log(layer.debug_label, "entity updated texture=" ..
-                              tostring(properties.textures and
-                                           properties.textures[1]) ..
-                              " visual_size=" ..
-                              core.serialize(properties.visual_size) .. " glow=" ..
-                              tostring(properties.glow))
                 meta:set_string(META_CENTER .. created, core.pos_to_string(center))
-            else
-                debug_log(layer.debug_label, "core.add_entity failed at " ..
-                              core.pos_to_string(center))
             end
 
             y_offset = y_offset + height

@@ -12,14 +12,8 @@ local function update_fluid_entity(pos)
     local total = meta:get_int("liquid_total")
     local texture_modifier = nil
     local solidify = meta:get_int("solidify")
-    local fields = meta:to_table().fields or {}
-    core.log("action", "[multifurnace:casting_basin] update pos=" ..
-                 core.pos_to_string(pos) .. " metadata=" .. core.serialize(fields))
 
     if liquid == "" or amount <= 0 or total <= 0 then
-        core.log("action", "[multifurnace:casting_basin] removing fluid entity" ..
-                     " liquid=" .. tostring(liquid) .. " amount=" ..
-                     tostring(amount) .. " total=" .. tostring(total))
         multifurnace.fluid_entity.remove(pos)
         return
     end
@@ -42,8 +36,7 @@ local function update_fluid_entity(pos)
     }, {{
         fluid = liquid,
         fill_ratio = amount / total,
-        texture_modifier = texture_modifier,
-        debug_label = "casting_basin"
+        texture_modifier = texture_modifier
     }})
 end
 
