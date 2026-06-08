@@ -241,6 +241,14 @@ end
 -- Furnace lifecycle --
 -----------------------
 
+local function swap_node(pos, node, name)
+    if node.name == name then
+        return
+    end
+    node.name = name
+    core.swap_node(pos, node)
+end
+
 function multifurnace.api.check_controller(pos)
     local check_serial = math.random(10000, 99999)
     local node = core.get_node_or_nil(pos)
@@ -250,6 +258,7 @@ function multifurnace.api.check_controller(pos)
     end
 
     local def = core.registered_nodes[node.name]
+    local states = def._multifurnace_states or {}
     local dimensions, ports, tanks, center, min =
         multifurnace.api.structure_detect(node, pos,
                                           def._multifurnace_max_dimensions or 8)
@@ -258,9 +267,11 @@ function multifurnace.api.check_controller(pos)
 
     if not dimensions then
         ctrl_meta:set_string("serial", "")
+        ctrl_meta:set_string("formspec", "")
         multifurnace.fluid_entity.remove(pos)
         notify_ports_removal(pos)
         update_timer(pos)
+        swap_node(pos, node, states.inactive or node.name)
         return
     end
 
@@ -283,6 +294,8 @@ function multifurnace.api.check_controller(pos)
     end
 
     local volume = calculate_volume(dimensions)
+    swap_node(pos, node, states.active or node.name)
+    def = core.registered_nodes[node.name]
     multifurnace.loaded_controllers[key] = {
         controller = pos,
         serial = check_serial,

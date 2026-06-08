@@ -415,6 +415,43 @@ core.register_node("multifurnace:controller", {
         tubedevice = 1,
         tubedevice_receiver = 1
     },
+    paramtype2 = "facedir",
+    is_ground_content = false,
+    -- on_timer = controller_timer,
+    on_construct = function(pos)
+        local meta = core.get_meta(pos)
+        local inv = meta:get_inventory()
+        inv:set_size("melt", 1)
+        meta:set_string("formspec", "")
+        multifurnace.api.component_changed_nearby(pos)
+    end,
+    on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
+    _mcl_hardness = 2,
+    _mcl_blast_resistance = 2,
+    _multifurnace_fuel_consumption = 10,
+    _multifurnace_max_dimensions = 8,
+    _multifurnace_states = {
+        inactive = "multifurnace:controller",
+        active = "multifurnace:controller_active"
+    },
+})
+
+core.register_node("multifurnace:controller_active", {
+    description = S("Multifurnace Controller"),
+    tiles = {
+        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png",
+        "metal_melter_heatbrick.png^(multifurnace_controller_face.png^[colorize:#DD7C00:60)"
+    },
+    groups = {
+        cracky = 3,
+        pickaxey = 1,
+        multifurnace = 1,
+        multifurnace_controller = 1,
+        tubedevice = 1,
+        tubedevice_receiver = 1
+    },
     tube = {
         can_remove = function() return 0 end,
         insert_object = function(pos, node, stack, direction)
@@ -479,8 +516,18 @@ core.register_node("multifurnace:controller", {
     _mcl_hardness = 2,
     _mcl_blast_resistance = 2,
     _multifurnace_fuel_consumption = 10,
-    _multifurnace_max_dimensions = 8
+    _multifurnace_max_dimensions = 8,
+    _multifurnace_states = {
+        inactive = "multifurnace:controller",
+        active = "multifurnace:controller_active"
+    },
+    drop = "multifurnace:controller",
 })
+
+-- Add entry alias for the Help
+if minetest.get_modpath("doc") then
+	doc.add_entry_alias("nodes", "multifurnace:controller", "nodes", "multifurnace:controller_active")
+end
 
 core.register_node("multifurnace:port", {
     description = S("Multifurnace Port"),
@@ -563,23 +610,20 @@ core.override_item("metal_melter:heated_bricks", {
 
 core.register_abm({
     label = "Update Multifurnace structures",
-    nodenames = {"multifurnace:controller"},
-    without_neighbors = {"multifurnace:controller"},
+    nodenames = {"multifurnace:controller", "multifurnace:controller_active"},
+    without_neighbors = {"multifurnace:controller", "multifurnace:controller_active"},
     interval = 5,
     chance = 1,
     action = function(pos) multifurnace.api.detect_changes(pos) end
 })
 
-core.register_lbm({
-    name = "multifurnace:load_controllers",
-    nodenames = {"multifurnace:controller"},
-    action = function(pos) multifurnace.api.detect_changes(pos) end
-})
-
 if core.get_modpath("tubelib") then
     core.override_item("multifurnace:controller", {
+        after_dig_node = function(pos) tubelib.remove_node(pos) end
+    })
+    core.override_item("multifurnace:controller_active", {
         after_place_node = function(pos, placer)
-            tubelib.add_node(pos, "multifurnace:controller")
+            tubelib.add_node(pos, "multifurnace:controller_active")
         end,
         after_dig_node = function(pos) tubelib.remove_node(pos) end
     })
@@ -603,7 +647,7 @@ if core.get_modpath("tubelib") then
         return true
     end
 
-    tubelib.register_node("multifurnace:controller", {}, {
+    tubelib.register_node("multifurnace:controller_active", {}, {
         on_pull_item = function() return nil end,
         on_push_item = function(pos, side, item)
             return tubelib_insert(pos, side, item)
