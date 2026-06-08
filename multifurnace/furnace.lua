@@ -430,6 +430,10 @@ core.register_node("multifurnace:controller", {
     _mcl_blast_resistance = 2,
     _multifurnace_fuel_consumption = 10,
     _multifurnace_max_dimensions = 8,
+    _multifurnace_states = {
+        inactive = "multifurnace:controller",
+        active = "multifurnace:controller_active"
+    },
 })
 
 core.register_node("multifurnace:controller_active", {
@@ -513,6 +517,10 @@ core.register_node("multifurnace:controller_active", {
     _mcl_blast_resistance = 2,
     _multifurnace_fuel_consumption = 10,
     _multifurnace_max_dimensions = 8,
+    _multifurnace_states = {
+        inactive = "multifurnace:controller",
+        active = "multifurnace:controller_active"
+    },
     drop = "multifurnace:controller",
 })
 

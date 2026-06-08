@@ -258,6 +258,7 @@ function multifurnace.api.check_controller(pos)
     end
 
     local def = core.registered_nodes[node.name]
+    local states = def._multifurnace_states or {}
     local dimensions, ports, tanks, center, min =
         multifurnace.api.structure_detect(node, pos,
                                           def._multifurnace_max_dimensions or 8)
@@ -270,7 +271,7 @@ function multifurnace.api.check_controller(pos)
         multifurnace.fluid_entity.remove(pos)
         notify_ports_removal(pos)
         update_timer(pos)
-        swap_node(pos, node, "multifurnace:controller")
+        swap_node(pos, node, states.inactive or node.name)
         return
     end
 
@@ -293,8 +294,8 @@ function multifurnace.api.check_controller(pos)
     end
 
     local volume = calculate_volume(dimensions)
-    swap_node(pos, node, "multifurnace:controller_active")
-    def = core.registered_nodes["multifurnace:controller_active"]
+    swap_node(pos, node, states.active or node.name)
+    def = core.registered_nodes[node.name]
     multifurnace.loaded_controllers[key] = {
         controller = pos,
         serial = check_serial,
