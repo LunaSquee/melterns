@@ -11,13 +11,19 @@ local function update_fluid_entity(pos)
     local amount = meta:get_int("liquid_amount")
     local total = meta:get_int("liquid_total")
     local texture_modifier = nil
+    local solidify = meta:get_int("solidify")
+    local fields = meta:to_table().fields or {}
+    core.log("action", "[multifurnace:casting_basin] update pos=" ..
+                 core.pos_to_string(pos) .. " metadata=" .. core.serialize(fields))
 
     if liquid == "" or amount <= 0 or total <= 0 then
+        core.log("action", "[multifurnace:casting_basin] removing fluid entity" ..
+                     " liquid=" .. tostring(liquid) .. " amount=" ..
+                     tostring(amount) .. " total=" .. tostring(total))
         multifurnace.fluid_entity.remove(pos)
         return
     end
 
-    local solidify = meta:get_int("solidify")
     if solidify > 0 then
         local def = core.registered_items[core.get_node(pos).name]
         local cooldown = def._multifurnace_casting_cooldown
@@ -36,14 +42,18 @@ local function update_fluid_entity(pos)
     }, {{
         fluid = liquid,
         fill_ratio = amount / total,
-        texture_modifier = texture_modifier
+        texture_modifier = texture_modifier,
+        debug_label = "casting_basin"
     }})
 end
 
 local function create_item_entity(istack, pos)
     local vpos = vector.add(pos, {x = 0, y = 0.2, z = 0})
     local e = core.add_entity(vpos, "multifurnace:table_item")
-    e:set_properties({visual_size = {x = 0.32, y = 0.32, z = 0.32}})
+    e:set_properties({
+        visual_size = {x = 0.32, y = 0.32, z = 0.32},
+        collisionbox = {0, 0.31, 0, 0, 0.31, 0}
+    })
     e:get_luaentity():set_item(istack:get_name())
     e:get_luaentity():set_is_cast(false)
 end
