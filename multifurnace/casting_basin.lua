@@ -5,6 +5,41 @@ local function update_timer(pos)
     if not t:is_started() then t:start(1.0) end
 end
 
+local function update_fluid_entity(pos)
+    local meta = core.get_meta(pos)
+    local liquid = meta:get_string("liquid")
+    local amount = meta:get_int("liquid_amount")
+    local total = meta:get_int("liquid_total")
+    local texture_modifier = nil
+
+    if liquid == "" or amount <= 0 or total <= 0 then
+        multifurnace.fluid_entity.remove(pos)
+        return
+    end
+
+    local solidify = meta:get_int("solidify")
+    if solidify > 0 then
+        local def = core.registered_items[core.get_node(pos).name]
+        local cooldown = def._multifurnace_casting_cooldown
+        local colorize = math.floor(140 * solidify / cooldown + 0.5)
+        texture_modifier = "^[colorize:#000000:" .. colorize
+    end
+
+    multifurnace.fluid_entity.create_box(pos, {
+        x = pos.x - 0.3,
+        y = pos.y - 0.24,
+        z = pos.z - 0.3
+    }, {
+        x = 0.6,
+        y = 0.77,
+        z = 0.6
+    }, {{
+        fluid = liquid,
+        fill_ratio = amount / total,
+        texture_modifier = texture_modifier
+    }})
+end
+
 local function create_item_entity(istack, pos)
     local vpos = vector.add(pos, {x = 0, y = 0.2, z = 0})
     local e = core.add_entity(vpos, "multifurnace:table_item")
@@ -62,12 +97,14 @@ local function on_timer(pos, elapsed)
     if liqc >= required then
         if solidify < cooldown then
             meta:set_int("solidify", solidify + 1)
+            update_fluid_entity(pos)
             return true
         end
 
         meta:set_string("liquid", "")
         meta:set_int("liquid_amount", 0)
         meta:set_int("solidify", 0)
+        update_fluid_entity(pos)
         inv:set_stack("item", 1, ItemStack(result))
         set_item_entity(inv, pos)
     end
@@ -133,6 +170,9 @@ core.register_node("multifurnace:casting_basin", {
     on_construct = function(pos)
         local inv = core.get_meta(pos):get_inventory()
         inv:set_size("item", 1)
+    end,
+    on_destruct = function(pos)
+        multifurnace.fluid_entity.remove(pos)
     end,
     on_punch = function(pos, node, puncher, pointed_thing)
         local meta = core.get_meta(pos)
@@ -211,6 +251,7 @@ core.register_node("multifurnace:casting_basin", {
         meta:set_string("liquid", liquid)
         meta:set_int("liquid_amount", liqc + add)
         meta:set_int("liquid_total", required)
+        update_fluid_entity(pos)
         update_timer(pos)
 
         return leftovers
@@ -238,6 +279,7 @@ core.register_lbm({
     action = function(pos, node)
         local inv = core.get_meta(pos):get_inventory()
         set_item_entity(inv, pos)
+        update_fluid_entity(pos)
     end
 })
 

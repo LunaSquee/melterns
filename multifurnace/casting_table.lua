@@ -27,7 +27,7 @@ local function update_fluid_entity(pos)
 
     multifurnace.fluid_entity.create_box(pos, {
         x = pos.x - 0.375,
-        y = pos.y + 0.44,
+        y = pos.y + 0.47,
         z = pos.z - 0.375
     }, {
         x = 0.75,
