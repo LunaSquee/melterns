@@ -14,3 +14,7 @@ dofile(modpath .. "/casting_table.lua")
 dofile(modpath .. "/casting_basin.lua")
 dofile(modpath .. "/furnace.lua")
 dofile(modpath .. "/crafting.lua")
+
+if core.get_modpath("mcl_craftguide") then
+	dofile(modpath .. "/craftguide.lua")
+end
