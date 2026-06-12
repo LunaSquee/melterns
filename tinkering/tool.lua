@@ -13,9 +13,10 @@ tinkering.tools = {
 			rod     = "tool_rod"
 		},
 		textures = {
-			main   = "tinkering_pickaxe_head.png",
-			second = "tinkering_overlay_handle_pickaxe.png",
-			offset = "1,-1"
+			main    = "tinkering_pickaxe_head.png",
+			second  = "tinkering_overlay_handle_pickaxe.png",
+			binding = "tinkering_overlay_binding_pickaxe.png",
+			offset  = "1,-1"
 		}
 	},
 	axe = {
@@ -28,9 +29,10 @@ tinkering.tools = {
 			rod     = "tool_rod"
 		},
 		textures = {
-			main   = "tinkering_axe_head.png",
-			second = "tinkering_overlay_handle_axe.png",
-			offset = "1,-3"
+			main    = "tinkering_axe_head.png",
+			second  = "tinkering_overlay_handle_axe.png",
+			binding = "tinkering_overlay_binding_axe.png",
+			offset  = "1,-3"
 		}
 	},
 	sword = {
@@ -43,9 +45,10 @@ tinkering.tools = {
 			rod     = "tool_rod"
 		},
 		textures = {
-			main   = "tinkering_sword_blade.png",
-			second = "tinkering_overlay_handle_sword.png",
-			offset = "0,0"
+			main    = "tinkering_sword_blade.png",
+			second  = "tinkering_overlay_handle_sword.png",
+			binding = "tinkering_overlay_binding_sword.png",
+			offset  = "0,0"
 		}
 	},
 	shovel = {
@@ -58,9 +61,10 @@ tinkering.tools = {
 			rod     = "tool_rod"
 		},
 		textures = {
-			main   = "tinkering_shovel_head.png",
-			second = "tinkering_overlay_handle_shovel.png",
-			offset = "3,-3"
+			main    = "tinkering_shovel_head.png",
+			second  = "tinkering_overlay_handle_shovel.png",
+			binding = "tinkering_overlay_binding_shovel.png",
+			offset  = "3,-3"
 		}
 	},
 }
@@ -280,13 +284,22 @@ local function apply_modifiers(materials, basegroup, dgroup, modifiers)
 	return groups, dmg, tags, maxlevel
 end
 
--- Generate a tool texture based on tool type, main material (head) and rod material (handle).
-function tinkering.compose_tool_texture(tooltype, main, rod)
+-- Generate a tool texture based on the head, handle, and binding materials.
+function tinkering.compose_tool_texture(tooltype, main, rod, binding)
 	local mat_main = tinkering.materials[main]
 	local mat_rod  = tinkering.materials[rod]
+	local mat_binding = tinkering.materials[binding]
 	local tool_data = tinkering.tools[tooltype].textures
 
-	return tinkering.combine_textures(tool_data.main, tool_data.second, mat_main.color, mat_rod.color, tool_data.offset)
+	return tinkering.combine_textures(
+		tool_data.main,
+		tool_data.second,
+		mat_main.color,
+		mat_rod.color,
+		tool_data.offset,
+		tool_data.binding,
+		mat_binding.color
+	)
 end
 
 -- Generate tool capabilities based on tool type and materials
@@ -390,7 +403,7 @@ end
 
 -- Return tool definition
 function tinkering.tool_definition(tool_type, materials, modifiers)
-	if not materials["main"] or not materials["rod"] then
+	if not materials["main"] or not materials["rod"] or not materials["binding"] then
 		return nil
 	end
 
@@ -403,7 +416,12 @@ function tinkering.tool_definition(tool_type, materials, modifiers)
 		groups            = {tinker_tool = 1, ["mainly_"..materials.main] = 1, ["tinker_"..tool_type] = 1, not_in_creative_inventory = 1},
 		after_use         = after_use_handler,
 		_is_broken        = false,
-		inventory_image   = tinkering.compose_tool_texture(tool_type, materials.main, materials.rod)
+		inventory_image   = tinkering.compose_tool_texture(
+			tool_type,
+			materials.main,
+			materials.rod,
+			materials.binding
+		)
 	}
 
 	return tool_tree, tags
@@ -539,7 +557,7 @@ end
 -- Register new tool material
 function tinkering.register_material_tool(material)
 	for t,_ in pairs(tinkering.tools) do
-		tinkering.create_tool(t, {main=material,binding="wood",rod="wood"}, false, nil)
+		tinkering.create_tool(t, {main=material,binding="bronze",rod="wood"}, false, nil)
 	end
 end
 
@@ -643,9 +661,10 @@ end
 --		rod     = "tool_rod"      -- Mandatory rod component
 --	},
 --	textures = {
---		main   = "tinkering_pickaxe_head.png",           -- Head (main) Texture
---		second = "tinkering_overlay_handle_pickaxe.png", -- Overlay (typically a handle)
---		offset = "1,-1"                                  -- Head's offset on the texture
+--		main    = "tinkering_pickaxe_head.png",            -- Head (main) texture
+--		second  = "tinkering_overlay_handle_pickaxe.png",  -- Handle overlay
+--		binding = "tinkering_overlay_binding_pickaxe.png", -- Binding overlay
+--		offset  = "1,-1"                                   -- Head's offset on the texture
 --	}
 --}
 --
