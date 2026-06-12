@@ -399,60 +399,69 @@ end
 -- Registrations --
 -------------------
 
-core.register_node("multifurnace:controller", {
-    description = S("Multifurnace Controller"),
-    tiles = {
-        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
-        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
-        "metal_melter_heatbrick.png",
-        "metal_melter_heatbrick.png^multifurnace_controller_face.png"
-    },
-    groups = {
-        cracky = 3,
-        pickaxey = 1,
-        multifurnace = 1,
-        multifurnace_controller = 1,
-        tubedevice = 1,
-        tubedevice_receiver = 1
-    },
-    paramtype2 = "facedir",
-    is_ground_content = false,
-    -- on_timer = controller_timer,
-    on_construct = function(pos)
-        local meta = core.get_meta(pos)
-        local inv = meta:get_inventory()
-        inv:set_size("melt", 1)
-        meta:set_string("formspec", "")
-        multifurnace.api.component_changed_nearby(pos)
-    end,
-    on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
-    _mcl_hardness = 2,
-    _mcl_blast_resistance = 2,
-    _multifurnace_fuel_consumption = 10,
-    _multifurnace_max_dimensions = 8,
-    _multifurnace_states = {
-        inactive = "multifurnace:controller",
-        active = "multifurnace:controller_active"
-    },
-})
+local is_mtg = fluidity.external.is_mtg
+local is_mcl = fluidity.external.is_mcl
+local has_pipeworks = core.get_modpath("pipeworks") ~= nil
 
-core.register_node("multifurnace:controller_active", {
-    description = S("Multifurnace Controller"),
-    tiles = {
-        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
-        "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
-        "metal_melter_heatbrick.png",
-        "metal_melter_heatbrick.png^(multifurnace_controller_face.png^[colorize:#DD7C00:60)"
-    },
-    groups = {
-        cracky = 3,
-        pickaxey = 1,
-        multifurnace = 1,
-        multifurnace_controller = 1,
-        tubedevice = 1,
-        tubedevice_receiver = 1
-    },
-    tube = {
+local function drop_controller_inventory(pos, oldmetadata)
+    if oldmetadata and oldmetadata.inventory then
+        for _, stack in pairs(oldmetadata.inventory.melt or {}) do
+            multifurnace.util.drop_stack(pos, stack)
+        end
+        return
+    end
+
+    local inv = core.get_meta(pos):get_inventory()
+    for _, stack in pairs(inv:get_list("melt") or {}) do
+        multifurnace.util.drop_stack(pos, stack)
+    end
+end
+
+local function controller_on_blast(pos, _, do_drop)
+    drop_controller_inventory(pos)
+    if do_drop then
+        multifurnace.util.drop_stack(pos, "multifurnace:controller")
+    end
+    core.remove_node(pos)
+end
+
+local function controller_hoppers_on_try_push(pos, _, hop_inv, hop_list)
+    local inv = core.get_meta(pos):get_inventory()
+    local stack_id = mcl_util.select_stack(hop_inv, hop_list, inv, "melt", nil, 1)
+    return inv, "melt", stack_id
+end
+
+local function apply_controller_game_fields(def, is_active)
+    if is_mtg then
+        def.groups.cracky = 3
+    elseif is_mcl then
+        def.groups.pickaxey = 1
+        def.groups.container = 2
+        def.groups.deco_block = 1
+        def.groups.material_stone = 1
+        def.groups.unmovable_by_piston = 1
+        def._mcl_hardness = 2
+        def._mcl_blast_resistance = 2
+        def.after_dig_node = function(pos, _, oldmetadata)
+            drop_controller_inventory(pos, oldmetadata)
+        end
+        def.on_blast = controller_on_blast
+
+        if is_active then
+            def.groups.not_in_creative_inventory = 1
+            def._doc_items_create_entry = false
+            def._mcl_hoppers_on_try_push = controller_hoppers_on_try_push
+            def._mcl_hoppers_on_after_push = update_timer
+        end
+    end
+end
+
+local function apply_controller_pipeworks_fields(def, is_active)
+    if not has_pipeworks or not is_active then return end
+
+    def.groups.tubedevice = 1
+    def.groups.tubedevice_receiver = 1
+    def.tube = {
         can_remove = function() return 0 end,
         insert_object = function(pos, node, stack, direction)
             local meta = core.get_meta(pos)
@@ -476,53 +485,107 @@ core.register_node("multifurnace:controller_active", {
             return stack:get_count() <= free_slots
         end,
         input_inventory = "melt",
-        connect_sides = {left = 1, right = 1, bottom = 1, front = 1, top = 1}
-    },
-    paramtype2 = "facedir",
-    is_ground_content = false,
-    on_timer = controller_timer,
-    on_construct = function(pos)
-        local meta = core.get_meta(pos)
-        local inv = meta:get_inventory()
-        inv:set_size("melt", 1)
-        multifurnace.api.component_changed_nearby(pos)
-    end,
-    on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        if sender and sender ~= "" and
-            minetest.is_protected(pos, sender:get_player_name()) then
-            return
-        end
+        connect_sides = {
+            left = 1,
+            right = 1,
+            bottom = 1,
+            front = 1,
+            top = 1
+        }
+    }
+end
 
-        local meta = minetest.get_meta(pos)
-        local set_buffer = nil
-        for field, val in pairs(fields) do
-            if field:match("^buffer") then
-                set_buffer = tonumber(string.sub(field, 7))
+local function get_controller_definition(is_active)
+    local face = "multifurnace_controller_face.png"
+    if is_active then face = "(" .. face .. "^[colorize:#DD7C00:60)" end
+
+    local def = {
+        description = S("Multifurnace Controller"),
+        tiles = {
+            "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+            "metal_melter_heatbrick.png", "metal_melter_heatbrick.png",
+            "metal_melter_heatbrick.png",
+            "metal_melter_heatbrick.png^" .. face
+        },
+        groups = {
+            multifurnace = 1,
+            multifurnace_controller = 1
+        },
+        paramtype2 = "facedir",
+        is_ground_content = false,
+        sounds = fluidity.external.sounds.node_sound_stone,
+        on_construct = function(pos)
+            local meta = core.get_meta(pos)
+            local inv = meta:get_inventory()
+            inv:set_size("melt", 1)
+            if not is_active then meta:set_string("formspec", "") end
+            multifurnace.api.component_changed_nearby(pos)
+        end,
+        on_destruct = function(pos) multifurnace.api.remove_controller(pos) end,
+        _multifurnace_fuel_consumption = 10,
+        _multifurnace_max_dimensions = 8,
+        _multifurnace_states = {
+            inactive = "multifurnace:controller",
+            active = "multifurnace:controller_active"
+        }
+    }
+
+    if is_active then
+        def.on_timer = controller_timer
+        def.on_receive_fields = function(pos, formname, fields, sender)
+            if sender and sender ~= "" and
+                core.is_protected(pos, sender:get_player_name()) then
+                return
+            end
+
+            local meta = core.get_meta(pos)
+            local set_buffer = nil
+            for field, val in pairs(fields) do
+                if field:match("^buffer") then
+                    set_buffer = tonumber(string.sub(field, 7))
+                end
+            end
+
+            if set_buffer then
+                set_hot(pos, set_buffer, false)
+                update_timer(pos)
             end
         end
+        def.on_metadata_inventory_move = update_timer
+        def.on_metadata_inventory_put = update_timer
+        def.on_metadata_inventory_take = update_timer
+        def.allow_metadata_inventory_put = allow_metadata_inventory_put
+        def.allow_metadata_inventory_move = allow_metadata_inventory_move
+        def.allow_metadata_inventory_take = allow_metadata_inventory_take
+        def.drop = "multifurnace:controller"
+    end
 
-        if set_buffer then
-            set_hot(pos, set_buffer, false)
-            update_timer(pos)
+    apply_controller_game_fields(def, is_active)
+    apply_controller_pipeworks_fields(def, is_active)
+    return def
+end
+
+core.register_node("multifurnace:controller", get_controller_definition(false))
+core.register_node("multifurnace:controller_active", get_controller_definition(true))
+
+if is_mcl then
+    core.register_on_mods_loaded(function()
+        if mesecon and mesecon.register_mvps_stopper then
+            mesecon.register_mvps_stopper("multifurnace:controller")
+            mesecon.register_mvps_stopper("multifurnace:controller_active")
         end
-    end,
-    on_metadata_inventory_move = update_timer,
-    on_metadata_inventory_put = update_timer,
-    on_metadata_inventory_take = update_timer,
-    allow_metadata_inventory_put = allow_metadata_inventory_put,
-    allow_metadata_inventory_move = allow_metadata_inventory_move,
-    allow_metadata_inventory_take = allow_metadata_inventory_take,
-    _mcl_hardness = 2,
-    _mcl_blast_resistance = 2,
-    _multifurnace_fuel_consumption = 10,
-    _multifurnace_max_dimensions = 8,
-    _multifurnace_states = {
-        inactive = "multifurnace:controller",
-        active = "multifurnace:controller_active"
-    },
-    drop = "multifurnace:controller",
-})
+
+        if screwdriver and screwdriver.rotate_simple then
+            local rotation_fields = {
+                on_rotate = screwdriver.rotate_simple,
+                after_rotate = multifurnace.api.component_changed_nearby
+            }
+            core.override_item("multifurnace:controller", rotation_fields)
+            core.override_item("multifurnace:controller_active",
+                               rotation_fields)
+        end
+    end)
+end
 
 -- Add entry alias for the Help
 if minetest.get_modpath("doc") then
