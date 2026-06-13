@@ -561,20 +561,47 @@ function tinkering.register_material_tool(material)
 	end
 end
 
+local function escape_texture_argument(texture)
+	return texture:gsub("\\", "\\\\"):gsub("%^", "\\^"):gsub(":", "\\:")
+end
+
+local function cut_mold_shape(blank_image, shape_image)
+	-- Turn the shape into a white inverse-alpha mask, then cut it out of the blank.
+	local inverse_shape = shape_image.."^[multiply:#000000^[invert:rgba"
+	return blank_image.."^[mask:"..escape_texture_argument(inverse_shape)
+end
+
+local function compose_cast_image(shape_image, border_image)
+	local cast = cut_mold_shape("metal_melter_blank_cast.png", shape_image)
+	local border = border_image.."^[colorize:#826800:alpha"
+	return cast.."^("..border..")"
+end
+
+local function compose_pattern_image(shape_image, border_image)
+	local pattern = cut_mold_shape("tinkering_blank_pattern.png", shape_image)
+	local border = pattern.."^[multiply:#A0A0A0^[mask:"..
+	-- Border pixels must be white to preserve colors of blank pattern
+		escape_texture_argument(border_image--[[ .."^[colorize:#FFFFFF:alpha" --]])
+	return pattern.."^("..border..")"
+end
+
 -- Register a new tool component
 function tinkering.register_component(name, data)
 	local mod = data.mod_name or core.get_current_modname()
+	data.mod_name = mod
 
 	if not tinkering.components[name] then
 		tinkering.components[name] = data
 	end
 
 	local comp_desc = data.description
+	local border_image = mod.."_"..name.."_border.png"
 
 	-- Register cast
 	metal_melter.register_melt_value(name, metal_caster.spec.cast)
 	metal_caster.register_cast(name, {
 		description = comp_desc,
+		inventory_image = compose_cast_image(data.image, border_image),
 		mod_name    = mod,
 		result      = name,
 		cost        = data.material_cost,
@@ -585,7 +612,8 @@ function tinkering.register_component(name, data)
 	tinkering.register_pattern(name, {
 		description = comp_desc,
 		cost        = data.material_cost,
-		mod_name    = mod
+		mod_name    = mod,
+		inventory_image = compose_pattern_image(data.image, border_image)
 	})
 
 	-- Register components for all materials
