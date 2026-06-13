@@ -42,7 +42,9 @@ function tool_station.get_formspec(comp_list)
 
 	if comp_list then
 		for _,comp in pairs(comp_list) do
-			local img = tinkering.components[comp].image .. "^[colorize:#1e1e1e:255"
+			local component = tinkering.components[comp]
+			local mod = component.mod_name or "tinkering"
+			local img = mod.."_"..comp.."_border.png^[colorize:#1e1e1e:alpha"
 			til = til .. "image[" .. x .. "," .. y .. ";1,1;".. img .. "]"
 			y = y + 1.25
 			h = h + 1
