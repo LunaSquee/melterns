@@ -12,8 +12,18 @@ metal_caster.max_metal = 16000
 -- Use melter values
 metal_caster.spec = metal_melter.spec
 
+local ingot_cast_image = fluidity.external.is_mcl
+	and "metal_melter_ingot_cast_mcl.png"
+	or "metal_melter_ingot_cast.png"
+
 metal_caster.casts = {
-	ingot = {description = S("Ingot"), result = "ingot",   cost = 1, typenames = {"ingot"}},
+	ingot = {
+		description = S("Ingot"),
+		inventory_image = ingot_cast_image,
+		result = "ingot",
+		cost = 1,
+		typenames = {"ingot"}
+	},
 	lump  = {description = S("Lump"),  result = "lump",    cost = 2, typenames = {"lump"}},
 	gem   = {description = S("Gem"),   result = "crystal", cost = 1, typenames = {"crystal", "gem"}}
 }
@@ -444,7 +454,7 @@ function metal_caster.register_cast(name, data)
 
 	minetest.register_craftitem(castname, {
 		description     = data.description.." " .. S("Cast") .. "\n\n" .. S("Material Cost: @1", data.cost),
-		inventory_image = mod.."_"..name.."_cast.png",
+		inventory_image = data.inventory_image or mod.."_"..name.."_cast.png",
 		stack_max       = 1,
 		groups          = {tinker_cast=1}
 	})
