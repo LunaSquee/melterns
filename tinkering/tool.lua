@@ -74,37 +74,49 @@ tinkering.components = {
 		description = S("Pickaxe Head"),
 		compose_description = function(u) return S("@1 Pickaxe Head", u) end,
 		material_cost = 2,
-		image = tinkering.tools.pick.textures.main
+		image = tinkering.tools.pick.textures.main,
+		cast_image = "tinkering_pickaxe_head_cast.png",
+		pattern_image = "tinkering_pickaxe_head_pattern.png"
 	},
 	axe_head = {
 		description = S("Axe Head"),
 		compose_description = function(u) return S("@1 Axe Head", u) end,
 		material_cost = 2,
-		image = tinkering.tools.axe.textures.main
+		image = tinkering.tools.axe.textures.main,
+		cast_image = "tinkering_axe_head_cast.png",
+		pattern_image = "tinkering_axe_head_pattern.png"
 	},
 	sword_blade = {
 		description = S("Sword Blade"),
 		compose_description = function(u) return S("@1 Sword Blade", u) end,
 		material_cost = 2,
-		image = tinkering.tools.sword.textures.main
+		image = tinkering.tools.sword.textures.main,
+		cast_image = "tinkering_sword_blade_cast.png",
+		pattern_image = "tinkering_sword_blade_pattern.png"
 	},
 	shovel_head = {
 		description = S("Shovel Head"),
 		compose_description = function(u) return S("@1 Shovel Head", u) end,
 		material_cost = 2,
-		image = tinkering.tools.shovel.textures.main
+		image = tinkering.tools.shovel.textures.main,
+		cast_image = "tinkering_shovel_head_cast.png",
+		pattern_image = "tinkering_shovel_head_pattern.png"
 	},
 	tool_rod = {
 		description = S("Tool Rod"),
 		compose_description = function(u) return S("@1 Tool Rod", u) end,
 		material_cost = 1,
-		image = "tinkering_tool_rod.png"
+		image = "tinkering_tool_rod.png",
+		cast_image = "tinkering_tool_rod_cast.png",
+		pattern_image = "tinkering_tool_rod_pattern.png"
 	},
 	tool_binding = {
 		description = S("Tool Binding"),
 		compose_description = function(u) return S("@1 Tool Binding", u) end,
 		material_cost = 2,
-		image = "tinkering_tool_binding.png"
+		image = "tinkering_tool_binding.png",
+		cast_image = "tinkering_tool_binding_cast.png",
+		pattern_image = "tinkering_tool_binding_pattern.png"
 	}
 }
 
@@ -585,7 +597,8 @@ local function compose_pattern_image(shape_image, border_image)
 	return pattern.."^("..border..")"
 end
 
--- Register a new tool component
+-- Register a new tool component. Optional cast_image and pattern_image override
+-- generated images independently; omitted images use the component shape and border.
 function tinkering.register_component(name, data)
 	local mod = data.mod_name or core.get_current_modname()
 	data.mod_name = mod
@@ -601,7 +614,7 @@ function tinkering.register_component(name, data)
 	metal_melter.register_melt_value(name, metal_caster.spec.cast)
 	metal_caster.register_cast(name, {
 		description = comp_desc,
-		inventory_image = compose_cast_image(data.image, border_image),
+		inventory_image = data.cast_image or compose_cast_image(data.image, border_image),
 		mod_name    = mod,
 		result      = name,
 		cost        = data.material_cost,
@@ -613,7 +626,7 @@ function tinkering.register_component(name, data)
 		description = comp_desc,
 		cost        = data.material_cost,
 		mod_name    = mod,
-		inventory_image = compose_pattern_image(data.image, border_image)
+		inventory_image = data.pattern_image or compose_pattern_image(data.image, border_image)
 	})
 
 	-- Register components for all materials
