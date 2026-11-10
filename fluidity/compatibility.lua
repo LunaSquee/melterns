@@ -6,6 +6,8 @@ local mcl = core.get_modpath("mcl_core") ~= nil
 local xcm = core.get_modpath("xcompat") ~= nil
 
 fluidity.external = {}
+fluidity.external.is_mtg = mtg
+fluidity.external.is_mcl = mcl
 fluidity.external.ref = {}
 fluidity.external.sounds = {}
 fluidity.external.items = {}
